@@ -5,7 +5,6 @@
 namespace ParalectEventSourcing.Dispatching
 {
     using System;
-    using Microsoft.Practices.ServiceLocation;
 
     /// <summary>
     /// Dispatcher configuration
@@ -34,7 +33,7 @@ namespace ParalectEventSourcing.Dispatching
         /// <summary>
         /// Gets or sets service locator
         /// </summary>
-        public IServiceLocator ServiceLocator { get; set; }
+        public IServiceProvider ServiceLocator { get; set; }
 
         /// <summary>
         /// Gets or sets message Handler Marker interface

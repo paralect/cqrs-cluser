@@ -26,26 +26,7 @@
         public static void Main(string[] args)
         {
             RegisterDependencies();
-
-            var factory = new ConnectionFactory { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: "hello",
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
-
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += ConsumerOnReceived;
-                channel.BasicConsume(queue: "hello",
-                                     noAck: true,
-                                     consumer: consumer);
-
-                Console.WriteLine(" Press [enter] to exit.");
-                Console.ReadLine();
-            }
+            ListenToCommands();
         }
 
         private static void RegisterDependencies()
@@ -69,7 +50,30 @@
                 .AddSingleton(Log.Logger)
                 .BuildServiceProvider();
 
-            dispatcherConfiguration.ServiceLocator = new ServiceLocator(_serviceProvider);
+            dispatcherConfiguration.ServiceLocator = _serviceProvider;
+        }
+
+        private static void ListenToCommands()
+        {
+            var factory = new ConnectionFactory { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "hello",
+                                     durable: false,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += ConsumerOnReceived;
+                channel.BasicConsume(queue: "hello",
+                                     noAck: true,
+                                     consumer: consumer);
+
+                Console.WriteLine(" Press [enter] to exit.");
+                Console.ReadLine();
+            }
         }
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)

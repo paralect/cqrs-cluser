@@ -21,7 +21,7 @@ namespace ParalectEventSourcing.Dispatching
         /// <summary>
         /// Service Locator that is used to create handlers
         /// </summary>
-        private readonly IServiceLocator serviceLocator;
+        private readonly IServiceProvider serviceLocator;
 
         /// <summary>
         /// Registry of all registered handlers
@@ -94,7 +94,7 @@ namespace ParalectEventSourcing.Dispatching
 
                 foreach (var subscription in subscriptions)
                 {
-                    var handler = this.serviceLocator.GetInstance(subscription.HandlerType);
+                    var handler = this.serviceLocator.GetService(subscription.HandlerType);
 
                     try
                     {
