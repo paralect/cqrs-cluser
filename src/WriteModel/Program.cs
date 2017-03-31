@@ -40,10 +40,10 @@
                 .AddSingleton<ICommandDispatcher, CommandDispatcher>()
                 .AddSingleton<IEventDispatcher, EventDispatcher>()
 
-                .AddTransient<DeviceCommandsHandler, DeviceCommandsHandler>()
-                .AddTransient<ShipmentCommandsHandler, ShipmentCommandsHandler>()
-                .AddTransient<DeviceEventsHandler, DeviceEventsHandler>()
-                .AddTransient<ShipmentEventsHandler, ShipmentEventsHandler>()
+                .AddSingleton<DeviceCommandsHandler, DeviceCommandsHandler>()
+                .AddSingleton<ShipmentCommandsHandler, ShipmentCommandsHandler>()
+                .AddSingleton<DeviceEventsHandler, DeviceEventsHandler>()
+                .AddSingleton<ShipmentEventsHandler, ShipmentEventsHandler>()
 
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 

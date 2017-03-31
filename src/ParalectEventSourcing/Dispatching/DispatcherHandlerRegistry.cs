@@ -196,7 +196,7 @@ namespace ParalectEventSourcing.Dispatching
             }
 
             var handler = ServiceLocator.GetService(handlerType) as IMessageHandler;
-            var subscription = new Subscription(handlerType, messageType, _handlerMethodCache, priority, handler);
+            var subscription = new Subscription(messageType, _handlerMethodCache, priority, handler);
 
             if (!_subscription[messageType].Contains(subscription))
             {

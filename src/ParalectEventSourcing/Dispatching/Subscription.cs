@@ -10,11 +10,10 @@ namespace ParalectEventSourcing.Dispatching
 
     public class Subscription
     {
-        private readonly IMessageHandler _handler;
         private readonly IHandlerMethodCache _handlerMethodCache;
         private readonly Type _messageType;
 
-        public Subscription(Type handlerType,
+        public Subscription(
             Type messageType,
             IHandlerMethodCache handlerMethodCache,
             int priority,
@@ -22,16 +21,15 @@ namespace ParalectEventSourcing.Dispatching
         {
             _messageType = messageType;
             _handlerMethodCache = handlerMethodCache;
-            HandlerType = handlerType;
             Priority = priority;
             Handler = handler;
         }
 
-        public IMessageHandler Handler { get; private set; }
+        public IMessageHandler Handler { get; }
 
-        public Type HandlerType { get; private set; }
+        public Type HandlerType => Handler.GetType();
 
-        public int Priority { get; private set; }
+        public int Priority { get; }
 
         public bool Equals(
             Subscription other)
@@ -90,7 +88,7 @@ namespace ParalectEventSourcing.Dispatching
         {
             unchecked
             {
-                return ((HandlerType != null ? HandlerType.GetHashCode() : 0) * 397) ^ Priority;
+                return ((HandlerType?.GetHashCode() ?? 0) * 397) ^ Priority;
             }
         }
     }
