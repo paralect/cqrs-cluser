@@ -15,6 +15,9 @@ namespace WebApi.Controllers
     [Route("api/[controller]")]
     public class DevicesController : Controller
     {
+        private const string WriteModelQueue = "WriteModelQueue";
+        private const string ErrorQueue = "ErrorQueue";
+
         // GET: api/values
         [HttpGet]
         public IEnumerable<string> Get()
@@ -35,7 +38,7 @@ namespace WebApi.Controllers
         {
             var command = new AddDeviceToShipmentCommand
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = "2d810a20-490e-4fee-845d-5a7f5de0fc42",
                 ShipmentKey = shipmentKey,
                 Metadata = new CommandMetadata
                 {
@@ -50,7 +53,7 @@ namespace WebApi.Controllers
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.QueueDeclare(queue: "hello",
+                channel.QueueDeclare(queue: WriteModelQueue,
                                      durable: false,
                                      exclusive: false,
                                      autoDelete: false,
@@ -60,7 +63,7 @@ namespace WebApi.Controllers
                 var body = Encoding.UTF8.GetBytes(data);
 
                 channel.BasicPublish(exchange: "",
-                                 routingKey: "hello",
+                                 routingKey: WriteModelQueue,
                                  basicProperties: null,
                                  body: body);
                 Console.WriteLine(" [x] Sent {0}", JsonConvert.SerializeObject(command));

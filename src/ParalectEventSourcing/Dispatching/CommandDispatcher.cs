@@ -87,7 +87,6 @@ namespace ParalectEventSourcing.Dispatching
             try
             {
                 var subscriptions = _registry.GetSubscriptions(message.GetType());
-
                 foreach (var subscription in subscriptions)
                 {
                     try
@@ -96,13 +95,17 @@ namespace ParalectEventSourcing.Dispatching
                     }
                     catch (HandlerException handlerException)
                     {
-                        _log.Error(handlerException, "{0}", new string[] { "Message handling failed." });
+                        _log.Error(handlerException, "{0}", new[] { "Message handling failed." });
                     }
                 }
             }
+            catch (DomainValidationException)
+            {
+                throw;
+            }
             catch (Exception exception)
             {
-                _log.Error(exception, "{0}", new string[] { "Error when dispatching message" });
+                _log.Error(exception, "{0}", new[] { "Error when dispatching message" });
             }
         }
 
@@ -118,6 +121,10 @@ namespace ParalectEventSourcing.Dispatching
                     // message handled correctly - so that should be
                     // the final attempt
                     attempt = _maxRetries;
+                }
+                catch (DomainValidationException)
+                {
+                    throw;
                 }
                 catch (Exception exception)
                 {

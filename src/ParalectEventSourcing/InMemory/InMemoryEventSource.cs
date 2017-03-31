@@ -29,7 +29,7 @@ namespace ParalectEventSourcing.InMemory
                 throw new DuplicateTransitionException(streamId, nextVersion, null);
             }
 
-            var transition = new Transition()
+            var transition = new Transition
             {
                 Version = nextVersion,
                 Events = events.ToList()

@@ -6,7 +6,9 @@ namespace ParalectEventSourcing.Commands
 {
     using System;
     using Dispatching;
+    using Exceptions;
     using Serilog;
+    using Utils;
 
     /// <summary>
     ///     Messages bus for commands
@@ -46,6 +48,10 @@ namespace ParalectEventSourcing.Commands
                         command);
                 }
             }
+            catch (DomainValidationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 // we are not throwing exception here, because dispatching
@@ -69,19 +75,6 @@ namespace ParalectEventSourcing.Commands
                 command.Metadata.CreatedDate = _dateTimeProvider.GetUtcNow();
                 command.Metadata.TypeName = command.GetType().FullName;
             }
-        }
-    }
-
-    public interface IDateTimeProvider
-    {
-        DateTime GetUtcNow();
-    }
-
-    public class DateTimeProvider : IDateTimeProvider
-    {
-        public DateTime GetUtcNow()
-        {
-            return DateTime.UtcNow;
         }
     }
 }

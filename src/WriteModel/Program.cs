@@ -11,10 +11,12 @@
     using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
+    using ParalectEventSourcing.Exceptions;
     using ParalectEventSourcing.InMemory;
     using ParalectEventSourcing.Repository;
     using ParalectEventSourcing.Repository.EventStore;
     using ParalectEventSourcing.Snapshoting;
+    using ParalectEventSourcing.Utils;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Serilog;
@@ -22,6 +24,9 @@
     public class Program
     {
         private static IServiceProvider _serviceProvider;
+        private const string WriteModelQueue = "WriteModelQueue";
+        private const string ErrorQueue = "ErrorQueue";
+        private static readonly ConnectionFactory ConnectionFactory = new ConnectionFactory { HostName = "localhost" };
 
         public static void Main(string[] args)
         {
@@ -65,16 +70,14 @@
             dispatcherConfiguration
                 .DispatcherEventHandlerRegistry
                 .Register(assemblyWithHandlers, new[] { typeof(DeviceEventsHandler).Namespace });
-            
         }
 
         private static void ListenToMessages()
         {
-            var factory = new ConnectionFactory { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
+            using (var connection = ConnectionFactory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.QueueDeclare(queue: "hello",
+                channel.QueueDeclare(queue: WriteModelQueue,
                                      durable: false,
                                      exclusive: false,
                                      autoDelete: false,
@@ -82,12 +85,11 @@
 
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += ConsumerOnReceived;
-                channel.BasicConsume(queue: "hello",
+                channel.BasicConsume(queue: WriteModelQueue,
                                      noAck: true,
                                      consumer: consumer);
 
-                Console.WriteLine(" Press [enter] to exit.");
-                Console.ReadLine();
+                Console.Read();
             }
         }
 
@@ -102,7 +104,35 @@
             var typedMessage = JsonConvert.DeserializeObject(body, messageType);
 
             var commandBus = _serviceProvider.GetService<ICommandBus>();
-            commandBus.Send(typedMessage);
+            try
+            {
+                commandBus.Send(typedMessage);
+            }
+            catch (DomainValidationException e)
+            {
+                SendMessage(ErrorQueue, e.Message);
+            }
+        }
+
+        private static void SendMessage(string queue, string message)
+        {
+            using (var connection = ConnectionFactory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: queue,
+                                     durable: false,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                var body = Encoding.UTF8.GetBytes(message);
+
+                channel.BasicPublish(exchange: "",
+                                 routingKey: queue,
+                                 basicProperties: null,
+                                 body: body);
+                Console.WriteLine(" [x] Sent {0}", message);
+            }
         }
     }
 }
