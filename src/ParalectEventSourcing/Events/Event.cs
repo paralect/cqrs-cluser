@@ -17,7 +17,7 @@ namespace ParalectEventSourcing.Events
         /// </summary>
         protected Event()
         {
-            this.Metadata = new EventMetadata();
+            Metadata = new EventMetadata();
         }
 
         /// <inheritdoc/>

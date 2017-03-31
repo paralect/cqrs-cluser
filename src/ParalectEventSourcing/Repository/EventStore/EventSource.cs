@@ -22,9 +22,9 @@ namespace ParalectEventSourcing.Repository.EventStore
     /// </summary>
     public class EventSource : IEventSource
     {
-        private readonly IEventStoreConnection connection;
-        private readonly IEventStoreSerializer serializer;
-        private readonly UserCredentials credentials;
+        private readonly IEventStoreConnection _connection;
+        private readonly IEventStoreSerializer _serializer;
+        private readonly UserCredentials _credentials;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventSource"/> class.
@@ -33,12 +33,12 @@ namespace ParalectEventSourcing.Repository.EventStore
         /// <param name="serializer">events serializator</param>
         public EventSource(EventStoreConnectionSettings connectionSettings, IEventStoreSerializer serializer)
         {
-            this.serializer = serializer;
+            _serializer = serializer;
 
-            IPEndPoint point = IPEndPointUtility.CreateIPEndPoint(connectionSettings.Host + ":" + connectionSettings.Port).Result;
-            this.connection = EventStoreConnection.Create(point);
-            this.connection.ConnectAsync().Wait();
-            this.credentials = new UserCredentials(connectionSettings.Login, connectionSettings.Pass);
+            IPEndPoint point = IpEndPointUtility.CreateIpEndPoint(connectionSettings.Host + ":" + connectionSettings.Port).Result;
+            _connection = EventStoreConnection.Create(point);
+            _connection.ConnectAsync().Wait();
+            _credentials = new UserCredentials(connectionSettings.Login, connectionSettings.Pass);
         }
 
         /// <summary>
@@ -51,10 +51,10 @@ namespace ParalectEventSourcing.Repository.EventStore
         /// <exception cref="DuplicateTransitionException">When concurrency exception</exception>
         public async Task AppendEventsAsync(string streamId, int version, IEnumerable<IEvent> events)
         {
-            var items = events.Select(x => this.serializer.Serialize(x));
+            var items = events.Select(x => _serializer.Serialize(x));
             try
             {
-                await this.connection.AppendToStreamAsync(streamId, version, items, this.credentials);
+                await _connection.AppendToStreamAsync(streamId, version, items, _credentials);
             }
             catch (WrongExpectedVersionException e)
             {
@@ -83,7 +83,7 @@ namespace ParalectEventSourcing.Repository.EventStore
             var lastVersion = 0;
             do
             {
-                var currentSlice = this.connection.ReadStreamEventsForwardAsync(streamId, nextSliceStart, step, false, this.credentials).Result;
+                var currentSlice = _connection.ReadStreamEventsForwardAsync(streamId, nextSliceStart, step, false, _credentials).Result;
                 nextSliceStart = currentSlice.NextEventNumber;
                 streamEvents.AddRange(currentSlice.Events);
                 if (currentSlice.IsEndOfStream)
@@ -93,7 +93,7 @@ namespace ParalectEventSourcing.Repository.EventStore
                 }
             }
             while (true);
-            var events = streamEvents.Select(x => (IEvent)this.serializer.Deserialize(x));
+            var events = streamEvents.Select(x => (IEvent)_serializer.Deserialize(x));
             return new EventsStream(streamId, start, lastVersion, events);
         }
 
@@ -104,7 +104,7 @@ namespace ParalectEventSourcing.Repository.EventStore
         /// <returns>The stream of events</returns>
         public EventsStream GetEventsStream(string streamId)
         {
-            return this.GetEventsStream(streamId, StreamPosition.Start);
+            return GetEventsStream(streamId, StreamPosition.Start);
         }
     }
 }

@@ -27,16 +27,16 @@ namespace ParalectEventSourcing.Dispatching
     /// </summary>
     public class HandlerMethodCache : IHandlerMethodCache
     {
-        private readonly ConcurrentDictionary<MethodDescriptor, MethodInfo> methodCache = new ConcurrentDictionary<MethodDescriptor, MethodInfo>();
+        private readonly ConcurrentDictionary<MethodDescriptor, MethodInfo> _methodCache = new ConcurrentDictionary<MethodDescriptor, MethodInfo>();
 
         /// <inheritdoc/>
         public MethodInfo GetMethodInfo(Type handlerType, Type messageType)
         {
             var methodDescriptor = new MethodDescriptor(handlerType, messageType);
             MethodInfo methodInfo = null;
-            if (!this.methodCache.TryGetValue(methodDescriptor, out methodInfo))
+            if (!_methodCache.TryGetValue(methodDescriptor, out methodInfo))
             {
-                this.methodCache[methodDescriptor] = methodInfo = handlerType.GetMethod(DispatcherHandlerRegistry.HandleMethodName, new[] { messageType });
+                _methodCache[methodDescriptor] = methodInfo = handlerType.GetMethod(DispatcherHandlerRegistry.HandleMethodName, new[] { messageType });
             }
 
             return methodInfo;

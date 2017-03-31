@@ -21,10 +21,10 @@ namespace ParalectEventSourcing.Repository.EventStore
         /// <param name="events">the events</param>
         public EventsStream(string streamId, int start, int end, IEnumerable<IEvent> events)
         {
-            this.StreamId = streamId;
-            this.Start = start;
-            this.End = end;
-            this.Events = events;
+            StreamId = streamId;
+            Start = start;
+            End = end;
+            Events = events;
         }
 
         /// <summary>

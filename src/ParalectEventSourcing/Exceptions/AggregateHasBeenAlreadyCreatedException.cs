@@ -5,7 +5,7 @@
 namespace ParalectEventSourcing.Exceptions
 {
     /// <summary>
-    /// Exception occurs when an aggragte attemps to create the stream second time
+    /// Exception occurs when an aggregate attemps to create the stream second time
     /// </summary>
     public class AggregateHasBeenAlreadyCreatedException : DomainValidationException
     {
@@ -17,7 +17,7 @@ namespace ParalectEventSourcing.Exceptions
         public AggregateHasBeenAlreadyCreatedException(string id)
             : base(string.Format("Aggregate has been already created."))
         {
-            this.Id = id;
+            Id = id;
         }
 
         /// <summary>

@@ -9,7 +9,7 @@
         public void On(
             DeviceAddedToShipment e)
         {
-            this.ShipmentKey = e.ShipmentKey;
+            ShipmentKey = e.ShipmentKey;
         }
     }
 }

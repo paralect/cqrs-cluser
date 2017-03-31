@@ -13,9 +13,9 @@ namespace ParalectEventSourcing.Dispatching
     /// </summary>
     public class Dispatcher : IDispatcher
     {
-        private readonly IDispatcherHandlerRegistry dispatcherHandlerRegistry;
+        private readonly IDispatcherHandlerRegistry _dispatcherHandlerRegistry;
 
-        private Serilog.ILogger logger = Log.Logger;
+        private ILogger _logger = Log.Logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Dispatcher"/> class.
@@ -24,13 +24,13 @@ namespace ParalectEventSourcing.Dispatching
         /// <param name="serviceLocator">service locator</param>
         public Dispatcher(IDispatcherHandlerRegistry dispatcherHandlerRegistry)
         {
-            this.dispatcherHandlerRegistry = dispatcherHandlerRegistry;
+            _dispatcherHandlerRegistry = dispatcherHandlerRegistry;
         }
 
         /// <inheritdoc/>
         public void Dispatch(object message)
         {
-            var subscriptions = this.dispatcherHandlerRegistry.GetSubscriptions(message.GetType());
+            var subscriptions = _dispatcherHandlerRegistry.GetSubscriptions(message.GetType());
 
             //foreach (var subscription in subscriptions)
             //{

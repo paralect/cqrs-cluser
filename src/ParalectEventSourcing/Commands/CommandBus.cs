@@ -15,19 +15,19 @@ namespace ParalectEventSourcing.Commands
     {
         private static readonly ILogger Log = Serilog.Log.Logger;
 
-        private readonly IDispatcher dispatcher;
+        private readonly IDispatcher _dispatcher;
 
-        private readonly IDateTimeProvider dateTimeProvider;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandBus"/> class.
         /// </summary>
         /// <param name="dispatcher">the dispatcher</param>
         /// <param name="dateTimeProvider">datetime provider</param>
-        public CommandBus(IDispatcher dispatcher, IDateTimeProvider dateTimeProvider)
+        public CommandBus(ICommandDispatcher dispatcher, IDateTimeProvider dateTimeProvider)
         {
-            this.dispatcher = dispatcher;
-            this.dateTimeProvider = dateTimeProvider;
+            _dispatcher = dispatcher;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         /// <summary>
@@ -36,13 +36,13 @@ namespace ParalectEventSourcing.Commands
         /// <param name="commands">The commands.</param>
         public void Send(params ICommand[] commands)
         {
-            this.PrepareCommands(commands);
+            PrepareCommands(commands);
 
             try
             {
                 foreach (var command in commands)
                 {
-                    this.dispatcher.Dispatch(
+                    _dispatcher.Dispatch(
                         command);
                 }
             }
@@ -66,7 +66,7 @@ namespace ParalectEventSourcing.Commands
             foreach (ICommand command in commands)
             {
                 command.Metadata.CommandId = Guid.NewGuid().ToString();
-                command.Metadata.CreatedDate = this.dateTimeProvider.GetUtcNow();
+                command.Metadata.CreatedDate = _dateTimeProvider.GetUtcNow();
                 command.Metadata.TypeName = command.GetType().FullName;
             }
         }

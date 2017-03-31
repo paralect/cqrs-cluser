@@ -6,7 +6,9 @@ namespace ParalectEventSourcing.Dispatching
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Reflection;
+    using Events;
     using Exceptions;
     using Microsoft.Practices.ServiceLocation;
     using Serilog;
@@ -14,24 +16,19 @@ namespace ParalectEventSourcing.Dispatching
     /// <summary>
     /// Dispatches a command in CQRS app
     /// </summary>
-    public class CommandDispatcher : IDispatcher
+    public class CommandDispatcher : ICommandDispatcher
     {
-        private readonly ILogger log;
-
-        /// <summary>
-        /// Service Locator that is used to create handlers
-        /// </summary>
-        private readonly IServiceProvider serviceLocator;
+        private readonly ILogger _log;
 
         /// <summary>
         /// Registry of all registered handlers
         /// </summary>
-        private readonly DispatcherHandlerRegistry registry;
+        private readonly DispatcherCommandHandlerRegistry _registry;
 
         /// <summary>
         /// Number of retries in case exception was logged
         /// </summary>
-        private readonly int maxRetries;
+        private readonly int _maxRetries;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandDispatcher"/> class.
@@ -40,23 +37,22 @@ namespace ParalectEventSourcing.Dispatching
         /// <param name="logger">logger</param>
         public CommandDispatcher(DispatcherConfiguration configuration, ILogger logger)
         {
-            this.log = logger;
+            _log = logger;
             if (configuration.ServiceLocator == null)
             {
                 throw new ArgumentException("Unity Container is not registered for distributor.");
             }
 
-            if (configuration.DispatcherHandlerRegistry == null)
+            if (configuration.DispatcherCommandHandlerRegistry == null)
             {
-                throw new ArgumentException("Dispatcher Handler Registry is null in distributor.");
+                throw new ArgumentException("Dispatcher Command Handler Registry is null in distributor.");
             }
 
-            this.serviceLocator = configuration.ServiceLocator;
-            this.registry = configuration.DispatcherHandlerRegistry;
-            this.maxRetries = configuration.NumberOfRetries;
+            _registry = configuration.DispatcherCommandHandlerRegistry;
+            _maxRetries = configuration.NumberOfRetries;
 
             // order handlers
-            this.registry.InsureOrderOfHandlers();
+            _registry.InsureOrderOfHandlers();
         }
 
         /// <summary>
@@ -78,7 +74,7 @@ namespace ParalectEventSourcing.Dispatching
         /// <param name="message">message</param>
         public void Dispatch(object message)
         {
-            this.Dispatch(message, null);
+            Dispatch(message, null);
         }
 
         /// <summary>
@@ -90,51 +86,46 @@ namespace ParalectEventSourcing.Dispatching
         {
             try
             {
-                var subscriptions = this.registry.GetSubscriptions(message.GetType());
+                var subscriptions = _registry.GetSubscriptions(message.GetType());
 
                 foreach (var subscription in subscriptions)
                 {
-                    var handler = this.serviceLocator.GetService(subscription.HandlerType);
-
                     try
                     {
-                        this.ExecuteHandler(handler, message, exceptionObserver);
+                        ExecuteHandler(subscription.Handler, message, exceptionObserver);
                     }
                     catch (HandlerException handlerException)
                     {
-                        this.log.Error(handlerException, "{0}", new string[] { "Message handling failed." });
+                        _log.Error(handlerException, "{0}", new string[] { "Message handling failed." });
                     }
                 }
             }
             catch (Exception exception)
             {
-                this.log.Error(exception, "{0}", new string[] { "Error when dispatching message" });
+                _log.Error(exception, "{0}", new string[] { "Error when dispatching message" });
             }
         }
 
         private void ExecuteHandler(object handler, object message, Action<Exception> exceptionObserver = null)
         {
             var attempt = 0;
-            while (attempt < this.maxRetries)
+            while (attempt < _maxRetries)
             {
                 try
                 {
-                    this.InvokeDynamic(handler, message);
+                    InvokeDynamic(handler, message);
 
                     // message handled correctly - so that should be
                     // the final attempt
-                    attempt = this.maxRetries;
+                    attempt = _maxRetries;
                 }
                 catch (Exception exception)
                 {
-                    if (exceptionObserver != null)
-                    {
-                        exceptionObserver(exception);
-                    }
+                    exceptionObserver?.Invoke(exception);
 
                     attempt++;
 
-                    if (attempt == this.maxRetries)
+                    if (attempt == _maxRetries)
                     {
                         throw new HandlerException(string.Format("Exception in the handler {0} for message {1}", handler.GetType().FullName, message.GetType().FullName), exception, message);
                     }

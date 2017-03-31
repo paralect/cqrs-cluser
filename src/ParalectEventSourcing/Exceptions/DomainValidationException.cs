@@ -7,7 +7,7 @@ namespace ParalectEventSourcing.Exceptions
     using System;
 
     /// <summary>
-    /// Exception occurs when any validation fails during command processing in the aggreagte
+    /// Exception occurs when any validation fails during command processing in the aggregate
     /// </summary>
     public class DomainValidationException : Exception
     {

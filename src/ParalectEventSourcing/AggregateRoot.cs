@@ -14,16 +14,16 @@ namespace ParalectEventSourcing
     /// </summary>
     public abstract class AggregateRoot : IAggregateRoot
     {
-        private readonly List<IEvent> changes = new List<IEvent>();
+        private readonly List<IEvent> _changes = new List<IEvent>();
 
-        private object state;
+        private object _state;
 
         /// <summary>
         /// Gets recovered aggregate state
         /// </summary>
         public object State
         {
-            get { return this.state; }
+            get { return _state; }
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace ParalectEventSourcing
         /// </summary>
         public IList<IEvent> UncommittedEvents
         {
-            get { return this.changes; }
+            get { return _changes; }
         }
 
         /// <summary>
@@ -46,8 +46,8 @@ namespace ParalectEventSourcing
         /// <param name="version">the verion</param>
         public virtual void Setup(object state, int version)
         {
-            this.Version = version;
-            this.state = state;
+            Version = version;
+            _state = state;
         }
 
         /// <summary>
@@ -61,8 +61,8 @@ namespace ParalectEventSourcing
                 throw new NoAggregateIdException(string.Format("Event {0} has null (or empty) ID property. You may trying to update the aggregate that has not been created. Make sure you specify it on event creation", evnt.GetType().FullName));
             }
 
-            StateSpooler.Spool(this.state, evnt);
-            this.changes.Add(evnt);
+            StateSpooler.Spool(_state, evnt);
+            _changes.Add(evnt);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace ParalectEventSourcing
         /// <exception cref="AggregateHasBeenAlreadyCreatedException">Aggreagte can't be crated twice</exception>
         protected void AggregateNotCreatedGuard(Func<TState, string> idSelector)
         {
-            var id = idSelector(this.State);
+            var id = idSelector(State);
             if (!string.IsNullOrEmpty(id))
             {
                 throw new AggregateHasBeenAlreadyCreatedException(id);

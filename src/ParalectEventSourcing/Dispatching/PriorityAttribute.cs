@@ -19,7 +19,7 @@ namespace ParalectEventSourcing.Dispatching
         /// <param name="priority">priority</param>
         public PriorityAttribute(int priority)
         {
-            this.Priority = priority;
+            Priority = priority;
         }
 
         /// <summary>

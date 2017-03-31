@@ -20,7 +20,7 @@ namespace ParalectEventSourcing.Exceptions
         public HandlerException(string message, Exception innerException, object messageObject)
             : base(message, innerException)
         {
-            this.MessageObject = messageObject;
+            MessageObject = messageObject;
         }
 
         private object MessageObject { get; }

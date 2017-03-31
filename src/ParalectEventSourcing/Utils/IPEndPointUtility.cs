@@ -13,7 +13,7 @@ namespace ParalectEventSourcing.Utils
     /// <summary>
     /// Enpoint utility
     /// </summary>
-    public static class IPEndPointUtility
+    public static class IpEndPointUtility
     {
         private static readonly Regex EndpointSplit = new Regex(@"(?<host>.*):(?<port>[0-9]*)");
 
@@ -22,13 +22,13 @@ namespace ParalectEventSourcing.Utils
         /// </summary>
         /// <param name="endPoint">endpoint</param>
         /// <returns>endpoint formed to specific object</returns>
-        public static async Task<IPEndPoint> CreateIPEndPoint(string endPoint)
+        public static async Task<IPEndPoint> CreateIpEndPoint(string endPoint)
         {
             var match = EndpointSplit.Match(endPoint);
             string host = match.Groups["host"].Value;
             string portString = match.Groups["port"].Value;
             int port = int.Parse(portString, NumberStyles.None, NumberFormatInfo.CurrentInfo);
-            return await CreateIPEndPoint(host, port);
+            return await CreateIpEndPoint(host, port);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace ParalectEventSourcing.Utils
         /// <param name="host">the host</param>
         /// <param name="port">the port</param>
         /// <returns>endpoint formed to specific object</returns>
-        public static async Task<IPEndPoint> CreateIPEndPoint(string host, int port)
+        public static async Task<IPEndPoint> CreateIpEndPoint(string host, int port)
         {
             IPAddress ip = (await Dns.GetHostAddressesAsync(host)).Single();
             return new IPEndPoint(ip, port);

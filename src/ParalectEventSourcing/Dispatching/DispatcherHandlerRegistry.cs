@@ -5,35 +5,39 @@
 namespace ParalectEventSourcing.Dispatching
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using Events;
+    using Microsoft.Practices.ServiceLocation;
     using Serilog;
     using Snapshoting;
 
     /// <summary>
     /// Registry of subcriptions to use in the dispatcher
     /// </summary>
-    public class DispatcherHandlerRegistry : IDispatcherHandlerRegistry
+    public abstract class DispatcherHandlerRegistry : IDispatcherHandlerRegistry
     {
+        protected IServiceProvider ServiceLocator;
+
         /// <summary>
         /// Method name to be used as entry point in handler
         /// </summary>
         public const string HandleMethodName = "Handle";
 
-        private readonly Type markerInterfaceGeneric = typeof(IMessageHandler<>);
+        public virtual Type MarkerInterfaceGeneric => typeof(IMessageHandler<>);
 
-        private readonly Type markerInterface = typeof(IMessageHandler);
+        public virtual Type MarkerInterface => typeof(IMessageHandler);
 
-        private readonly ILogger logger = Log.Logger;
+        private readonly ILogger _logger = Log.Logger;
 
         /// <summary>
         /// Message type -> List of handlers type
         /// </summary>
-        private readonly Dictionary<Type, List<Subscription>> subscription = new Dictionary<Type, List<Subscription>>();
+        private readonly Dictionary<Type, List<Subscription>> _subscription = new Dictionary<Type, List<Subscription>>();
 
-        private readonly IHandlerMethodCache handlerMethodCache = new HandlerMethodCache();
+        private readonly IHandlerMethodCache _handlerMethodCache = new HandlerMethodCache();
 
         /// <summary>
         /// Register all handlers in assembly (you can register handlers that optionally belongs to specified namespaces)
@@ -42,7 +46,7 @@ namespace ParalectEventSourcing.Dispatching
         /// <param name="namespaces">namespaces to scan</param>
         public void Register(Assembly assembly, string[] namespaces)
         {
-            this.Register(assembly.GetTypes().Where(t => this.BelongToNamespaces(t, namespaces)));
+            Register(assembly.GetTypes().Where(t => BelongToNamespaces(t, namespaces)));
         }
 
         /// <summary>
@@ -54,7 +58,7 @@ namespace ParalectEventSourcing.Dispatching
         {
             foreach (var assembly in assemblies)
             {
-                this.Register(assembly, namespaces);
+                Register(assembly, namespaces);
             }
         }
 
@@ -66,7 +70,7 @@ namespace ParalectEventSourcing.Dispatching
         {
             foreach (var type in types)
             {
-                this.Register(type);
+                Register(type);
             }
         }
 
@@ -76,7 +80,7 @@ namespace ParalectEventSourcing.Dispatching
         /// <param name="type">register the type</param>
         public void Register(Type type)
         {
-            var searchTarget = this.markerInterfaceGeneric;
+            var searchTarget = MarkerInterfaceGeneric;
 
             //var priorityAttribute = ReflectionUtils.GetSingleAttribute<PriorityAttribute>(type); TODO make it work
             PriorityAttribute priorityAttribute = null;
@@ -84,16 +88,16 @@ namespace ParalectEventSourcing.Dispatching
             var defaultPriority = priorityAttribute == null ? 0 : priorityAttribute.Priority;
 
             var interfaces = type.GetInterfaces();
-            var markerInterface = interfaces.FirstOrDefault(i => i == this.markerInterface);
-            var markerInterfacesGeneric = interfaces.Where(i => 
-                i.GetTypeInfo().IsGenericType 
-                && (i.GetGenericTypeDefinition() == searchTarget) 
+            var markerInterface = interfaces.FirstOrDefault(i => i == MarkerInterface);
+            var markerInterfacesGeneric = interfaces.Where(i =>
+                i.GetTypeInfo().IsGenericType
+                && (i.GetGenericTypeDefinition() == searchTarget)
                 && !i.GetTypeInfo().ContainsGenericParameters).ToList();
 
             if (markerInterface != null)
             {
                 var methods = type.GetMethods()
-                    .Select(m => new { Method = m, Parameters = m.GetParameters() })
+                    .Select(m => new {Method = m, Parameters = m.GetParameters()})
                     .Where(m => m.Method.ReturnType == typeof(void) && m.Parameters.Count() == 1);
 
                 foreach (var method in methods)
@@ -118,7 +122,7 @@ namespace ParalectEventSourcing.Dispatching
                     }
 
                     var messageType = method.Parameters[0].ParameterType;
-                    this.AddSubscription(messageType, type, finalPriority);
+                    AddSubscription(messageType, type, finalPriority);
                 }
             }
             else if (markerInterfacesGeneric.Count > 0)
@@ -127,7 +131,7 @@ namespace ParalectEventSourcing.Dispatching
                 foreach (var i in markerInterfacesGeneric)
                 {
                     var messageType = i.GetGenericArguments()[0];
-                    this.AddSubscription(messageType, type, defaultPriority);
+                    AddSubscription(messageType, type, defaultPriority);
                 }
             }
         }
@@ -137,10 +141,10 @@ namespace ParalectEventSourcing.Dispatching
         /// </summary>
         public void InsureOrderOfHandlers()
         {
-            foreach (var type in this.subscription.Keys)
+            foreach (var type in _subscription.Keys)
             {
-                var handlerTypes = this.subscription[type];
-                this.SortInPlace(handlerTypes);
+                var handlerTypes = _subscription[type];
+                SortInPlace(handlerTypes);
             }
         }
 
@@ -168,12 +172,12 @@ namespace ParalectEventSourcing.Dispatching
         /// <returns>list of subscriptions</returns>
         public List<Subscription> GetSubscriptions(Type messageType)
         {
-            if (!this.subscription.ContainsKey(messageType))
+            if (!_subscription.ContainsKey(messageType))
             {
                 return new List<Subscription>();
             }
 
-            var handlers = this.subscription[messageType];
+            var handlers = _subscription[messageType];
 
             if (handlers.Count < 1)
             {
@@ -186,16 +190,17 @@ namespace ParalectEventSourcing.Dispatching
 
         private void AddSubscription(Type messageType, Type handlerType, int priority)
         {
-            if (!this.subscription.ContainsKey(messageType))
+            if (!_subscription.ContainsKey(messageType))
             {
-                this.subscription[messageType] = new List<Subscription>();
+                _subscription[messageType] = new List<Subscription>();
             }
 
-            var subscription = new Subscription(handlerType, messageType, this.handlerMethodCache, priority);
+            var handler = ServiceLocator.GetService(handlerType) as IMessageHandler;
+            var subscription = new Subscription(handlerType, messageType, _handlerMethodCache, priority, handler);
 
-            if (!this.subscription[messageType].Contains(subscription))
+            if (!_subscription[messageType].Contains(subscription))
             {
-                this.subscription[messageType].Add(subscription);
+                _subscription[messageType].Add(subscription);
             }
         }
 

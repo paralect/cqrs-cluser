@@ -12,7 +12,7 @@ namespace ParalectEventSourcing.Commands
         /// <summary>
         ///     Command metadata
         /// </summary>
-        private ICommandMetadata metadata = new CommandMetadata();
+        private ICommandMetadata _metadata = new CommandMetadata();
 
         /// <summary>
         /// Gets or sets ID of aggregate
@@ -24,8 +24,8 @@ namespace ParalectEventSourcing.Commands
         /// </summary>
         public ICommandMetadata Metadata
         {
-            get { return this.metadata; }
-            set { this.metadata = value; }
+            get { return _metadata; }
+            set { _metadata = value; }
         }
     }
 }

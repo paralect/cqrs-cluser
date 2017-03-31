@@ -12,26 +12,26 @@ namespace ParalectEventSourcing.InMemory
     /// </summary>
     public class InMemorySnapshotRepository : ISnapshotRepository
     {
-        private readonly ConcurrentDictionary<string, Snapshot> snapshots;
+        private readonly ConcurrentDictionary<string, Snapshot> _snapshots;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemorySnapshotRepository"/> class.
         /// </summary>
         public InMemorySnapshotRepository()
         {
-            this.snapshots = new ConcurrentDictionary<string, Snapshot>();
+            _snapshots = new ConcurrentDictionary<string, Snapshot>();
         }
 
         /// <inheritdoc/>
         public void Save(Snapshot snapshot)
         {
-            this.snapshots[snapshot.StreamId] = snapshot;
+            _snapshots[snapshot.StreamId] = snapshot;
         }
 
         /// <inheritdoc/>
         public Snapshot Load(string id)
         {
-            return this.snapshots.ContainsKey(id) ? this.snapshots[id] : null;
+            return _snapshots.ContainsKey(id) ? _snapshots[id] : null;
         }
     }
 }

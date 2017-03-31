@@ -16,28 +16,37 @@ namespace ParalectEventSourcing.Dispatching
         /// </summary>
         public DispatcherConfiguration()
         {
-            this.DispatcherHandlerRegistry = new DispatcherHandlerRegistry();
-            this.NumberOfRetries = 1;
+            NumberOfRetries = 3;
         }
 
         /// <summary>
-        /// Gets or sets handlers registry
+        /// Gets or sets command handlers registry
         /// </summary>
-        public DispatcherHandlerRegistry DispatcherHandlerRegistry { get; set; }
+        public DispatcherCommandHandlerRegistry DispatcherCommandHandlerRegistry { get; set; }
+
+        /// <summary>
+        /// Gets or sets event handlers registry
+        /// </summary>
+        public DispatcherEventHandlerRegistry DispatcherEventHandlerRegistry { get; set; }
 
         /// <summary>
         /// Gets or sets number of retries
         /// </summary>
         public int NumberOfRetries { get; set; }
 
+        private IServiceProvider _serviceLocator;
+
         /// <summary>
         /// Gets or sets service locator
         /// </summary>
-        public IServiceProvider ServiceLocator { get; set; }
-
-        /// <summary>
-        /// Gets or sets message Handler Marker interface
-        /// </summary>
-        public Type MessageHandlerMarkerInterface { get; set; }
+        public IServiceProvider ServiceLocator {
+            get { return _serviceLocator; }
+            set
+            {
+                _serviceLocator = value;
+                DispatcherCommandHandlerRegistry = new DispatcherCommandHandlerRegistry(_serviceLocator);
+                DispatcherEventHandlerRegistry = new DispatcherEventHandlerRegistry(_serviceLocator);
+            }
+        }
     }
 }

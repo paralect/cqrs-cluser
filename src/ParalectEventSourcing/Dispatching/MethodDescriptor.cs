@@ -29,8 +29,8 @@ namespace ParalectEventSourcing.Dispatching
         public MethodDescriptor(Type handlerType, Type messageType)
             : this()
         {
-            this.HandlerType = handlerType;
-            this.MessageType = messageType;
+            HandlerType = handlerType;
+            MessageType = messageType;
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace ParalectEventSourcing.Dispatching
         /// <returns>true if equals</returns>
         public bool Equals(MethodDescriptor descriptor)
         {
-            return descriptor.HandlerType == this.HandlerType && descriptor.MessageType == this.MessageType;
+            return descriptor.HandlerType == HandlerType && descriptor.MessageType == MessageType;
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace ParalectEventSourcing.Dispatching
                 return false;
             }
 
-            return this.Equals((MethodDescriptor)descriptor);
+            return Equals((MethodDescriptor)descriptor);
         }
 
         /// <summary>
@@ -71,8 +71,8 @@ namespace ParalectEventSourcing.Dispatching
         {
             unchecked
             {
-                return ((this.HandlerType != null ? this.HandlerType.GetHashCode() : 0) * 397)
-                     ^ (this.MessageType != null ? this.MessageType.GetHashCode() : 0);
+                return ((HandlerType != null ? HandlerType.GetHashCode() : 0) * 397)
+                     ^ (MessageType != null ? MessageType.GetHashCode() : 0);
             }
         }
     }

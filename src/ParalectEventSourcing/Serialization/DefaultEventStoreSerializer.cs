@@ -48,7 +48,7 @@ namespace ParalectEventSourcing.Serialization
         /// <inheritdoc/>
         public object Deserialize(ResolvedEvent @event)
         {
-            return this.Deserialize(Encoding.UTF8.GetString(@event.Event.Metadata), @event.Event.Data);
+            return Deserialize(Encoding.UTF8.GetString(@event.Event.Metadata), @event.Event.Data);
         }
 
         /// <inheritdoc/>

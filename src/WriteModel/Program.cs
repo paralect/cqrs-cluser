@@ -26,34 +26,49 @@
         public static void Main(string[] args)
         {
             RegisterDependencies();
-            ListenToCommands();
+            ListenToMessages();
         }
 
         private static void RegisterDependencies()
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
-            dispatcherConfiguration
-                .DispatcherHandlerRegistry
-                .Register(typeof(Program).GetTypeInfo().Assembly, new[] { "WriteModel.CommandHandlers", "WriteModel.EventHandlers" });
 
             _serviceProvider = new ServiceCollection()
                 .AddTransient<ICommandBus, CommandBus>()
-                .AddTransient<IDateTimeProvider, DateTimeProvider>()
+                .AddTransient<IEventBus, EventBus>()
+
+                .AddSingleton<ICommandDispatcher, CommandDispatcher>()
+                .AddSingleton<IEventDispatcher, EventDispatcher>()
+
                 .AddTransient<DeviceCommandsHandler, DeviceCommandsHandler>()
+                .AddTransient<ShipmentCommandsHandler, ShipmentCommandsHandler>()
                 .AddTransient<DeviceEventsHandler, DeviceEventsHandler>()
+                .AddTransient<ShipmentEventsHandler, ShipmentEventsHandler>()
+
+                .AddTransient<IDateTimeProvider, DateTimeProvider>()
+
                 .AddTransient<IAggregateRepository<Device>, AggregateRepository<Device>>()
+                .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
                 .AddTransient<IEventSource, InMemoryEventSource>()
-                .AddTransient<IEventBus, DispatcherEventBus>()
-                .AddTransient<IDispatcher, CommandDispatcher>()
+
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
                 .AddSingleton(dispatcherConfiguration)
                 .AddSingleton(Log.Logger)
                 .BuildServiceProvider();
 
             dispatcherConfiguration.ServiceLocator = _serviceProvider;
+
+            var assemblyWithHandlers = typeof(Program).GetTypeInfo().Assembly;
+            dispatcherConfiguration
+                .DispatcherCommandHandlerRegistry
+                .Register(assemblyWithHandlers, new[] { typeof(DeviceCommandsHandler).Namespace });
+            dispatcherConfiguration
+                .DispatcherEventHandlerRegistry
+                .Register(assemblyWithHandlers, new[] { typeof(DeviceEventsHandler).Namespace });
+            
         }
 
-        private static void ListenToCommands()
+        private static void ListenToMessages()
         {
             var factory = new ConnectionFactory { HostName = "localhost" };
             using (var connection = factory.CreateConnection())

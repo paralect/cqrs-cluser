@@ -20,8 +20,8 @@ namespace ParalectEventSourcing.Exceptions
         public DuplicateTransitionException(string streamId, int version, Exception innerException)
             : base(string.Format("Transition ({0}, {1}) already exists.", streamId, version), innerException)
         {
-            this.VersionId = version;
-            this.StreamId = streamId;
+            VersionId = version;
+            StreamId = streamId;
         }
 
         /// <summary>

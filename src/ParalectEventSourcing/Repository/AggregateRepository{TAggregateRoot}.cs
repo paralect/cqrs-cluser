@@ -23,9 +23,9 @@ namespace ParalectEventSourcing.Repository
         where TAggregateRoot : AggregateRoot, IAggregateRoot, new()
     {
         private const int SnapshotsInterval = 10;
-        private readonly IEventSource eventSource;
-        private readonly IEventBus eventBus;
-        private readonly ISnapshotRepository snapshots;
+        private readonly IEventSource _eventSource;
+        private readonly IEventBus _eventBus;
+        private readonly ISnapshotRepository _snapshots;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateRepository{TAggregateRoot}"/> class.
@@ -35,9 +35,9 @@ namespace ParalectEventSourcing.Repository
         /// <param name="snapshots">snapshots repository</param>
         public AggregateRepository(IEventSource eventSource, IEventBus eventBus, ISnapshotRepository snapshots)
         {
-            this.eventSource = eventSource;
-            this.eventBus = eventBus;
-            this.snapshots = snapshots;
+            _eventSource = eventSource;
+            _eventBus = eventBus;
+            _snapshots = snapshots;
         }
 
         /// <summary>
@@ -64,8 +64,8 @@ namespace ParalectEventSourcing.Repository
                     "Aggregate ID was not specified when trying to get by id {0} aggregate", typeof(TAggregateRoot).FullName));
             }
 
-            var snapshot = this.snapshots.Load(streamId);
-            var stream = snapshot == null ? this.eventSource.GetEventsStream(streamId) : this.eventSource.GetEventsStream(streamId, snapshot.StreamVersion + 1);
+            var snapshot = _snapshots.Load(streamId);
+            var stream = snapshot == null ? _eventSource.GetEventsStream(streamId) : _eventSource.GetEventsStream(streamId, snapshot.StreamVersion + 1);
             var aggregate = new TAggregateRoot();
             var state = snapshot != null ? snapshot.Payload : CreateAggregateState(typeof(TAggregateRoot));
             StateSpooler.Spool(state ?? aggregate, stream.Events);
@@ -82,18 +82,18 @@ namespace ParalectEventSourcing.Repository
         /// <returns>async task boid result</returns>
         public async Task CommitEventsAsync(string id, IAggregateRoot aggregateRoot, ICommandMetadata metadata)
         {
-            var events = this.ExtractEvents(aggregateRoot, metadata).ToList();
+            var events = ExtractEvents(aggregateRoot, metadata).ToList();
             var version = aggregateRoot.Version;
             events.ForEach(e => e.Version = version);
-            await this.eventSource.AppendEventsAsync(id.ToString(), version, events);
-            if (this.eventBus != null)
+            await _eventSource.AppendEventsAsync(id.ToString(), version, events);
+            if (_eventBus != null)
             {
-                this.eventBus.Publish(events);
+                _eventBus.Publish(events);
             }
 
             if (aggregateRoot.Version % SnapshotsInterval == 0)
             {
-                this.snapshots.Save(new Snapshot(id.ToString(), version, aggregateRoot.State));
+                _snapshots.Save(new Snapshot(id.ToString(), version, aggregateRoot.State));
             }
         }
 
@@ -105,7 +105,7 @@ namespace ParalectEventSourcing.Repository
         /// <param name="metadata">metadata</param>
         public void CommitEvents(string id, IAggregateRoot aggregateRoot, ICommandMetadata metadata)
         {
-            this.CommitEventsAsync(id, aggregateRoot, metadata).Wait();
+            CommitEventsAsync(id, aggregateRoot, metadata).Wait();
         }
 
         /// <summary>
@@ -116,9 +116,9 @@ namespace ParalectEventSourcing.Repository
         /// <param name="metadata">metadata</param>
         public void Perform(string id, Action<TAggregateRoot> update, ICommandMetadata metadata = null)
         {
-            var aggregate = this.Get(id);
+            var aggregate = Get(id);
             update(aggregate);
-            this.CommitEvents(id, aggregate, metadata);
+            CommitEvents(id, aggregate, metadata);
         }
 
         /// <summary>

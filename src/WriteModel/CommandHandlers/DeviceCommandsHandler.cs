@@ -14,13 +14,13 @@
 
         public DeviceCommandsHandler(IAggregateRepository<Device> devices)
         {
-            this._devices = devices;
+            _devices = devices;
         }
 
         public void Handle(
             AddDeviceToShipmentCommand c)
         {
-            this._devices.Perform(
+            _devices.Perform(
                 c.Id,
                 device => device.AddToShipment(
                     c.ShipmentKey));

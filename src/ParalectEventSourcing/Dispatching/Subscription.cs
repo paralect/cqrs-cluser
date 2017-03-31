@@ -6,22 +6,28 @@ namespace ParalectEventSourcing.Dispatching
 {
     using System;
     using System.Reflection;
+    using Events;
 
     public class Subscription
     {
-        private readonly IHandlerMethodCache handlerMethodCache;
-        private readonly Type messageType;
+        private readonly IMessageHandler _handler;
+        private readonly IHandlerMethodCache _handlerMethodCache;
+        private readonly Type _messageType;
 
         public Subscription(Type handlerType,
             Type messageType,
             IHandlerMethodCache handlerMethodCache,
-            int priority)
+            int priority,
+            IMessageHandler handler)
         {
-            this.messageType = messageType;
-            this.handlerMethodCache = handlerMethodCache;
-            this.HandlerType = handlerType;
-            this.Priority = priority;
+            _messageType = messageType;
+            _handlerMethodCache = handlerMethodCache;
+            HandlerType = handlerType;
+            Priority = priority;
+            Handler = handler;
         }
+
+        public IMessageHandler Handler { get; private set; }
 
         public Type HandlerType { get; private set; }
 
@@ -44,7 +50,7 @@ namespace ParalectEventSourcing.Dispatching
                 return true;
             }
 
-            return other.HandlerType == this.HandlerType && other.Priority == this.Priority;
+            return other.HandlerType == HandlerType && other.Priority == Priority;
         }
 
         public override bool Equals(
@@ -69,22 +75,22 @@ namespace ParalectEventSourcing.Dispatching
                 return false;
             }
 
-            return this.Equals(
+            return Equals(
                 (Subscription)obj);
         }
 
         public MethodInfo GetMethodInfo()
         {
-            return this.handlerMethodCache.GetMethodInfo(
-                this.HandlerType,
-                this.messageType);
+            return _handlerMethodCache.GetMethodInfo(
+                HandlerType,
+                _messageType);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return ((this.HandlerType != null ? this.HandlerType.GetHashCode() : 0) * 397) ^ this.Priority;
+                return ((HandlerType != null ? HandlerType.GetHashCode() : 0) * 397) ^ Priority;
             }
         }
     }

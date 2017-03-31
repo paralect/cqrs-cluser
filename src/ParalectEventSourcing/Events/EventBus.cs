@@ -1,4 +1,4 @@
-﻿// <copyright file="DispatcherEventBus.cs" company="Advanced Metering Services LLC">
+﻿// <copyright file="EventBus.cs" company="Advanced Metering Services LLC">
 // Copyright (c) Advanced Metering Services LLC. All rights reserved.
 // </copyright>
 
@@ -10,24 +10,24 @@ namespace ParalectEventSourcing.Events
     /// <summary>
     /// Events bus which directly pass event to the dispatcher
     /// </summary>
-    public class DispatcherEventBus : IEventBus
+    public class EventBus : IEventBus
     {
-        private readonly IDispatcher dispatcher;
+        private readonly IEventDispatcher _dispatcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DispatcherEventBus"/> class.
+        /// Initializes a new instance of the <see cref="EventBus"/> class.
         /// </summary>
         /// <param name="dispatcher">the dispatcher</param>
-        public DispatcherEventBus(IDispatcher dispatcher)
+        public EventBus(IEventDispatcher dispatcher)
         {
-            this.dispatcher = dispatcher;
+            _dispatcher = dispatcher;
         }
 
         /// <inheritdoc/>
         public void Publish(
             IEvent eventMessage)
         {
-            this.dispatcher.Dispatch(
+            _dispatcher.Dispatch(
                 eventMessage);
         }
 
@@ -37,7 +37,7 @@ namespace ParalectEventSourcing.Events
         {
             foreach (var evnt in eventMessages)
             {
-                this.dispatcher.Dispatch(
+                _dispatcher.Dispatch(
                     evnt);
             }
         }

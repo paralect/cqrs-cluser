@@ -17,13 +17,13 @@ namespace ParalectEventSourcing.InMemory
     /// </summary>
     public class InMemoryEventSource : IEventSource
     {
-        private readonly ConcurrentDictionary<string, Dictionary<int, Transition>> store = new ConcurrentDictionary<string, Dictionary<int, Transition>>();
+        private readonly ConcurrentDictionary<string, Dictionary<int, Transition>> _store = new ConcurrentDictionary<string, Dictionary<int, Transition>>();
 
         /// <inheritdoc/>
         public Task AppendEventsAsync(string streamId, int version, IEnumerable<IEvent> events)
         {
             var nextVersion = version + 1;
-            var stream = this.GetStream(streamId);
+            var stream = GetStream(streamId);
             if (stream.ContainsKey(nextVersion))
             {
                 throw new DuplicateTransitionException(streamId, nextVersion, null);
@@ -42,7 +42,7 @@ namespace ParalectEventSourcing.InMemory
         /// <inheritdoc/>
         public EventsStream GetEventsStream(string streamId, int offset)
         {
-            var stream = this.GetStream(streamId);
+            var stream = GetStream(streamId);
             var events = stream.Values.Skip(offset).SelectMany(x => x.Events).ToList();
             return new EventsStream(streamId, offset, stream.Any() ? stream.Max(x => x.Key) : 0, events);
         }
@@ -50,17 +50,17 @@ namespace ParalectEventSourcing.InMemory
         /// <inheritdoc/>
         public EventsStream GetEventsStream(string streamId)
         {
-            return this.GetEventsStream(streamId, 0);
+            return GetEventsStream(streamId, 0);
         }
 
         private Dictionary<int, Transition> GetStream(string streamId)
         {
-            if (!this.store.ContainsKey(streamId))
+            if (!_store.ContainsKey(streamId))
             {
-                this.store[streamId] = new Dictionary<int, Transition>();
+                _store[streamId] = new Dictionary<int, Transition>();
             }
 
-            return this.store[streamId];
+            return _store[streamId];
         }
 
         internal class Transition
