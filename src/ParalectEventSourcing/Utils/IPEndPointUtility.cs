@@ -39,7 +39,7 @@ namespace ParalectEventSourcing.Utils
         /// <returns>endpoint formed to specific object</returns>
         public static async Task<IPEndPoint> CreateIpEndPoint(string host, int port)
         {
-            IPAddress ip = (await Dns.GetHostAddressesAsync(host)).Single();
+            IPAddress ip = (await Dns.GetHostAddressesAsync(host)).First();
             return new IPEndPoint(ip, port);
         }
     }

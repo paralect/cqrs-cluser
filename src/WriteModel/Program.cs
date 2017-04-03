@@ -15,6 +15,7 @@
     using ParalectEventSourcing.InMemory;
     using ParalectEventSourcing.Repository;
     using ParalectEventSourcing.Repository.EventStore;
+    using ParalectEventSourcing.Serialization;
     using ParalectEventSourcing.Snapshoting;
     using ParalectEventSourcing.Utils;
     using RabbitMQ.Client;
@@ -40,6 +41,13 @@
         private static void RegisterDependencies()
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
+            var eventStoreConnectionsSettings = new EventStoreConnectionSettings
+            {
+                Host = "localhost",
+                Port = 1113,
+                Login = "admin",
+                Pass = "changeit"
+            }; // todo read from configuration
 
             _serviceProvider = new ServiceCollection()
 
@@ -57,7 +65,10 @@
 
                 .AddTransient<IAggregateRepository<Device>, AggregateRepository<Device>>()
                 .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
-                .AddTransient<IEventSource, InMemoryEventSource>()
+
+                .AddTransient<IEventSource, EventSource>()
+                .AddTransient<IEventStoreSerializer, DefaultEventStoreSerializer>()
+                .AddSingleton(eventStoreConnectionsSettings)
 
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
                 .AddSingleton(dispatcherConfiguration)
