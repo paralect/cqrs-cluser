@@ -1,13 +1,15 @@
 ﻿namespace WebApi
 {
-    using Infrastructure;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using ParalectEventSourcing.Commands;
+    using ParalectEventSourcing.Messaging;
     using ParalectEventSourcing.Utils;
+    using RabbitMQ.Client;
+    using WriteModel.Infrastructure.Messaging;
 
     public class Startup
     {
@@ -28,7 +30,8 @@
         {
             services
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
-                .AddTransient<IDateTimeProvider, DateTimeProvider>();
+                .AddTransient<IDateTimeProvider, DateTimeProvider>()
+                .AddSingleton<IChannelFactory>(new ChannelFactory(new ConnectionFactory().CreateConnection()));
 
             // Add framework services.
             services.AddMvc();

@@ -1,26 +1,26 @@
-﻿namespace WebApi.Infrastructure
+﻿namespace ParalectEventSourcing.Messaging
 {
     using System.Text;
+    using Commands;
     using Newtonsoft.Json;
-    using ParalectEventSourcing.Commands;
-    using ParalectEventSourcing.Utils;
     using RabbitMQ.Client;
+    using Utils;
+    using WriteModel.Infrastructure.Messaging;
 
     public class RabbitMqCommandBus : CommandBus
     {
-        private const string HostName = "localhost";
         private const string WriteModelQueue = "WriteModelQueue";
+        private readonly IChannelFactory _channelFactory;
 
-        public RabbitMqCommandBus(IDateTimeProvider dateTimeProvider) 
+        public RabbitMqCommandBus(IDateTimeProvider dateTimeProvider, IChannelFactory channelFactory) 
             : base(dateTimeProvider)
         {
+            _channelFactory = channelFactory;
         }
 
         protected override void SendInternal(params ICommand[] commands)
         {
-            var factory = new ConnectionFactory { HostName = HostName };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
+            using (var channel = _channelFactory.CreateChannel())
             {
                 channel.QueueDeclare(queue: WriteModelQueue,
                                      durable: false,

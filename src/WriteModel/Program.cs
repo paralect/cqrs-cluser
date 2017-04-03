@@ -7,12 +7,14 @@
     using Domain;
     using EventHandlers;
     using Infrastructure;
+    using Infrastructure.Messaging;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
     using ParalectEventSourcing.Exceptions;
     using ParalectEventSourcing.InMemory;
+    using ParalectEventSourcing.Messaging;
     using ParalectEventSourcing.Repository;
     using ParalectEventSourcing.Repository.EventStore;
     using ParalectEventSourcing.Serialization;
@@ -51,6 +53,8 @@
 
             _serviceProvider = new ServiceCollection()
 
+                .AddSingleton<IChannelFactory>(new ChannelFactory(new ConnectionFactory().CreateConnection()))
+
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 
                 .AddSingleton<ICommandDispatcher, CommandDispatcher>()
@@ -71,6 +75,7 @@
                 .AddSingleton(eventStoreConnectionsSettings)
 
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
+
                 .AddSingleton(dispatcherConfiguration)
                 .AddSingleton(Log.Logger)
                 .BuildServiceProvider();
