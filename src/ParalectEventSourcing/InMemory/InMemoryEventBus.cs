@@ -1,24 +1,25 @@
-﻿// <copyright file="EventBus.cs" company="Advanced Metering Services LLC">
+﻿// <copyright file="InMemoryEventBus.cs" company="Advanced Metering Services LLC">
 // Copyright (c) Advanced Metering Services LLC. All rights reserved.
 // </copyright>
 
-namespace ParalectEventSourcing.Events
+namespace ParalectEventSourcing.InMemory
 {
     using System.Collections.Generic;
     using Dispatching;
+    using Events;
 
     /// <summary>
     /// Events bus which directly pass event to the dispatcher
     /// </summary>
-    public class EventBus : IEventBus
+    public class InMemoryEventBus : IEventBus
     {
         private readonly IEventDispatcher _dispatcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventBus"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryEventBus"/> class.
         /// </summary>
         /// <param name="dispatcher">the dispatcher</param>
-        public EventBus(IEventDispatcher dispatcher)
+        public InMemoryEventBus(IEventDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
         }

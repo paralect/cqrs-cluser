@@ -6,6 +6,7 @@
     using CommandHandlers;
     using Domain;
     using EventHandlers;
+    using Infrastructure;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
@@ -42,7 +43,7 @@
 
             _serviceProvider = new ServiceCollection()
 
-                .AddTransient<IEventBus, EventBus>()
+                .AddTransient<IEventBus, RabbitMqEventBus>()
 
                 .AddSingleton<ICommandDispatcher, CommandDispatcher>()
                 .AddSingleton<IEventDispatcher, EventDispatcher>()

@@ -57,7 +57,7 @@ namespace ParalectEventSourcing.Repository
         /// <returns>AR instance</returns>
         public TAggregateRoot Get(string id)
         {
-            var streamId = id.ToString();
+            var streamId = id;
             if (string.IsNullOrEmpty(id))
             {
                 throw new ArgumentException(string.Format(
@@ -85,15 +85,12 @@ namespace ParalectEventSourcing.Repository
             var events = ExtractEvents(aggregateRoot, metadata).ToList();
             var version = aggregateRoot.Version;
             events.ForEach(e => e.Version = version);
-            await _eventSource.AppendEventsAsync(id.ToString(), version, events);
-            if (_eventBus != null)
-            {
-                _eventBus.Publish(events);
-            }
+            await _eventSource.AppendEventsAsync(id, version, events);
+            _eventBus?.Publish(events);
 
             if (aggregateRoot.Version % SnapshotsInterval == 0)
             {
-                _snapshots.Save(new Snapshot(id.ToString(), version, aggregateRoot.State));
+                _snapshots.Save(new Snapshot(id, version, aggregateRoot.State));
             }
         }
 
