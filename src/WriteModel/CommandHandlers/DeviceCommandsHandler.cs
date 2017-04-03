@@ -18,7 +18,7 @@
         }
 
         public void Handle(
-            AddDeviceToShipmentCommand c)
+            AddDeviceToShipment c)
         {
             _devices.Perform(
                 c.Id,

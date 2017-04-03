@@ -15,7 +15,7 @@
         }
 
         public void Handle(
-            UpdateShipmentAddressCommand c)
+            UpdateShipmentAddress c)
         {
             _shipments.Perform(
                 c.Id,

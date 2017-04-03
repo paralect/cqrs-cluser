@@ -5,12 +5,7 @@
 namespace ParalectEventSourcing.Dispatching
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using Events;
     using Exceptions;
-    using Microsoft.Practices.ServiceLocation;
     using Serilog;
 
     /// <summary>

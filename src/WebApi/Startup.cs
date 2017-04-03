@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
-namespace WebApi
+﻿namespace WebApi
 {
+    using Infrastructure;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using ParalectEventSourcing.Commands;
+    using ParalectEventSourcing.Utils;
+
     public class Startup
     {
         public Startup(IHostingEnvironment env)
@@ -27,6 +26,10 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddTransient<ICommandBus, RabbitMqCommandBus>()
+                .AddTransient<IDateTimeProvider, DateTimeProvider>();
+
             // Add framework services.
             services.AddMvc();
         }

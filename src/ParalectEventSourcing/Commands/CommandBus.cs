@@ -1,66 +1,24 @@
-﻿// <copyright file="CommandBus.cs" company="Advanced Metering Services LLC">
-// Copyright (c) Advanced Metering Services LLC. All rights reserved.
-// </copyright>
-
-namespace ParalectEventSourcing.Commands
+﻿namespace ParalectEventSourcing.Commands
 {
     using System;
-    using Dispatching;
-    using Exceptions;
-    using Serilog;
     using Utils;
 
-    /// <summary>
-    ///     Messages bus for commands
-    /// </summary>
-    public class CommandBus : ICommandBus
+    public abstract class CommandBus : ICommandBus
     {
-        private static readonly ILogger Log = Serilog.Log.Logger;
-
-        private readonly IDispatcher _dispatcher;
-
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CommandBus"/> class.
-        /// </summary>
-        /// <param name="dispatcher">the dispatcher</param>
-        /// <param name="dateTimeProvider">datetime provider</param>
-        public CommandBus(ICommandDispatcher dispatcher, IDateTimeProvider dateTimeProvider)
+        protected CommandBus(IDateTimeProvider dateTimeProvider)
         {
-            _dispatcher = dispatcher;
             _dateTimeProvider = dateTimeProvider;
         }
 
-        /// <summary>
-        /// Send single or several messages
-        /// </summary>
-        /// <param name="commands">The commands.</param>
         public void Send(params ICommand[] commands)
         {
             PrepareCommands(commands);
-
-            try
-            {
-                foreach (var command in commands)
-                {
-                    _dispatcher.Dispatch(
-                        command);
-                }
-            }
-            catch (DomainValidationException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                // we are not throwing exception here, because dispatching
-                // may be performed asynchronously and on another machine
-                // (but right now we dispatching synchronously)
-                // so we can just log error message
-                Log.Error(ex, "Command bus exception.");
-            }
+            SendInternal(commands);
         }
+
+        protected abstract void SendInternal(params ICommand[] commands);
 
         /// <summary>
         /// Prepare commands before they reach adressee
@@ -73,7 +31,7 @@ namespace ParalectEventSourcing.Commands
             {
                 command.Metadata.CommandId = Guid.NewGuid().ToString();
                 command.Metadata.CreatedDate = _dateTimeProvider.GetUtcNow();
-                command.Metadata.TypeName = command.GetType().FullName;
+                command.Metadata.TypeName = command.GetType().AssemblyQualifiedName;
             }
         }
     }

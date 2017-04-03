@@ -6,17 +6,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
 {
-    using System.Text;
     using Contracts.Commands;
-    using Newtonsoft.Json;
     using ParalectEventSourcing.Commands;
-    using RabbitMQ.Client;
 
     [Route("api/[controller]")]
     public class DevicesController : Controller
     {
-        private const string WriteModelQueue = "WriteModelQueue";
-        private const string ErrorQueue = "ErrorQueue";
+        private readonly ICommandBus _commandBus;
+
+        public DevicesController(ICommandBus commandBus)
+        {
+            _commandBus = commandBus;
+        }
 
         // GET: api/values
         [HttpGet]
@@ -36,38 +37,13 @@ namespace WebApi.Controllers
         [HttpPost]
         public void Post([FromBody]string shipmentKey)
         {
-            var command = new AddDeviceToShipmentCommand
+            var command = new AddDeviceToShipment
             {
                 Id = "2d810a20-490e-4fee-845d-5a7f5de0fc42",
-                ShipmentKey = shipmentKey,
-                Metadata = new CommandMetadata
-                {
-                    CommandId = Guid.NewGuid().ToString(),
-                    CreatedDate = DateTime.UtcNow,
-                    TypeName = typeof(AddDeviceToShipmentCommand).AssemblyQualifiedName,
-                    UserId = "123"
-                }
+                ShipmentKey = shipmentKey
             };
 
-            var factory = new ConnectionFactory { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: WriteModelQueue,
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
-
-                var data = JsonConvert.SerializeObject(command);
-                var body = Encoding.UTF8.GetBytes(data);
-
-                channel.BasicPublish(exchange: "",
-                                 routingKey: WriteModelQueue,
-                                 basicProperties: null,
-                                 body: body);
-                Console.WriteLine(" [x] Sent {0}", JsonConvert.SerializeObject(command));
-            }
+            _commandBus.Send(command);
         }
 
         // PUT api/values/5

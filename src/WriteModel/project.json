@@ -12,6 +12,7 @@
       "version": "1.0.1"
     },
     "Newtonsoft.Json": "10.0.1",
+"ParalectEventSourcing": "1.0.0-*",
     "RabbitMQ.Client": "4.1.3"
   },
 

@@ -8,7 +8,6 @@
     using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
-    using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
     using ParalectEventSourcing.Exceptions;
@@ -23,10 +22,13 @@
 
     public class Program
     {
-        private static IServiceProvider _serviceProvider;
         private const string WriteModelQueue = "WriteModelQueue";
         private const string ErrorQueue = "ErrorQueue";
-        private static readonly ConnectionFactory ConnectionFactory = new ConnectionFactory { HostName = "localhost" };
+        private const string HostName = "localhost";
+
+        private static readonly ConnectionFactory ConnectionFactory = new ConnectionFactory { HostName = HostName };
+
+        private static IServiceProvider _serviceProvider;
 
         public static void Main(string[] args)
         {
@@ -39,7 +41,7 @@
             var dispatcherConfiguration = new DispatcherConfiguration();
 
             _serviceProvider = new ServiceCollection()
-                .AddTransient<ICommandBus, CommandBus>()
+
                 .AddTransient<IEventBus, EventBus>()
 
                 .AddSingleton<ICommandDispatcher, CommandDispatcher>()
@@ -96,17 +98,20 @@
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
             var body = Encoding.UTF8.GetString(basicDeliverEventArgs.Body);
+            Console.WriteLine("Received: " + body);
+
             var message = JsonConvert.DeserializeObject(body);
-            Console.WriteLine(" [x] Received {0}", message);
 
             var typeName = ((dynamic)message).Metadata.TypeName.ToString();
             var messageType = Type.GetType(typeName);
             var typedMessage = JsonConvert.DeserializeObject(body, messageType);
 
-            var commandBus = _serviceProvider.GetService<ICommandBus>();
             try
             {
-                commandBus.Send(typedMessage);
+                var commandDispatcher = (dynamic) _serviceProvider.GetService<ICommandDispatcher>();
+                commandDispatcher.Dispatch(typedMessage);
+
+                Console.WriteLine("Command handled successfully.");
             }
             catch (DomainValidationException e)
             {
@@ -131,7 +136,8 @@
                                  routingKey: queue,
                                  basicProperties: null,
                                  body: body);
-                Console.WriteLine(" [x] Sent {0}", message);
+
+                Console.WriteLine("Sent: " + message);
             }
         }
     }

@@ -2,7 +2,7 @@
 {
     using ParalectEventSourcing.Commands;
 
-    public class AddDeviceToShipmentCommand : Command
+    public class AddDeviceToShipment : Command
     {
         public string ShipmentKey { get; set; }
     }
