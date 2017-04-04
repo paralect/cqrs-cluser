@@ -39,7 +39,7 @@ namespace WebApi.Controllers
         {
             var command = new AddDeviceToShipment
             {
-                Id = "2d810a20-490e-4fee-845d-5a7f5de0fc42",
+                Id = "b7faf0b8-836a-44a1-b99e-673cfdfb4425",
                 ShipmentKey = shipmentKey
             };
 

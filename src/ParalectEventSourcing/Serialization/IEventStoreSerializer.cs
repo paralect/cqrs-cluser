@@ -28,11 +28,11 @@ namespace ParalectEventSourcing.Serialization
         EventData Serialize(object @event, IDictionary<string, object> headers = null);
 
         /// <summary>
-        /// Deserialize event from json event metadata and binary event data
+        /// Deserialize event from binary event metadata and binary event data
         /// </summary>
-        /// <param name="metadataJson">json event metadata</param>
+        /// <param name="metadata">binary event metadata</param>
         /// <param name="data">binary event data</param>
         /// <returns>the event</returns>
-        object Deserialize(string metadataJson, byte[] data);
+        object Deserialize(byte[] metadata, byte[] data);
     }
 }

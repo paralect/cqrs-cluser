@@ -29,18 +29,15 @@ namespace ParalectEventSourcing.Serialization
         {
             var data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(@event, JsonSerializerSettings));
 
-            if (headers == null)
-            {
-                headers = new Dictionary<string, object>();
-            }
+            var typeName = @event.GetType().AssemblyQualifiedName;
 
+            headers = headers ?? new Dictionary<string, object>();
             var eventHeaders = new Dictionary<string, object>(headers)
             {
-                { EventClrTypeHeader, @event.GetType().AssemblyQualifiedName }
+                { EventClrTypeHeader, typeName }
             };
 
             var metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventHeaders, JsonSerializerSettings));
-            var typeName = @event.GetType().Name;
 
             return new EventData(Guid.NewGuid(), typeName, true, data, metadata);
         }
@@ -48,16 +45,17 @@ namespace ParalectEventSourcing.Serialization
         /// <inheritdoc/>
         public object Deserialize(ResolvedEvent @event)
         {
-            return Deserialize(Encoding.UTF8.GetString(@event.Event.Metadata), @event.Event.Data);
+            return Deserialize(@event.Event.Metadata, @event.Event.Data);
         }
 
         /// <inheritdoc/>
-        public object Deserialize(string metadataJson, byte[] data)
+        public object Deserialize(byte[] metadataBinary, byte[] data)
         {
+            var metadataJson = Encoding.UTF8.GetString(metadataBinary);
             var metadata = JsonConvert.DeserializeObject<Dictionary<string, string>>(metadataJson);
-            var eventDataJson = Encoding.UTF8.GetString(data);
-
             var eventType = metadata[EventClrTypeHeader];
+
+            var eventDataJson = Encoding.UTF8.GetString(data);
 
             return JsonConvert.DeserializeObject(eventDataJson, Type.GetType(eventType), JsonSerializerSettings);
         }

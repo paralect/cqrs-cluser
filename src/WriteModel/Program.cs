@@ -78,7 +78,7 @@
                 .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
 
                 .AddTransient<IEventSource, EventSource>()
-                .AddTransient<IEventStoreSerializer, DefaultEventStoreSerializer>()
+                .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
                 .AddSingleton<EventStoreConnectionSettings>(eventStoreConnectionsSettings)
 
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
