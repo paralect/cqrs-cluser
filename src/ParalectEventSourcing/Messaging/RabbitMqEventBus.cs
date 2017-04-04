@@ -1,40 +1,20 @@
 ﻿namespace ParalectEventSourcing.Messaging
 {
     using System.Collections.Generic;
-    using System.Text;
     using Events;
-    using Newtonsoft.Json;
-    using RabbitMQ.Client;
-    using WriteModel.Infrastructure.Messaging;
 
     public class RabbitMqEventBus : IEventBus
     {
-        private const string ReadModelQueue = "ReadModelQueue";
-        private readonly IChannelFactory _channelFactory;
+        private readonly IChannel _channel;
 
-        public RabbitMqEventBus(IChannelFactory channelFactory)
+        public RabbitMqEventBus(IChannel channel)
         {
-            _channelFactory = channelFactory;
+            _channel = channel;
         }
 
         public void Publish(IEvent eventMessage)
         {
-            using (var channel = _channelFactory.CreateChannel())
-            {
-                channel.QueueDeclare(queue: ReadModelQueue,
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
-
-                var data = JsonConvert.SerializeObject(eventMessage);
-                var body = Encoding.UTF8.GetBytes(data);
-
-                channel.BasicPublish(exchange: "",
-                                 routingKey: ReadModelQueue,
-                                 basicProperties: null,
-                                 body: body);
-            }
+            _channel.Send(QueueConfiguration.ReadModelQueue, eventMessage);
         }
 
         public void Publish(IEnumerable<IEvent> eventMessages)

@@ -3,11 +3,10 @@
     using System;
     using System.Reflection;
     using System.Text;
+    using System.Threading.Tasks;
     using CommandHandlers;
     using Domain;
     using EventHandlers;
-    using Infrastructure;
-    using Infrastructure.Messaging;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
@@ -26,18 +25,14 @@
 
     public class Program
     {
-        private const string WriteModelQueue = "WriteModelQueue";
-        private const string ErrorQueue = "ErrorQueue";
-        private const string HostName = "localhost";
-
-        private static readonly ConnectionFactory ConnectionFactory = new ConnectionFactory { HostName = HostName };
-
         private static IServiceProvider _serviceProvider;
 
         public static void Main(string[] args)
         {
             RegisterDependencies();
             ListenToMessages();
+
+            Console.Read();
         }
 
         private static void RegisterDependencies()
@@ -49,11 +44,16 @@
                 Port = 1113,
                 Login = "admin",
                 Pass = "changeit"
-            }; // todo read from configuration
+            }; // TODO read from configuration
 
             _serviceProvider = new ServiceCollection()
 
-                .AddSingleton<IChannelFactory>(new ChannelFactory(new ConnectionFactory().CreateConnection()))
+                // TODO consider creating channels per thread
+                .AddTransient<IChannel, Channel>()
+                .AddSingleton<IConnectionFactory, ConnectionFactory>()
+                .AddSingleton<IConnection>(sp => sp.GetService<IConnectionFactory>().CreateConnection())
+                .AddTransient<IModel>(sp => sp.GetService<IConnection>().CreateModel())
+                .AddTransient<IMessageSerializer, MessageSerializer>()
 
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 
@@ -72,12 +72,12 @@
 
                 .AddTransient<IEventSource, EventSource>()
                 .AddTransient<IEventStoreSerializer, DefaultEventStoreSerializer>()
-                .AddSingleton(eventStoreConnectionsSettings)
+                .AddSingleton<EventStoreConnectionSettings>(eventStoreConnectionsSettings)
 
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
 
-                .AddSingleton(dispatcherConfiguration)
-                .AddSingleton(Log.Logger)
+                .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
+                .AddSingleton<ILogger>(Log.Logger)
                 .BuildServiceProvider();
 
             dispatcherConfiguration.ServiceLocator = _serviceProvider;
@@ -93,23 +93,21 @@
 
         private static void ListenToMessages()
         {
-            using (var connection = ConnectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
+            Task.Run(() =>
             {
-                channel.QueueDeclare(queue: WriteModelQueue,
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+                var channel = _serviceProvider.GetService<IChannel>();
+                channel.Listen(QueueConfiguration.WriteModelQueue, ConsumerOnReceived);
+            });
 
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += ConsumerOnReceived;
-                channel.BasicConsume(queue: WriteModelQueue,
-                                     noAck: true,
-                                     consumer: consumer);
-
-                Console.Read();
-            }
+            Task.Run(() =>
+            {
+                var channel = _serviceProvider.GetService<IChannel>();
+                channel.Listen(QueueConfiguration.ErrorQueue, (sender, args) =>
+                {
+                    var body = Encoding.UTF8.GetString(args.Body);
+                    Console.WriteLine(body);
+                });
+            });
         }
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
@@ -132,29 +130,8 @@
             }
             catch (DomainValidationException e)
             {
-                SendMessage(ErrorQueue, e.Message);
-            }
-        }
-
-        private static void SendMessage(string queue, string message)
-        {
-            using (var connection = ConnectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: queue,
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
-
-                var body = Encoding.UTF8.GetBytes(message);
-
-                channel.BasicPublish(exchange: "",
-                                 routingKey: queue,
-                                 basicProperties: null,
-                                 body: body);
-
-                Console.WriteLine("Sent: " + message);
+                var channel = _serviceProvider.GetService<IChannel>();
+                channel.Send(QueueConfiguration.ErrorQueue, e.Message);
             }
         }
     }

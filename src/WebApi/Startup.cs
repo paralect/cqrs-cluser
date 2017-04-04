@@ -9,7 +9,6 @@
     using ParalectEventSourcing.Messaging;
     using ParalectEventSourcing.Utils;
     using RabbitMQ.Client;
-    using WriteModel.Infrastructure.Messaging;
 
     public class Startup
     {
@@ -31,7 +30,13 @@
             services
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
-                .AddSingleton<IChannelFactory>(new ChannelFactory(new ConnectionFactory().CreateConnection()));
+
+                // TODO consider creating channels per thread
+                .AddTransient<IChannel, Channel>()
+                .AddSingleton<IConnectionFactory, ConnectionFactory>()
+                .AddSingleton<IConnection>(sp => sp.GetService<IConnectionFactory>().CreateConnection())
+                .AddTransient<IModel>(sp => sp.GetService<IConnection>().CreateModel())
+                .AddTransient<IMessageSerializer, MessageSerializer>();
 
             // Add framework services.
             services.AddMvc();

@@ -151,7 +151,7 @@ namespace ParalectEventSourcing.Repository
             {
                 e.Metadata.EventId = Guid.NewGuid().ToString();
                 e.Metadata.StoredDate = currentTime;
-                e.Metadata.TypeName = e.GetType().Name;
+                e.Metadata.TypeName = e.GetType().AssemblyQualifiedName;
 
                 // Take some metadata properties from command
                 if (metadata != null)
