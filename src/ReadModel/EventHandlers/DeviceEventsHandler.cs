@@ -1,4 +1,4 @@
-﻿namespace WriteModel.EventHandlers
+﻿namespace ReadModel.EventHandlers
 {
     using Contracts.Events;
     using ParalectEventSourcing.Events;

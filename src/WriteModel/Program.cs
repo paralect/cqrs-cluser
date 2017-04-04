@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using CommandHandlers;
     using Domain;
-    using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
@@ -65,13 +64,10 @@
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 
                 .AddSingleton<ICommandDispatcher, CommandDispatcher>()
-                .AddSingleton<IEventDispatcher, EventDispatcher>()
 
                 .AddSingleton<DeviceCommandsHandler, DeviceCommandsHandler>()
                 .AddSingleton<ShipmentCommandsHandler, ShipmentCommandsHandler>()
-                .AddSingleton<DeviceEventsHandler, DeviceEventsHandler>()
-                .AddSingleton<ShipmentEventsHandler, ShipmentEventsHandler>()
-
+            
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 
                 .AddTransient<IAggregateRepository<Device>, AggregateRepository<Device>>()
@@ -89,13 +85,9 @@
 
             dispatcherConfiguration.ServiceLocator = _serviceProvider;
 
-            var assemblyWithHandlers = typeof(Program).GetTypeInfo().Assembly;
             dispatcherConfiguration
                 .DispatcherCommandHandlerRegistry
-                .Register(assemblyWithHandlers, new[] { typeof(DeviceCommandsHandler).Namespace });
-            dispatcherConfiguration
-                .DispatcherEventHandlerRegistry
-                .Register(assemblyWithHandlers, new[] { typeof(DeviceEventsHandler).Namespace });
+                .Register(Assembly.GetEntryAssembly(), new[] { typeof(DeviceCommandsHandler).Namespace });
         }
 
         private static void ListenToMessages()

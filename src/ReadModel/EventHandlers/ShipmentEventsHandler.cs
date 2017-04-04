@@ -1,4 +1,4 @@
-﻿namespace WriteModel.EventHandlers
+﻿namespace ReadModel.EventHandlers
 {
     using Contracts.Events;
     using ParalectEventSourcing.Events;
@@ -10,7 +10,7 @@
             // Update read model here
         }
 
-        public void Handle(ShipmentAddressUpdated e)
+        public void Handle(ShipmentAddressChanged e)
         {
             
         }

@@ -1,12 +1,17 @@
 ﻿namespace ReadModel
 {
     using System;
+    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
+    using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
+    using Newtonsoft.Json;
+    using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;
+    using Serilog;
 
     public class Program
     {
@@ -31,6 +36,8 @@
                 Port = 5672
             }; // TODO read from configuration
 
+            var dispatcherConfiguration = new DispatcherConfiguration();
+
             _serviceProvider = new ServiceCollection()
 
                 // TODO consider creating channels per thread
@@ -39,7 +46,21 @@
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
+                .AddTransient<IEventDispatcher, EventDispatcher>()
+
+                .AddSingleton<DeviceEventsHandler, DeviceEventsHandler>()
+                .AddSingleton<ShipmentEventsHandler, ShipmentEventsHandler>()
+
+                .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
+                .AddSingleton<ILogger>(Log.Logger)
+
                 .BuildServiceProvider();
+
+            dispatcherConfiguration.ServiceLocator = _serviceProvider;
+
+            dispatcherConfiguration
+                .DispatcherEventHandlerRegistry
+                .Register(Assembly.GetEntryAssembly(), new[] { typeof(DeviceEventsHandler).Namespace });
         }
 
         private static void ListenToMessages()
@@ -55,6 +76,17 @@
         {
             var body = Encoding.UTF8.GetString(basicDeliverEventArgs.Body);
             Console.WriteLine("Received: " + body);
+
+            var message = JsonConvert.DeserializeObject(body);
+
+            var typeName = ((dynamic)message).Metadata.TypeName.ToString();
+            var messageType = Type.GetType(typeName);
+            var typedMessage = JsonConvert.DeserializeObject(body, messageType);
+
+            var eventDispatcher = (dynamic)_serviceProvider.GetService<IEventDispatcher>();
+            eventDispatcher.Dispatch(typedMessage);
+
+            Console.WriteLine("Event handled successfully.");
         }
     }
 }

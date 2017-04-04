@@ -8,7 +8,7 @@
     {
         public void UpdateAddress(string newAddress)
         {
-            Apply(new ShipmentAddressUpdated
+            Apply(new ShipmentAddressChanged
             {
                 NewAddress = newAddress,
                 Id = Guid.NewGuid().ToString()
