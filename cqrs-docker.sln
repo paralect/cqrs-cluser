@@ -18,6 +18,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Contracts", "src\Contracts\
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ParalectEventSourcing", "src\ParalectEventSourcing\ParalectEventSourcing.xproj", "{4586180D-4F4B-46B9-82E0-611646AC9299}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ReadModel", "src\ReadModel\ReadModel.xproj", "{EB75250F-239E-4D73-83D2-E3153C16814E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{4586180D-4F4B-46B9-82E0-611646AC9299}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4586180D-4F4B-46B9-82E0-611646AC9299}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4586180D-4F4B-46B9-82E0-611646AC9299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB75250F-239E-4D73-83D2-E3153C16814E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB75250F-239E-4D73-83D2-E3153C16814E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB75250F-239E-4D73-83D2-E3153C16814E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB75250F-239E-4D73-83D2-E3153C16814E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,5 +55,6 @@ Global
 		{0AB6CC6D-2776-4EDF-9429-39E9DFC42DDC} = {A88C7DD1-8C59-4F55-A4D7-483AE9606533}
 		{4B073E1A-5DC2-465F-8A83-D547628D023B} = {A88C7DD1-8C59-4F55-A4D7-483AE9606533}
 		{4586180D-4F4B-46B9-82E0-611646AC9299} = {A88C7DD1-8C59-4F55-A4D7-483AE9606533}
+		{EB75250F-239E-4D73-83D2-E3153C16814E} = {A88C7DD1-8C59-4F55-A4D7-483AE9606533}
 	EndGlobalSection
 EndGlobal
