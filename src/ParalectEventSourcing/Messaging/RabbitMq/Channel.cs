@@ -1,22 +1,23 @@
-﻿namespace ParalectEventSourcing.Messaging
+﻿namespace ParalectEventSourcing.Messaging.RabbitMq
 {
     using System;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Serialization;
 
     public class Channel : IChannel
     {
         private readonly IModel _channel;
         private readonly IMessageSerializer _messageSerializer;
 
-        public Channel(IModel channel, IMessageSerializer messageSerializer)
+        public Channel(IChannelFactory rabbitMq, IMessageSerializer messageSerializer)
         {
-            _channel = channel;
-            _messageSerializer = messageSerializer;
+            _channel = rabbitMq.CreateChannel();
+            _channel.QueueDeclare(QueueConfiguration.ReadModelQueue, true, false, false);
+            _channel.QueueDeclare(QueueConfiguration.WriteModelQueue, true, false, false);
+            _channel.QueueDeclare(QueueConfiguration.ErrorQueue, true, false, false);
 
-            channel.QueueDeclare(QueueConfiguration.ReadModelQueue, true, false, false);
-            channel.QueueDeclare(QueueConfiguration.WriteModelQueue, true, false, false);
-            channel.QueueDeclare(QueueConfiguration.ErrorQueue, true, false, false);
+            _messageSerializer = messageSerializer;
         }
 
         public void Send(string queue, object message)

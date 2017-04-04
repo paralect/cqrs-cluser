@@ -1,4 +1,4 @@
-﻿namespace ParalectEventSourcing.Messaging
+﻿namespace ParalectEventSourcing.Serialization
 {
     public interface IMessageSerializer
     {

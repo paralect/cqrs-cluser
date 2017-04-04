@@ -1,4 +1,4 @@
-﻿namespace ParalectEventSourcing.Messaging
+﻿namespace ParalectEventSourcing.Messaging.RabbitMq
 {
     using Commands;
     using Utils;

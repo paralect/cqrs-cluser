@@ -6,9 +6,9 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using ParalectEventSourcing.Commands;
-    using ParalectEventSourcing.Messaging;
+    using ParalectEventSourcing.Messaging.RabbitMq;
+    using ParalectEventSourcing.Serialization;
     using ParalectEventSourcing.Utils;
-    using RabbitMQ.Client;
 
     public class Startup
     {
@@ -27,16 +27,24 @@
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var rabbitMqConnectionSettings = new RabbitMqConnectionSettings
+            {
+                UserName = "guest",
+                Password = "guest",
+                VirtualHost = "/",
+                HostName = "localhost",
+                Port = 5672
+            }; // TODO read from configuration
+
             services
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 
                 // TODO consider creating channels per thread
                 .AddTransient<IChannel, Channel>()
-                .AddSingleton<IConnectionFactory, ConnectionFactory>()
-                .AddSingleton<IConnection>(sp => sp.GetService<IConnectionFactory>().CreateConnection())
-                .AddTransient<IModel>(sp => sp.GetService<IConnection>().CreateModel())
-                .AddTransient<IMessageSerializer, MessageSerializer>();
+                .AddSingleton<IChannelFactory, ChannelFactory>()
+                .AddSingleton<RabbitMqConnectionSettings>(rabbitMqConnectionSettings)
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>();
 
             // Add framework services.
             services.AddMvc();

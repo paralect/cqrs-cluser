@@ -1,9 +1,9 @@
-﻿namespace ParalectEventSourcing.Messaging
+﻿namespace ParalectEventSourcing.Serialization
 {
     using System.Text;
     using Newtonsoft.Json;
 
-    public class MessageSerializer : IMessageSerializer
+    public class DefaultMessageSerializer : IMessageSerializer
     {
         public byte[] Serialize(object message)
         {

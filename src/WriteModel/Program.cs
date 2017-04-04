@@ -13,13 +13,12 @@
     using ParalectEventSourcing.Events;
     using ParalectEventSourcing.Exceptions;
     using ParalectEventSourcing.InMemory;
-    using ParalectEventSourcing.Messaging;
+    using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Repository;
     using ParalectEventSourcing.Repository.EventStore;
     using ParalectEventSourcing.Serialization;
     using ParalectEventSourcing.Snapshoting;
     using ParalectEventSourcing.Utils;
-    using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Serilog;
 
@@ -46,14 +45,22 @@
                 Pass = "changeit"
             }; // TODO read from configuration
 
+            var rabbitMqConnectionSettings = new RabbitMqConnectionSettings
+            {
+                UserName = "guest",
+                Password = "guest",
+                VirtualHost = "/",
+                HostName = "localhost",
+                Port = 5672
+            }; // TODO read from configuration
+
             _serviceProvider = new ServiceCollection()
 
                 // TODO consider creating channels per thread
                 .AddTransient<IChannel, Channel>()
-                .AddSingleton<IConnectionFactory, ConnectionFactory>()
-                .AddSingleton<IConnection>(sp => sp.GetService<IConnectionFactory>().CreateConnection())
-                .AddTransient<IModel>(sp => sp.GetService<IConnection>().CreateModel())
-                .AddTransient<IMessageSerializer, MessageSerializer>()
+                .AddSingleton<RabbitMqConnectionSettings>(rabbitMqConnectionSettings)
+                .AddSingleton<IChannelFactory, ChannelFactory>()
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 
@@ -97,16 +104,6 @@
             {
                 var channel = _serviceProvider.GetService<IChannel>();
                 channel.Listen(QueueConfiguration.WriteModelQueue, ConsumerOnReceived);
-            });
-
-            Task.Run(() =>
-            {
-                var channel = _serviceProvider.GetService<IChannel>();
-                channel.Listen(QueueConfiguration.ErrorQueue, (sender, args) =>
-                {
-                    var body = Encoding.UTF8.GetString(args.Body);
-                    Console.WriteLine(body);
-                });
             });
         }
 
