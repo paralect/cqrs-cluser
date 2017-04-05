@@ -38,7 +38,7 @@
             var dispatcherConfiguration = new DispatcherConfiguration();
             var eventStoreConnectionsSettings = new EventStoreConnectionSettings
             {
-                Host = "localhost",
+                Host = "eventstore",
                 Port = 1113,
                 Login = "admin",
                 Pass = "changeit"
@@ -49,7 +49,7 @@
                 UserName = "guest",
                 Password = "guest",
                 VirtualHost = "/",
-                HostName = "localhost",
+                HostName = "rabbit",
                 Port = 5672
             }; // TODO read from configuration
 
