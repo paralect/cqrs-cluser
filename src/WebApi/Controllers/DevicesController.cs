@@ -37,13 +37,21 @@ namespace WebApi.Controllers
         [HttpPost]
         public void Post([FromBody]string shipmentKey)
         {
-            var command = new AddDeviceToShipment
+            var id = "0a9acf37-3e57-4178-b608-08664d4bedb3";
+
+            var command1 = new CreateShipment
             {
-                Id = "b7faf0b8-836a-44a1-b99e-673cfdfb4425",
-                ShipmentKey = shipmentKey
+                Id = id,
+                Address = "Minsk"
             };
 
-            _commandBus.Send(command);
+            var command2 = new ChangeShipmentAddress
+            {
+                Id = id,
+                NewAddress = "Den Haag"
+            };
+
+            _commandBus.Send(command1, command2);
         }
 
         // PUT api/values/5

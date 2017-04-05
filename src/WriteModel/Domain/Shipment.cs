@@ -1,6 +1,5 @@
 ﻿namespace WriteModel.Domain
 {
-    using System;
     using Contracts.Events;
     using ParalectEventSourcing;
 
@@ -10,8 +9,17 @@
         {
             Apply(new ShipmentAddressChanged
             {
-                NewAddress = newAddress,
-                Id = Guid.NewGuid().ToString()
+                Id = State.Id,
+                NewAddress = newAddress
+            });
+        }
+
+        public void CreateShipment(string id, string address)
+        {
+            Apply(new ShipmentCreated
+            {
+                Id = id,
+                Address = address
             });
         }
     }

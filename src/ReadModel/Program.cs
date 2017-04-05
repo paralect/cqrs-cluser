@@ -6,9 +6,11 @@
     using System.Threading.Tasks;
     using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
+    using MongoDB.Driver;
     using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Messaging.RabbitMq;
+    using ParalectEventSourcing.Persistence;
     using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;
     using Serilog;
@@ -53,6 +55,8 @@
 
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
+
+                .AddSingleton<IMongoClient, MongoClient>()
 
                 .BuildServiceProvider();
 

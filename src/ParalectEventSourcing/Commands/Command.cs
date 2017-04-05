@@ -10,11 +10,6 @@ namespace ParalectEventSourcing.Commands
     public abstract class Command : ICommand
     {
         /// <summary>
-        ///     Command metadata
-        /// </summary>
-        private ICommandMetadata _metadata = new CommandMetadata();
-
-        /// <summary>
         /// Gets or sets ID of aggregate
         /// </summary>
         public string Id { get; set; }
@@ -22,10 +17,6 @@ namespace ParalectEventSourcing.Commands
         /// <summary>
         /// Gets or sets Command metadata
         /// </summary>
-        public ICommandMetadata Metadata
-        {
-            get { return _metadata; }
-            set { _metadata = value; }
-        }
+        public ICommandMetadata Metadata { get; set; } = new CommandMetadata();
     }
 }

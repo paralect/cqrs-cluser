@@ -21,18 +21,12 @@ namespace ParalectEventSourcing
         /// <summary>
         /// Gets recovered aggregate state
         /// </summary>
-        public object State
-        {
-            get { return _state; }
-        }
+        public object State => _state;
 
         /// <summary>
         /// Gets current uncomitted events produced by currently processing command
         /// </summary>
-        public IList<IEvent> UncommittedEvents
-        {
-            get { return _changes; }
-        }
+        public IList<IEvent> UncommittedEvents => _changes;
 
         /// <summary>
         /// Gets versions of the aggreagte

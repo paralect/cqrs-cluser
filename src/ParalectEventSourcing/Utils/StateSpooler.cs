@@ -28,7 +28,7 @@ namespace ParalectEventSourcing.Utils
         {
             if (state == null)
             {
-                throw new ArgumentNullException("state");
+                throw new ArgumentNullException(nameof(state));
             }
 
             InvokeMethodOn(state, evnt);
@@ -44,7 +44,7 @@ namespace ParalectEventSourcing.Utils
         {
             if (state == null)
             {
-                throw new ArgumentNullException("state");
+                throw new ArgumentNullException(nameof(state));
             }
 
             foreach (var evnt in events)
@@ -61,16 +61,10 @@ namespace ParalectEventSourcing.Utils
             {
                 //MethodCache[methodDescriptor] = methodInfo = state.GetType()
                 //    .GetMethod("On", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { message.GetType() }, null); TODO make it work
-                MethodCache[methodDescriptor] = methodInfo = state.GetType()
-                    .GetMethod("On", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                MethodCache[methodDescriptor] = methodInfo = state.GetType().GetMethod("On", new [] { message.GetType() });
             }
 
-            if (methodInfo == null)
-            {
-                return;
-            }
-
-            methodInfo.Invoke(state, new[] { message });
+            methodInfo?.Invoke(state, new[] { message });
         }
     }
 }

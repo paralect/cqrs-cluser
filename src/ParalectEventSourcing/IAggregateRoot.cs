@@ -18,7 +18,7 @@ namespace ParalectEventSourcing
         IList<IEvent> UncommittedEvents { get; }
 
         /// <summary>
-        /// Gets versions of the aggreagte
+        /// Gets versions of the aggregate
         /// </summary>
         int Version { get; }
 

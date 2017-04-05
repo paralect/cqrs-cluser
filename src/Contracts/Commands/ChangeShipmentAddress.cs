@@ -2,7 +2,7 @@
 {
     using ParalectEventSourcing.Commands;
 
-    public class UpdateShipmentAddress : Command
+    public class ChangeShipmentAddress : Command
     {
         public string NewAddress { get; set; }
     }

@@ -16,16 +16,13 @@ namespace ParalectEventSourcing
         /// <summary>
         /// Gets aggregate state
         /// </summary>
-        public new TState State
-        {
-            get { return (TState)base.State; }
-        }
+        public new TState State => (TState) base.State;
 
         /// <summary>
         /// Checks if aggregate has been already created
         /// </summary>
         /// <param name="idSelector">selects ID in the state</param>
-        /// <exception cref="AggregateHasBeenAlreadyCreatedException">Aggreagte can't be crated twice</exception>
+        /// <exception cref="AggregateHasBeenAlreadyCreatedException">Aggregate can't be crated twice</exception>
         protected void AggregateNotCreatedGuard(Func<TState, string> idSelector)
         {
             var id = idSelector(State);

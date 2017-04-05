@@ -15,12 +15,19 @@
         }
 
         public void Handle(
-            UpdateShipmentAddress c)
+            ChangeShipmentAddress c)
         {
             _shipments.Perform(
                 c.Id,
-                shipment => shipment.UpdateAddress(
-                    c.NewAddress));
+                shipment => shipment.UpdateAddress(c.NewAddress));
+        }
+
+        public void Handle(
+            CreateShipment c)
+        {
+            _shipments.Perform(
+                c.Id,
+                shipment => shipment.CreateShipment(c.Id, c.Address));
         }
     }
 }
