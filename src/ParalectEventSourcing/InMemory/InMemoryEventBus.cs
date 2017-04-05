@@ -13,13 +13,13 @@ namespace ParalectEventSourcing.InMemory
     /// </summary>
     public class InMemoryEventBus : IEventBus
     {
-        private readonly IEventDispatcher _dispatcher;
+        private readonly IDispatcher _dispatcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryEventBus"/> class.
         /// </summary>
         /// <param name="dispatcher">the dispatcher</param>
-        public InMemoryEventBus(IEventDispatcher dispatcher)
+        public InMemoryEventBus(IDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
         }

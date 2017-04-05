@@ -4,7 +4,7 @@
     using Exceptions;
     using Serilog;
 
-    public class EventDispatcher : IEventDispatcher
+    public class EventDispatcher : IDispatcher
     {
         private readonly ILogger _log;
 

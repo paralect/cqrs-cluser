@@ -37,7 +37,7 @@ namespace WebApi.Controllers
         [HttpPost]
         public void Post([FromBody]string shipmentKey)
         {
-            var id = "a32b0aa8-ecc3-4de6-a323-72ca42f084b2";
+            var id = Guid.NewGuid().ToString();
 
             var command1 = new CreateShipment
             {

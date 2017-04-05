@@ -54,7 +54,7 @@
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
-                .AddTransient<IEventDispatcher, EventDispatcher>()
+                .AddTransient<IDispatcher, EventDispatcher>()
 
                 .AddSingleton<DeviceEventsHandler, DeviceEventsHandler>()
                 .AddSingleton<ShipmentEventsHandler, ShipmentEventsHandler>()
@@ -95,7 +95,7 @@
             var messageType = Type.GetType(typeName);
             var typedMessage = JsonConvert.DeserializeObject(body, messageType);
 
-            var eventDispatcher = (dynamic)_serviceProvider.GetService<IEventDispatcher>();
+            var eventDispatcher = _serviceProvider.GetService<IDispatcher>();
             eventDispatcher.Dispatch(typedMessage);
 
             Console.WriteLine("Event handled successfully.");

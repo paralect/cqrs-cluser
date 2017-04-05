@@ -11,7 +11,7 @@ namespace ParalectEventSourcing.Dispatching
     /// <summary>
     /// Dispatches a command in CQRS app
     /// </summary>
-    public class CommandDispatcher : ICommandDispatcher
+    public class CommandDispatcher : IDispatcher
     {
         private readonly ILogger _log;
 

@@ -63,7 +63,7 @@
 
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 
-                .AddSingleton<ICommandDispatcher, CommandDispatcher>()
+                .AddSingleton<IDispatcher, CommandDispatcher>()
 
                 .AddSingleton<DeviceCommandsHandler, DeviceCommandsHandler>()
                 .AddSingleton<ShipmentCommandsHandler, ShipmentCommandsHandler>()
@@ -112,7 +112,7 @@
 
             try
             {
-                var commandDispatcher = (dynamic) _serviceProvider.GetService<ICommandDispatcher>();
+                var commandDispatcher = _serviceProvider.GetService<IDispatcher>();
                 commandDispatcher.Dispatch(typedMessage);
 
                 Console.WriteLine("Command handled successfully.");

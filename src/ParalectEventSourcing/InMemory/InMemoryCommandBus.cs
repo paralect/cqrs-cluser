@@ -24,7 +24,7 @@ namespace ParalectEventSourcing.InMemory
         /// </summary>
         /// <param name="dispatcher">the dispatcher</param>
         /// <param name="dateTimeProvider">datetime provider</param>
-        public InMemoryCommandBus(ICommandDispatcher dispatcher, IDateTimeProvider dateTimeProvider)
+        public InMemoryCommandBus(IDispatcher dispatcher, IDateTimeProvider dateTimeProvider)
             : base(dateTimeProvider)
         {
             _dispatcher = dispatcher;
