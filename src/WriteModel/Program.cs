@@ -30,7 +30,7 @@
             RegisterDependencies();
             ListenToMessages();
 
-            Console.Read();
+            Console.ReadLine();
         }
 
         private static void RegisterDependencies()

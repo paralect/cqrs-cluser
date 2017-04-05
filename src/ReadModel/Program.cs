@@ -3,6 +3,7 @@
     using System;
     using System.Reflection;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,6 @@
     using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Messaging.RabbitMq;
-    using ParalectEventSourcing.Persistence;
     using ParalectEventSourcing.Persistence.MongoDb;
     using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;
@@ -25,7 +25,7 @@
             RegisterDependencies();
             ListenToMessages();
 
-            Console.Read();
+            Console.ReadLine();
         }
 
         private static void RegisterDependencies()
@@ -35,16 +35,16 @@
                 UserName = "guest",
                 Password = "guest",
                 VirtualHost = "/",
-                HostName = "localhost",
+                HostName = "rabbit",
                 Port = 5672
             }; // TODO read from configuration
 
             var dispatcherConfiguration = new DispatcherConfiguration();
 
-            var mongoDbConnectionSettings = new MongoDbConnectionSettings
+            var mongoClient = new MongoClient(new MongoClientSettings
             {
-                DatabaseName = "ReadModel"
-            };
+                Server = new MongoServerAddress("mongo", 27017)
+            });
 
             _serviceProvider = new ServiceCollection()
 
@@ -62,8 +62,7 @@
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
 
-                .AddSingleton<IMongoClient, MongoClient>()
-                .AddSingleton<MongoDbConnectionSettings>(mongoDbConnectionSettings)
+                .AddSingleton<IMongoClient>(mongoClient)
                 .AddTransient<IDatabase, Database>()
 
                 .BuildServiceProvider();

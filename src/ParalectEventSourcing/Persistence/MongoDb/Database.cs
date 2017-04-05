@@ -5,11 +5,12 @@
 
     public class Database : IDatabase
     {
+        private const string DatabaseName = "ReadModel";
         private readonly IMongoDatabase _database;
 
-        public Database(IMongoClient client, MongoDbConnectionSettings connectionSettings)
+        public Database(IMongoClient client)
         {
-            _database = client.GetDatabase(connectionSettings.DatabaseName);
+            _database = client.GetDatabase(DatabaseName);
         }
 
         public IMongoCollection<BsonDocument> GetCollection(string name)

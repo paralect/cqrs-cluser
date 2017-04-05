@@ -11,6 +11,11 @@ services:
     ports:
       - "2113:2113"
       - "1113:1113"
+  mongo:
+    container_name: mongo
+    image: "mongo"
+    ports:
+      - "27017:27017"
   web:
     container_name: web
     build: ./WebApi
@@ -24,3 +29,10 @@ services:
     depends_on:
       - rabbit
       - eventstore
+  read_model:
+    container_name: read_model
+    build: ./ReadModel
+    depends_on:
+      - rabbit
+      - mongo
+    tty: true
