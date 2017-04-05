@@ -11,6 +11,7 @@
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Persistence;
+    using ParalectEventSourcing.Persistence.MongoDb;
     using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;
     using Serilog;
@@ -40,6 +41,11 @@
 
             var dispatcherConfiguration = new DispatcherConfiguration();
 
+            var mongoDbConnectionSettings = new MongoDbConnectionSettings
+            {
+                DatabaseName = "ReadModel"
+            };
+
             _serviceProvider = new ServiceCollection()
 
                 // TODO consider creating channels per thread
@@ -57,6 +63,8 @@
                 .AddSingleton<ILogger>(Log.Logger)
 
                 .AddSingleton<IMongoClient, MongoClient>()
+                .AddSingleton<MongoDbConnectionSettings>(mongoDbConnectionSettings)
+                .AddTransient<IDatabase, Database>()
 
                 .BuildServiceProvider();
 

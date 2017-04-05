@@ -4,14 +4,17 @@
     using MongoDB.Bson;
     using MongoDB.Driver;
     using ParalectEventSourcing.Events;
+    using ParalectEventSourcing.Persistence.MongoDb;
 
     public class ShipmentEventsHandler : IEventHandler
     {
-        private readonly IMongoClient _client;
+        private const string ShipmentCollection = "shipments";
 
-        public ShipmentEventsHandler(IMongoClient client)
+        private readonly IDatabase _database;
+
+        public ShipmentEventsHandler(IDatabase database)
         {
-            _client = client;
+            _database = database;
         }
 
         public void Handle(DeviceAddedToShipment e)
@@ -21,8 +24,7 @@
 
         public void Handle(ShipmentCreated e)
         {
-            var database = _client.GetDatabase("ReadModel");
-            var collection = database.GetCollection<BsonDocument>("shipments");
+            var collection = _database.GetCollection(ShipmentCollection);
             var shipment = new BsonDocument
             {
                 { "id", e.Id },
@@ -34,14 +36,13 @@
 
         public void Handle(ShipmentAddressChanged e)
         {
-            var database = _client.GetDatabase("ReadModel");
-            var collection = database.GetCollection<BsonDocument>("shipments");
+            var collection = _database.GetCollection(ShipmentCollection);
             var filter = Builders<BsonDocument>.Filter.Eq("id", e.Id);
             var update = Builders<BsonDocument>.Update
                 .Set("address", e.NewAddress)
                 .CurrentDate("lastModified");
 
-            var result = collection.UpdateOneAsync(filter, update).Result;
+            var result = collection.UpdateOne(filter, update);
         }
     }
 }
