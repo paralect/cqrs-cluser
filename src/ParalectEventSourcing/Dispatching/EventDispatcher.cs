@@ -79,7 +79,7 @@
             }
             catch (Exception exception)
             {
-                _log.Error(exception, "Exception in the handler {0} for message {1}", handler.GetType().FullName, message.GetType().FullName);
+                _log.Error(exception, $"Exception in the handler {handler.GetType().FullName} for message {message.GetType().FullName}");
             }
         }
 

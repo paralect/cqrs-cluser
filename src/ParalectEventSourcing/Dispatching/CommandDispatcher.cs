@@ -112,10 +112,7 @@ namespace ParalectEventSourcing.Dispatching
                 try
                 {
                     InvokeDynamic(handler, message);
-
-                    // message handled correctly - so that should be
-                    // the final attempt
-                    attempt = _maxRetries;
+                    break;
                 }
                 catch (DomainValidationException)
                 {
@@ -129,7 +126,7 @@ namespace ParalectEventSourcing.Dispatching
 
                     if (attempt == _maxRetries)
                     {
-                        throw new HandlerException(string.Format("Exception in the handler {0} for message {1}", handler.GetType().FullName, message.GetType().FullName), exception, message);
+                        throw new HandlerException($"Exception in the handler {handler.GetType().FullName} for message {message.GetType().FullName}", exception, message);
                     }
                 }
             }
