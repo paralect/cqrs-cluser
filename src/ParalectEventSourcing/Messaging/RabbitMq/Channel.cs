@@ -10,9 +10,9 @@
         private readonly IModel _channel;
         private readonly IMessageSerializer _messageSerializer;
 
-        public Channel(IChannelFactory rabbitMq, IMessageSerializer messageSerializer)
+        public Channel(IChannelFactory channelFactory, IMessageSerializer messageSerializer)
         {
-            _channel = rabbitMq.CreateChannel();
+            _channel = channelFactory.CreateChannel();
             _channel.QueueDeclare(QueueConfiguration.ReadModelQueue, true, false, false);
             _channel.QueueDeclare(QueueConfiguration.WriteModelQueue, true, false, false);
             _channel.QueueDeclare(QueueConfiguration.ErrorQueue, true, false, false);

@@ -32,7 +32,7 @@
                 UserName = "guest",
                 Password = "guest",
                 VirtualHost = "/",
-                HostName = "localhost",
+                HostName = "rabbit",
                 Port = 5672
             }; // TODO read from configuration
 

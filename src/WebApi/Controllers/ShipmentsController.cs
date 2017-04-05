@@ -10,11 +10,11 @@ namespace WebApi.Controllers
     using ParalectEventSourcing.Commands;
 
     [Route("api/[controller]")]
-    public class DevicesController : Controller
+    public class ShipmentsController : Controller
     {
         private readonly ICommandBus _commandBus;
 
-        public DevicesController(ICommandBus commandBus)
+        public ShipmentsController(ICommandBus commandBus)
         {
             _commandBus = commandBus;
         }
@@ -35,20 +35,20 @@ namespace WebApi.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string shipmentKey)
+        public void Post([FromBody]Addresses addresses)
         {
             var id = Guid.NewGuid().ToString();
 
             var command1 = new CreateShipment
             {
                 Id = id,
-                Address = "Minsk"
+                Address = addresses.InitialAddress
             };
 
             var command2 = new ChangeShipmentAddress
             {
                 Id = id,
-                NewAddress = "Den Haag"
+                NewAddress = addresses.NewAddress
             };
 
             _commandBus.Send(command1, command2);
@@ -65,5 +65,11 @@ namespace WebApi.Controllers
         public void Delete(int id)
         {
         }
+    }
+
+    public class Addresses
+    {
+        public string InitialAddress { get; set; }
+        public string NewAddress { get; set; }
     }
 }

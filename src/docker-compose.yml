@@ -1,0 +1,12 @@
+version: '3'
+services:
+  web:
+    container_name: web
+    build: ./WebApi
+    ports:
+     - "8000:80"
+  rabbit:
+    container_name: rabbit
+    image: "rabbitmq:3-management"
+    ports:
+     - "8080:15672"
