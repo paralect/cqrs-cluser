@@ -23,16 +23,18 @@ services:
      - "8000:80"
     depends_on:
       - rabbit
+    restart: always
   write_model:
     container_name: write_model
     build: ./WriteModel
     depends_on:
       - rabbit
       - eventstore
+    restart: always
   read_model:
     container_name: read_model
     build: ./ReadModel
     depends_on:
       - rabbit
       - mongo
-    tty: true
+    restart: always

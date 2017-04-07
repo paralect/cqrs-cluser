@@ -76,11 +76,8 @@
 
         private static void ListenToMessages()
         {
-            Task.Run(() =>
-            {
-                var channel = _serviceProvider.GetService<IChannel>();
-                channel.Listen(QueueConfiguration.ReadModelQueue, ConsumerOnReceived);
-            });
+            var channel = _serviceProvider.GetService<IChannel>();
+            channel.Listen(QueueConfiguration.ReadModelQueue, ConsumerOnReceived);
         }
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)

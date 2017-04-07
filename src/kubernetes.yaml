@@ -90,7 +90,7 @@ spec:
     spec:
       containers:
         - name: write-model
-          image: yarmolovichalex1/write_model
+          image: yarmolovichalex1/write-model
 ---
 apiVersion: v1
 kind: Service
@@ -152,9 +152,7 @@ spec:
     spec:
       containers:
         - name: read-model
-          image: yarmolovichalex1/read_model
-          stdin: true
-          tty: true
+          image: yarmolovichalex1/read-model
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
