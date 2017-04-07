@@ -1,0 +1,202 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  selector:
+    app: web
+  type: LoadBalancer
+  ports:
+    - port: 5000
+      targetPort: http
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: yarmolovichalex1/web
+          ports:
+            - name: http
+              containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbit-client
+  labels:
+    app: rabbit-client
+spec:
+  selector:
+    app: rabbit
+  type: LoadBalancer
+  ports:
+    - port: 15672
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbit
+  labels:
+    app: rabbit
+spec:
+  selector:
+    app: rabbit
+  ports:
+    - port: 5672
+      targetPort: tcp
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: rabbit
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbit
+    spec:
+      containers:
+        - name: rabbit
+          image: "rabbitmq:3-management"
+          ports:
+            - name: http
+              containerPort: 15672
+            - name: tcp
+              containerPort: 5672
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: write-model
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: write-model
+    spec:
+      containers:
+        - name: write-model
+          image: yarmolovichalex1/write_model
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventstore-client
+  labels:
+    app: eventstore-client
+spec:
+  selector:
+    app: eventstore
+  type: LoadBalancer
+  ports:
+    - port: 2113
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventstore
+  labels:
+    app: eventstore
+spec:
+  selector:
+    app: eventstore
+  ports:
+    - port: 1113
+      targetPort: tcp
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: eventstore
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: eventstore
+    spec:
+      containers:
+        - name: eventstore
+          image: eventstore/eventstore
+          ports:
+            - name: http
+              containerPort: 2113
+            - name: tcp
+              containerPort: 1113
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: read-model
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: read-model
+    spec:
+      containers:
+        - name: read-model
+          image: yarmolovichalex1/read_model
+          stdin: true
+          tty: true
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - name: tcp
+              containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-client
+  labels:
+    app: mongo-client
+spec:
+  selector:
+    app: mongo
+  type: NodePort
+  ports:
+    - port: 27017
+      targetPort: tcp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: tcp
