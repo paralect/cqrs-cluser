@@ -1,7 +1,7 @@
 ﻿var ShipmentNode = React.createClass({
     getInitialState: function () {
         return {
-            address: this.props.address, 
+            address: this.props.address,
             newAddress: this.props.address
         };
     },
@@ -14,7 +14,7 @@
                          <input type="submit" value="Update" className="form-control" />
                     </form>
                 </td>
-            ); 
+            );
         } else {
             return (
                 <td>
@@ -34,7 +34,6 @@
         }
 
         this.props.onShipmentUpdate({ id: this.props.id, newAddress: newAddress });
-
         this.setState({ address: newAddress });
     }
 });
@@ -45,16 +44,16 @@ var ShipmentRow = React.createClass({
             editMode: false
         };
     },
-    render: function() {
+    render: function () {
         return (
                 <tr>
                     <td>{this.props.data.id}</td>
-                     <ShipmentNode id={this.props.data.id} address={this.props.data.address} editMode={this.state.editMode} onShipmentUpdate={this.onShipmentUpdate}/>
+                     <ShipmentNode id={this.props.data.id} address={this.props.data.address} editMode={this.state.editMode} onShipmentUpdate={this.onShipmentUpdate} />
                     <td><button onClick={this.toggleEditMode} className="btn btn-link">Edit</button></td>
                 </tr>
               );
     },
-    toggleEditMode: function() {
+    toggleEditMode: function () {
         this.setState({ editMode: !this.state.editMode });
     },
     onShipmentUpdate: function (shipment) {
@@ -64,6 +63,19 @@ var ShipmentRow = React.createClass({
 });
 
 var ShipmentList = React.createClass({
+    getInitialState: function () {
+        return { data: [] };
+    },
+    loadShipments: function () {
+        fetch(this.props.listUrl)
+            .then(response => response.json())
+            .then(responseJson => {
+                this.setState({ data: responseJson });
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
     handleShipmentUpdate: function (shipment) {
         fetch(this.props.updateUrl + '/' + shipment.id,
             {
@@ -74,9 +86,13 @@ var ShipmentList = React.createClass({
                 console.log(error);
             });
     },
+    componentDidMount: function () {
+        this.loadShipments();
+        window.setInterval(this.loadShipments, this.props.pollInterval);
+    },
     render: function () {
         var handleShipmentUpdate = this.handleShipmentUpdate;
-        var shipmentNodes = this.props.data.map(function (data) {
+        var shipmentRows = this.state.data.map(function (data) {
             return <ShipmentRow onShipmentUpdate={handleShipmentUpdate} key={data.id} data={data} />;
         });
         return (
@@ -89,7 +105,7 @@ var ShipmentList = React.createClass({
                    </tr>
                </thead>
                <tbody>
-                   {shipmentNodes}
+                   {shipmentRows}
                </tbody>
            </table>
         );
@@ -110,16 +126,16 @@ var ShipmentForm = React.createClass({
             return;
         }
 
-        this.props.onShipmentSubmit({address: address });
+        this.props.onShipmentSubmit({ address: address });
         this.setState({ address: '' });
     },
-    render: function() {
+    render: function () {
         return (
           <form onSubmit={this.handleSubmit}>
               <h3>Add new shipment:</h3>
               <div className="form-group">
                 <label>Shipment address</label>
-                <input type="text" className="form-control" value={this.state.address} onChange={this.handleAddressChange}/>
+                <input type="text" className="form-control" value={this.state.address} onChange={this.handleAddressChange} />
               </div>
             <input type="submit" value="Create" />
           </form>
@@ -128,47 +144,30 @@ var ShipmentForm = React.createClass({
 });
 
 var ShipmentBox = React.createClass({
-    loadShipments: function () {
-        fetch(this.props.url)
-            .then(response => response.json())
-            .then(responseJson => {
-                this.setState({ data: responseJson });
-            })
-            .catch(error => {
-                console.log(error);
-            });
+    handleShipmentCreation: function (shipment) {
+        fetch(this.props.createUrl,
+             {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify(shipment.address)
+             }).catch(error => {
+                 console.log(error);
+             });
     },
-    handleShipmentSubmit: function (shipment) {
-        fetch(this.props.submitUrl,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(shipment.address)
-            }).catch(error => {
-                console.log(error);
-            });
-    },
-    getInitialState: function () {
-        return { data: [] };
-    },
-    componentDidMount: function() {
-        this.loadShipments();
-        window.setInterval(this.loadShipments, this.props.pollInterval);
-    },
-    render: function() {
+    render: function () {
         return (
           <div>
             <h1>Shipments</h1>
-            <ShipmentList data={this.state.data} updateUrl={"http://localhost:8000/api/shipments"} />
-            <ShipmentForm onShipmentSubmit={this.handleShipmentSubmit} />
+            <ShipmentList listUrl={"http://localhost:8000/api/shipments"}
+                          updateUrl={"http://localhost:8000/api/shipments"}
+                          pollInterval={2000} />
+            <ShipmentForm onShipmentSubmit={this.handleShipmentCreation} />
           </div>
         );
     }
 });
 
 ReactDOM.render(
-  <ShipmentBox url={"http://localhost:8000/api/shipments"} 
-               submitUrl={"http://localhost:8000/api/shipments"}
-               pollInterval={2000}/>,
+  <ShipmentBox createUrl={"http://localhost:8000/api/shipments"} />,
   document.getElementById('shipments')
 );
