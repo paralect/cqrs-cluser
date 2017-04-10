@@ -24,35 +24,6 @@
     }
 });
 
-var ShipmentBox = React.createClass({
-    getInitialState: function () {
-        return { data: [] };
-    },
-    componentWillMount: function () {
-        var xhr = new XMLHttpRequest();
-        xhr.open('get', this.props.url, true);
-        xhr.onload = function () {
-            var data = JSON.parse(xhr.responseText);
-            this.setState({ data: data });
-        }.bind(this);
-        xhr.send();
-    },
-    render: function() {
-        return (
-          <div>
-            <h1>Shipments</h1>
-            <ShipmentList data={this.state.data} />
-          </div>
-        );
-    }
-});
-
-
-ReactDOM.render(
-  <ShipmentBox url={"http://localhost:8000/api/shipments" } />,
-  document.getElementById('shipments')
-);
-
 var ShipmentForm = React.createClass({
     getInitialState: function () {
         return { address: '' };
@@ -67,13 +38,7 @@ var ShipmentForm = React.createClass({
             return;
         }
 
-        var data = JSON.stringify(address);
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('post', this.props.url, true);
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        xhr.send(data);
-
+        this.props.onShipmentSubmit({address: address });
         this.setState({ address: '' });
     },
     render: function() {
@@ -90,7 +55,46 @@ var ShipmentForm = React.createClass({
     }
 });
 
+var ShipmentBox = React.createClass({
+    loadShipments: function () {
+        fetch(this.props.url)
+            .then(response => response.json())
+            .then(responseJson => {
+                this.setState({ data: responseJson });
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    handleShipmentSubmit: function (shipment) {
+        fetch(this.props.submitUrl,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(shipment.address)
+            }).catch(error => {
+                console.log(error);
+            });
+    },
+    getInitialState: function () {
+        return { data: [] };
+    },
+    componentDidMount: function() {
+        this.loadShipments();
+        window.setInterval(this.loadShipments, this.props.pollInterval);
+    },
+    render: function() {
+        return (
+          <div>
+            <h1>Shipments</h1>
+            <ShipmentList data={this.state.data} />
+            <ShipmentForm onShipmentSubmit={this.handleShipmentSubmit} />
+          </div>
+        );
+    }
+});
+
 ReactDOM.render(
-  <ShipmentForm url={"http://localhost:8000/api/shipments" } />,
-  document.getElementById('shipmentForm')
+  <ShipmentBox url={"http://localhost:8000/api/shipments"} submitUrl={"http://localhost:8000/api/shipments"} pollInterval={2000}/>,
+  document.getElementById('shipments')
 );
