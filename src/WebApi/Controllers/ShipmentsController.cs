@@ -38,29 +38,28 @@ namespace WebApi.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]Addresses addresses)
+        public void Post([FromBody]string address)
         {
-            var id = Guid.NewGuid().ToString();
-
-            var command1 = new CreateShipment
+            var command = new CreateShipment
             {
-                Id = id,
-                Address = addresses.InitialAddress
+                Id = Guid.NewGuid().ToString(),
+                Address = address
             };
 
-            var command2 = new ChangeShipmentAddress
-            {
-                Id = id,
-                NewAddress = addresses.NewAddress
-            };
-
-            _commandBus.Send(command1, command2);
+            _commandBus.Send(command);
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public void Put(string id, [FromBody]string newAddress)
         {
+            var command = new ChangeShipmentAddress
+            {
+                Id = id,
+                NewAddress = newAddress
+            };
+
+            _commandBus.Send(command);
         }
 
         // DELETE api/values/5
@@ -68,11 +67,5 @@ namespace WebApi.Controllers
         public void Delete(int id)
         {
         }
-    }
-
-    public class Addresses
-    {
-        public string InitialAddress { get; set; }
-        public string NewAddress { get; set; }
     }
 }
