@@ -9,7 +9,7 @@
               );
         });
         return (
-           <table className="shipmentList">
+           <table className="table">
                <thead>
                    <tr>
                        <th>Id</th>
@@ -39,7 +39,7 @@ var ShipmentBox = React.createClass({
     },
     render: function() {
         return (
-          <div className="shipmentBox">
+          <div>
             <h1>Shipments</h1>
             <ShipmentList data={this.state.data} />
           </div>
