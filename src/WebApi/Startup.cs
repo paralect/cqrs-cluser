@@ -1,12 +1,15 @@
 ﻿namespace WebApi
 {
+    using DataService;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using MongoDB.Driver;
     using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Messaging.RabbitMq;
+    using ParalectEventSourcing.Persistence.MongoDb;
     using ParalectEventSourcing.Serialization;
     using ParalectEventSourcing.Utils;
 
@@ -36,6 +39,11 @@
                 Port = 5672
             }; // TODO read from configuration
 
+            var mongoClient = new MongoClient(new MongoClientSettings
+            {
+                Server = new MongoServerAddress("mongo", 27017)
+            });
+
             services
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
@@ -44,7 +52,11 @@
                 .AddTransient<IChannel, Channel>()
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<RabbitMqConnectionSettings>(rabbitMqConnectionSettings)
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>();
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+
+                .AddTransient<IShipmentDataService, ShipmentDataService>()
+                .AddSingleton<IMongoClient>(mongoClient)
+                .AddTransient<IDatabase, Database>();
 
             // Add framework services.
             services.AddMvc();

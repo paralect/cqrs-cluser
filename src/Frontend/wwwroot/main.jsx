@@ -1,19 +1,30 @@
-﻿var ValueList = React.createClass({
+﻿var ShipmentList = React.createClass({
     render: function () {
-        var valueNodes = this.props.data.map(function (value, index) {
+        var shipmentNodes = this.props.data.map(function (data) {
             return (
-                  <h2 key={index}>{value}</h2>
+                <tr key={data.id}>
+                    <td>{data.id}</td>
+                    <td>{data.address}</td>
+                </tr>
               );
         });
         return (
-           <div className="valueList">
-               {valueNodes}
-           </div>
+           <table className="shipmentList">
+               <thead>
+                   <tr>
+                       <th>Id</th>
+                       <th>Address</th>
+                   </tr>
+               </thead>
+               <tbody>
+                   {shipmentNodes}
+               </tbody>
+           </table>
         );
     }
 });
 
-var ValueBox = React.createClass({
+var ShipmentBox = React.createClass({
     getInitialState: function () {
         return { data: [] };
     },
@@ -28,15 +39,15 @@ var ValueBox = React.createClass({
     },
     render: function() {
         return (
-          <div className="valueBox">
-            <h1>Values</h1>
-            <ValueList data={this.state.data} />
+          <div className="shipmentBox">
+            <h1>Shipments</h1>
+            <ShipmentList data={this.state.data} />
           </div>
         );
     }
 });
 
 ReactDOM.render(
-  <ValueBox url={"http://localhost:8000/api/values" } />,
-  document.getElementById('content')
+  <ShipmentBox url={"http://localhost:8000/api/shipments" } />,
+  document.getElementById('shipments')
 );

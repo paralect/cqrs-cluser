@@ -7,23 +7,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebApi.Controllers
 {
     using Contracts.Commands;
+    using DataService;
     using ParalectEventSourcing.Commands;
 
     [Route("api/[controller]")]
     public class ShipmentsController : Controller
     {
         private readonly ICommandBus _commandBus;
+        private readonly IShipmentDataService _shipmentDataService;
 
-        public ShipmentsController(ICommandBus commandBus)
+        public ShipmentsController(ICommandBus commandBus, IShipmentDataService shipmentDataService)
         {
             _commandBus = commandBus;
+            _shipmentDataService = shipmentDataService;
         }
 
         // GET: api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<Shipment> Get()
         {
-            return new string[] { "value1", "value2" };
+            return _shipmentDataService.GetAllShipments();
         }
 
         // GET api/values/5
