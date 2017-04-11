@@ -24,18 +24,12 @@ namespace Frontend
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddReact();
 
-            var serviceProvider = services
+            services
                 // TODO consider creating channels per thread
                 .AddTransient<IChannel, Channel>()
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
-                
-                .AddSingleton<RabbitMqListener, RabbitMqListener>()
-
-                .BuildServiceProvider();
-
-            var rabbitMqListener = serviceProvider.GetService<RabbitMqListener>();
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
