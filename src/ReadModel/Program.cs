@@ -30,15 +30,6 @@
 
         private static void RegisterDependencies()
         {
-            var rabbitMqConnectionSettings = new RabbitMqConnectionSettings
-            {
-                UserName = "guest",
-                Password = "guest",
-                VirtualHost = "/",
-                HostName = "rabbit",
-                Port = 5672
-            }; // TODO read from configuration
-
             var dispatcherConfiguration = new DispatcherConfiguration();
 
             var mongoClient = new MongoClient(new MongoClientSettings
@@ -50,7 +41,7 @@
 
                 // TODO consider creating channels per thread
                 .AddTransient<IChannel, Channel>()
-                .AddSingleton<RabbitMqConnectionSettings>(rabbitMqConnectionSettings)
+                .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 

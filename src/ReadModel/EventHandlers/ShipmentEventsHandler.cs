@@ -4,6 +4,7 @@
     using MongoDB.Bson;
     using MongoDB.Driver;
     using ParalectEventSourcing.Events;
+    using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Persistence.MongoDb;
 
     public class ShipmentEventsHandler : IEventHandler
@@ -11,10 +12,12 @@
         private const string ShipmentCollection = "shipments";
 
         private readonly IDatabase _database;
+        private readonly IChannel _channel;
 
-        public ShipmentEventsHandler(IDatabase database)
+        public ShipmentEventsHandler(IDatabase database, IChannel channel)
         {
             _database = database;
+            _channel = channel;
         }
 
         public void Handle(DeviceAddedToShipment e)
@@ -32,6 +35,8 @@
             };
 
             collection.InsertOne(shipment);
+
+            _channel.Send(QueueConfiguration.SuccessQueue, e);
         }
 
         public void Handle(ShipmentAddressChanged e)
@@ -43,6 +48,8 @@
                 .CurrentDate("lastModified");
 
             var result = collection.UpdateOne(filter, update);
+
+            _channel.Send(QueueConfiguration.SuccessQueue, e);
         }
     }
 }

@@ -7,5 +7,14 @@
         public string VirtualHost { get; set; }
         public string HostName { get; set; }
         public int Port { get; set; }
+
+        public RabbitMqConnectionSettings()
+        {
+            UserName = "guest";
+            Password = "guest";
+            VirtualHost = "/";
+            HostName = "localhost";
+            Port = 5672;
+        }
     }
 }

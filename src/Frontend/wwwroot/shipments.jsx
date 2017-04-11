@@ -88,7 +88,6 @@ var ShipmentList = React.createClass({
     },
     componentDidMount: function () {
         this.loadShipments();
-        window.setInterval(this.loadShipments, this.props.pollInterval);
     },
     render: function () {
         var handleShipmentUpdate = this.handleShipmentUpdate;
@@ -148,9 +147,17 @@ var ShipmentBox = React.createClass({
         fetch(this.props.createUrl,
              {
                  method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
+                 headers: {
+                     'Content-Type': 'application/json',
+                     'Connection-Id': $.connection.hub.id
+                 },
                  body: JSON.stringify(shipment.address)
-             }).catch(error => {
+             })
+             .then(response => response.json())
+             .then(responseJson => {
+                 console.log(responseJson);
+             })
+             .catch(error => {
                  console.log(error);
              });
     },
@@ -158,9 +165,8 @@ var ShipmentBox = React.createClass({
         return (
           <div>
             <h1>Shipments</h1>
-            <ShipmentList listUrl={"http://localhost:8000/api/shipments"}
-                          updateUrl={"http://localhost:8000/api/shipments"}
-                          pollInterval={2000} />
+            <ShipmentList listUrl={"http://localhost:5001/api/shipments"}
+                          updateUrl={"http://localhost:5001/api/shipments"} />
             <ShipmentForm onShipmentSubmit={this.handleShipmentCreation} />
           </div>
         );
@@ -168,6 +174,6 @@ var ShipmentBox = React.createClass({
 });
 
 ReactDOM.render(
-  <ShipmentBox createUrl={"http://localhost:8000/api/shipments"} />,
+  <ShipmentBox createUrl={"http://localhost:5001/api/shipments" } />,
   document.getElementById('shipments')
 );

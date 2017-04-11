@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Frontend
 {
+    using ParalectEventSourcing.Messaging.RabbitMq;
+    using ParalectEventSourcing.Serialization;
     using React.AspNet;
 
     public class Startup
@@ -14,10 +16,26 @@ namespace Frontend
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSignalR(options =>
+            {
+                options.Hubs.EnableDetailedErrors = true;
+            });
             services.AddMemoryCache();
-
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddReact();
+
+            var serviceProvider = services
+                // TODO consider creating channels per thread
+                .AddTransient<IChannel, Channel>()
+                .AddSingleton<IChannelFactory, ChannelFactory>()
+                .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+                
+                .AddSingleton<RabbitMqListener, RabbitMqListener>()
+
+                .BuildServiceProvider();
+
+            var rabbitMqListener = serviceProvider.GetService<RabbitMqListener>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +69,8 @@ namespace Frontend
             });
 
             app.UseStaticFiles();
+            app.UseWebSockets();
+            app.UseSignalR();
         }
     }
 }

@@ -4,14 +4,17 @@
       "version": "1.1.1",
       "type": "platform"
     },
-    "Microsoft.AspNetCore.Diagnostics": "1.0.0",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.0.1",
-    "Microsoft.Extensions.Logging.Console": "1.0.0",
-    "Microsoft.AspNetCore.StaticFiles": "1.0.0",
+    "Microsoft.AspNetCore.Diagnostics": "1.1.1",
     "React.AspNet": "3.0.1",
-    "Microsoft.Extensions.Caching.Memory": "1.0.0",
-    "WebApi": "1.0.0-*"
+    "WebApi": "1.0.0-*",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.1.1",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.1.1",
+    "Microsoft.AspNetCore.StaticFiles": "1.1.1",
+    "Microsoft.Extensions.Caching.Memory": "1.1.1",
+    "Microsoft.Extensions.Logging.Console": "1.1.1",
+    "Gray.Microsoft.AspNetCore.SignalR.Server": "0.2.0-alpha1",
+    "Microsoft.AspNetCore.WebSockets": "1.0.1",
+    "RabbitMQ.Client": "4.1.3"
   },
 
   "tools": {

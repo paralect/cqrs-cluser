@@ -30,15 +30,6 @@
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var rabbitMqConnectionSettings = new RabbitMqConnectionSettings
-            {
-                UserName = "guest",
-                Password = "guest",
-                VirtualHost = "/",
-                HostName = "rabbit",
-                Port = 5672
-            }; // TODO read from configuration
-
             var mongoClient = new MongoClient(new MongoClientSettings
             {
                 Server = new MongoServerAddress("mongo", 27017)
@@ -51,7 +42,7 @@
                 // TODO consider creating channels per thread
                 .AddTransient<IChannel, Channel>()
                 .AddSingleton<IChannelFactory, ChannelFactory>()
-                .AddSingleton<RabbitMqConnectionSettings>(rabbitMqConnectionSettings)
+                .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddTransient<IShipmentDataService, ShipmentDataService>()

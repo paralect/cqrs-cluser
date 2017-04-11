@@ -38,28 +38,47 @@ namespace WebApi.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string address)
+        public object Post([FromBody]string address)
         {
+            var connectionId = Request.Headers["Connection-Id"];
+            var commandId  = Guid.NewGuid().ToString();
             var command = new CreateShipment
             {
                 Id = Guid.NewGuid().ToString(),
-                Address = address
+                Address = address,
+                Metadata = new CommandMetadata
+                {
+                    CommandId = commandId,
+                    CreatedDate = DateTime.Now,
+                    TypeName = typeof(CreateShipment).AssemblyQualifiedName
+                }
             };
 
             _commandBus.Send(command);
+
+            return new { commandId };
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(string id, [FromBody]string newAddress)
+        public object Put(string id, [FromBody]string newAddress)
         {
+            var commandId = Guid.NewGuid().ToString();
             var command = new ChangeShipmentAddress
             {
                 Id = id,
-                NewAddress = newAddress
+                NewAddress = newAddress,
+                Metadata = new CommandMetadata
+                {
+                    CommandId = commandId,
+                    CreatedDate = DateTime.Now,
+                    TypeName = typeof(ChangeShipmentAddress).AssemblyQualifiedName
+                }
             };
 
             _commandBus.Send(command);
+
+            return new { commandId };
         }
 
         // DELETE api/values/5

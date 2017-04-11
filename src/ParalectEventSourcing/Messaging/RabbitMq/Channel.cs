@@ -16,6 +16,7 @@
             _channel.QueueDeclare(QueueConfiguration.ReadModelQueue, true, false, false);
             _channel.QueueDeclare(QueueConfiguration.WriteModelQueue, true, false, false);
             _channel.QueueDeclare(QueueConfiguration.ErrorQueue, true, false, false);
+            _channel.QueueDeclare(QueueConfiguration.SuccessQueue, true, false, false);
 
             _messageSerializer = messageSerializer;
         }
