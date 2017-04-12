@@ -6,23 +6,14 @@ class ShipmentBox extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { data: [] };
+        this.state = { data: this.props.store.data };
         this.handleShipmentCreation = this.handleShipmentCreation.bind(this);
     }
 
-    loadShipments () {
-        fetch(this.props.listUrl)
-            .then(response => response.json())
-            .then(responseJson => {
-                this.setState({ data: responseJson });
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }
-
-    componentDidMount () {
-        this.loadShipments();
+    componentWillMount(){
+        this.props.store.onDataUpdated = () => {
+            this.setState(this.props.store.data);     
+        };
     }
 
     handleShipmentCreation (shipment) {

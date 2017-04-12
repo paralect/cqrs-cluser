@@ -33,7 +33,7 @@
 
             var commandId = typedMessage.Metadata.CommandId;
 
-            Clients.All.shipmentCreated();
+            Clients.All.shipmentCreated(typedMessage.Id, typedMessage.Address);
         }
 
         public override Task OnConnected()
