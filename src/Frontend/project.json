@@ -5,7 +5,6 @@
       "type": "platform"
     },
     "Microsoft.AspNetCore.Diagnostics": "1.1.1",
-    "React.AspNet": "3.0.1",
     "WebApi": "1.0.0-*",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.1.1",
     "Microsoft.AspNetCore.Server.Kestrel": "1.1.1",

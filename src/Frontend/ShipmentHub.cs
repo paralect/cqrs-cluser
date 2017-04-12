@@ -48,7 +48,7 @@
 
         public override Task OnDisconnected(bool stopCalled)
         {
-            ConnectedUsers.Remove(Context.ConnectionId);
+            ConnectedUsers?.Remove(Context.ConnectionId);
 
             return base.OnDisconnected(stopCalled);
         }

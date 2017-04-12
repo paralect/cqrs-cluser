@@ -1,8 +1,7 @@
 ﻿var shipmentHub = $.connection.shipmentHub;
-
 shipmentHub.client.shipmentCreated = function () {
-    console.log('shipment is created');
-}
+    console.log("shipment is created");
+};
 
 $.connection.hub.logging = true;
 $.connection.hub.start()
