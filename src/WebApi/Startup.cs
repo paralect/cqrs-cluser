@@ -30,9 +30,10 @@
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mongoDbConnectionSettings = new MongoDbConnectionSettings();
             var mongoClient = new MongoClient(new MongoClientSettings
             {
-                Server = new MongoServerAddress("mongo", 27017)
+                Server = new MongoServerAddress(mongoDbConnectionSettings.HostName, mongoDbConnectionSettings.Port)
             });
 
             services

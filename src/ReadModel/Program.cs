@@ -3,8 +3,6 @@
     using System;
     using System.Reflection;
     using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
     using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
@@ -32,9 +30,10 @@
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
 
+            var mongoDbConnectionSettings = new MongoDbConnectionSettings();
             var mongoClient = new MongoClient(new MongoClientSettings
             {
-                Server = new MongoServerAddress("mongo", 27017)
+                Server = new MongoServerAddress(mongoDbConnectionSettings.HostName, mongoDbConnectionSettings.Port)
             });
 
             _serviceProvider = new ServiceCollection()

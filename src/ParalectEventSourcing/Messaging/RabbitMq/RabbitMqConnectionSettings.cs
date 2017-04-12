@@ -10,11 +10,19 @@
 
         public RabbitMqConnectionSettings()
         {
+#if DEBUG
             UserName = "guest";
             Password = "guest";
             VirtualHost = "/";
             HostName = "localhost";
             Port = 5672;
+#else
+            UserName = "guest";
+            Password = "guest";
+            VirtualHost = "/";
+            HostName = "rabbit";
+            Port = 5672;
+#endif
         }
     }
 }

@@ -28,5 +28,20 @@ namespace ParalectEventSourcing.Repository.EventStore
         /// Gets or sets pass for connection
         /// </summary>
         public string Pass { get; set; }
+
+        public EventStoreConnectionSettings()
+        {
+#if DEBUG
+            Host = "localhost";
+            Port = 1113;
+            Login = "admin";
+            Pass = "changeit";
+#else
+            Host = "eventstore";
+            Port = 1113;
+            Login = "admin";
+            Pass = "changeit";
+#endif
+        }
     }
 }

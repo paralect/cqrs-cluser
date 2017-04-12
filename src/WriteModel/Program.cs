@@ -3,7 +3,6 @@
     using System;
     using System.Reflection;
     using System.Text;
-    using System.Threading.Tasks;
     using CommandHandlers;
     using Domain;
     using Microsoft.Extensions.DependencyInjection;
@@ -36,13 +35,6 @@
         private static void RegisterDependencies()
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
-            var eventStoreConnectionsSettings = new EventStoreConnectionSettings
-            {
-                Host = "eventstore",
-                Port = 1113,
-                Login = "admin",
-                Pass = "changeit"
-            }; // TODO read from configuration
 
             _serviceProvider = new ServiceCollection()
 
@@ -66,7 +58,7 @@
 
                 .AddTransient<IEventSource, EventSource>()
                 .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
-                .AddSingleton<EventStoreConnectionSettings>(eventStoreConnectionsSettings)
+                .AddSingleton<EventStoreConnectionSettings>(new EventStoreConnectionSettings())
 
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
 
