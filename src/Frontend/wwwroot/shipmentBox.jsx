@@ -2,11 +2,15 @@
 import ShipmentList from 'shipmentList.jsx';
 import ShipmentForm from 'shipmentForm.jsx';
 
-var ShipmentBox = React.createClass({
-    getInitialState: function () {
-        return { data: [] };
-    },
-    loadShipments: function () {
+class ShipmentBox extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = { data: [] };
+        this.handleShipmentCreation = this.handleShipmentCreation.bind(this);
+    }
+
+    loadShipments () {
         fetch(this.props.listUrl)
             .then(response => response.json())
             .then(responseJson => {
@@ -15,12 +19,13 @@ var ShipmentBox = React.createClass({
             .catch(error => {
                 console.log(error);
             });
-    },
-    componentDidMount: function () {
-        this.loadShipments();
-    },
-    handleShipmentCreation: function (shipment) {
+    }
 
+    componentDidMount () {
+        this.loadShipments();
+    }
+
+    handleShipmentCreation (shipment) {
         fetch(this.props.createUrl,
              {
                  method: 'POST',
@@ -37,8 +42,9 @@ var ShipmentBox = React.createClass({
              .catch(error => {
                  console.log(error);
              });
-    },
-    render: function () {
+    }
+
+    render () {
         return (
           <div>
             <h1>Shipments</h1>
@@ -48,6 +54,6 @@ var ShipmentBox = React.createClass({
           </div>
         );
     }
-});
+};
 
 export default ShipmentBox;

@@ -1,12 +1,18 @@
 ﻿import React from 'react';
-var ShipmentNode = React.createClass({
-    getInitialState: function () {
-        return {
+
+class ShipmentNode extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = { 
             address: this.props.address,
-            newAddress: this.props.address
+            newAddress: this.props.address 
         };
-    },
-    render: function () {
+        this.handleAddressChange = this.handleAddressChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    render () {
         if (this.props.editMode) {
             return (
                 <td>
@@ -23,11 +29,13 @@ var ShipmentNode = React.createClass({
                 </td>
             );
         }
-    },
-    handleAddressChange: function (e) {
+    }
+
+    handleAddressChange (e) {
         this.setState({ newAddress: e.target.value });
-    },
-    handleSubmit: function (e) {
+    }
+
+    handleSubmit (e) {
         e.preventDefault();
         var newAddress = this.state.newAddress.trim();
         if (!newAddress) {
@@ -37,6 +45,6 @@ var ShipmentNode = React.createClass({
         this.props.onShipmentUpdate({ id: this.props.id, newAddress: newAddress });
         this.setState({ address: newAddress });
     }
-});
+};
 
 export default ShipmentNode;

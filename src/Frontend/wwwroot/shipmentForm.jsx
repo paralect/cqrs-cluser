@@ -1,13 +1,19 @@
 ﻿import React from 'react';
 
-var ShipmentForm = React.createClass({
-    getInitialState: function () {
-        return { address: '' };
-    },
-    handleAddressChange: function (e) {
+class ShipmentForm extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = { address: '' };
+        this.handleAddressChange = this.handleAddressChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleAddressChange (e) {
         this.setState({ address: e.target.value });
-    },
-    handleSubmit: function (e) {
+    }
+
+    handleSubmit (e) {
         e.preventDefault();
         var address = this.state.address.trim();
         if (!address) {
@@ -16,8 +22,9 @@ var ShipmentForm = React.createClass({
 
         this.props.onShipmentSubmit({ address: address });
         this.setState({ address: '' });
-    },
-    render: function () {
+    }
+
+    render () {
         return (
           <form onSubmit={this.handleSubmit}>
               <h3>Add new shipment:</h3>
@@ -29,6 +36,6 @@ var ShipmentForm = React.createClass({
           </form>
       );
     }
-});
+};
 
 export default ShipmentForm;

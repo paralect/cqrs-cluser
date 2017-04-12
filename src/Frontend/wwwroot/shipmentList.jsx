@@ -1,8 +1,14 @@
 ﻿import React from 'react';
 import ShipmentRow from 'shipmentRow.jsx';
 
-var ShipmentList = React.createClass({
-    handleShipmentUpdate: function (shipment) {
+class ShipmentList extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.handleShipmentUpdate = this.handleShipmentUpdate.bind(this);
+    }
+
+    handleShipmentUpdate (shipment) {
         fetch(this.props.updateUrl + '/' + shipment.id,
             {
                 method: 'PUT',
@@ -11,8 +17,9 @@ var ShipmentList = React.createClass({
             }).catch(error => {
                 console.log(error);
             });
-    },
-    render: function () {
+    }
+
+    render () {
         var handleShipmentUpdate = this.handleShipmentUpdate;
         var shipmentRows = this.props.data.map(function (data) {
             return <ShipmentRow onShipmentUpdate={handleShipmentUpdate} key={data.id} data={data} />;
@@ -32,6 +39,6 @@ var ShipmentList = React.createClass({
            </table>
         );
     }
-});
+};
 
 export default ShipmentList;

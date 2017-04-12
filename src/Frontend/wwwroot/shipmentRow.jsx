@@ -1,13 +1,18 @@
 ﻿import React from 'react';
 import ShipmentNode from 'shipmentNode.jsx';
 
-var ShipmentRow = React.createClass({
-    getInitialState: function () {
-        return {
+class ShipmentRow extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
             editMode: false
         };
-    },
-    render: function () {
+        this.toggleEditMode = this.toggleEditMode.bind(this);
+        this.onShipmentUpdate = this.onShipmentUpdate.bind(this);
+    }
+
+    render () {
         return (
                 <tr>
                     <td>{this.props.data.id}</td>
@@ -15,14 +20,16 @@ var ShipmentRow = React.createClass({
                     <td><button onClick={this.toggleEditMode} className="btn btn-link">Edit</button></td>
                 </tr>
               );
-    },
-    toggleEditMode: function () {
+    }
+
+    toggleEditMode () {
         this.setState({ editMode: !this.state.editMode });
-    },
-    onShipmentUpdate: function (shipment) {
+    }
+
+    onShipmentUpdate (shipment) {
         this.props.onShipmentUpdate(shipment);
         this.setState({ editMode: false });
     }
-});
+};
 
 export default ShipmentRow;
