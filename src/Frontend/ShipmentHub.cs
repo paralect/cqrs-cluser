@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Text;
     using System.Threading.Tasks;
+    using Contracts.Events;
     using Microsoft.AspNetCore.SignalR;
     using Newtonsoft.Json;
     using ParalectEventSourcing.Messaging.RabbitMq;
@@ -33,7 +34,15 @@
 
             var commandId = typedMessage.Metadata.CommandId;
 
-            Clients.All.shipmentCreated(typedMessage.Id, typedMessage.Address);
+            // TODO dispatch events
+            if (messageType == typeof(ShipmentCreated))
+            {
+                Clients.All.shipmentCreated(typedMessage.Id, typedMessage.Address);
+            }
+            else if (messageType == typeof(ShipmentAddressChanged))
+            {
+                Clients.All.shipmentAddressChanged(typedMessage.Id, typedMessage.NewAddress);
+            }
         }
 
         public override Task OnConnected()

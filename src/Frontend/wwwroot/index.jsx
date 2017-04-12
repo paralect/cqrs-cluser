@@ -20,6 +20,12 @@ fetch(listUrl)
             store.onDataUpdated();
         };
 
+        shipmentHub.client.shipmentAddressChanged = function(id, newAddress) {
+            console.log("shipment is updated");
+            store.data.find(s => s.id === id).address = newAddress;
+            store.onDataUpdated();
+        };
+
         $.connection.hub.logging = true;
         $.connection.hub.start()
             .done(function() { console.log('Now connected, connection ID=' + $.connection.hub.id); })

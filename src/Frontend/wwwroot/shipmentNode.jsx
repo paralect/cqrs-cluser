@@ -5,7 +5,6 @@ class ShipmentNode extends React.Component {
     constructor(props) {
         super(props);
         this.state = { 
-            address: this.props.address,
             newAddress: this.props.address 
         };
         this.handleAddressChange = this.handleAddressChange.bind(this);
@@ -25,7 +24,7 @@ class ShipmentNode extends React.Component {
         } else {
             return (
                 <td>
-                    {this.state.address}
+                    {this.props.address}
                 </td>
             );
         }
@@ -43,7 +42,6 @@ class ShipmentNode extends React.Component {
         }
 
         this.props.onShipmentUpdate({ id: this.props.id, newAddress: newAddress });
-        this.setState({ address: newAddress });
     }
 };
 

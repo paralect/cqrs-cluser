@@ -6,13 +6,13 @@ class ShipmentBox extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { data: this.props.store.data };
+        this.state = { data: this.props.store.data }
         this.handleShipmentCreation = this.handleShipmentCreation.bind(this);
     }
 
     componentWillMount(){
         this.props.store.onDataUpdated = () => {
-            this.setState(this.props.store.data);     
+            this.setState({ data: this.props.store.data });
         };
     }
 
