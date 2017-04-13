@@ -12,7 +12,10 @@ class ShipmentList extends React.Component {
         fetch(this.props.updateUrl + '/' + shipment.id,
             {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Connection-Id': this.props.connectionId
+                },
                 body: JSON.stringify(shipment.newAddress)
             }).catch(error => {
                 console.log(error);

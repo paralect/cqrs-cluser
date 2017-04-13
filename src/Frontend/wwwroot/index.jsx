@@ -38,15 +38,19 @@ fetch(listUrl)
         connection.logging = true;
         connection.url = "http://localhost:5001/signalr/hubs";
         connection.start()
-            .done(function() { console.log('Now connected, connection ID=' + connection.id); })
+            .done(function() {
+                 let connectionId = connection.id;
+                 console.log('Now connected, connection ID=' + connectionId);
+
+                 ReactDOM.render(
+                    <ShipmentBox store={store}
+                                 createUrl={createUrl}
+                                 connectionId={connectionId} />,
+                    document.getElementById('shipments')
+                );
+
+            })
             .fail(function() { console.log('Could not Connect!'); });
-
-        ReactDOM.render(
-            <ShipmentBox store={store}
-                         createUrl={createUrl} />,
-            document.getElementById('shipments')
-        );
-
     })
     .catch(error => {
         console.log(error);

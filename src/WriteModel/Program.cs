@@ -100,7 +100,11 @@
             catch (DomainValidationException e)
             {
                 var channel = _serviceProvider.GetService<IChannel>();
-                channel.Send(QueueConfiguration.ErrorQueue, e.Message);
+                channel.Send(QueueConfiguration.ErrorQueue, new
+                {
+                    OriginalCommand = typedMessage,
+                    ErrorMessage = e.Message
+                });
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿namespace ParalectEventSourcing.Commands
 {
-    using System;
     using Utils;
 
     public abstract class CommandBus : ICommandBus
@@ -29,7 +28,6 @@
         {
             foreach (ICommand command in commands)
             {
-                command.Metadata.CommandId = Guid.NewGuid().ToString();
                 command.Metadata.CreatedDate = _dateTimeProvider.GetUtcNow();
                 command.Metadata.TypeName = command.GetType().AssemblyQualifiedName;
             }

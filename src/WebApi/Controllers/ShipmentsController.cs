@@ -15,11 +15,13 @@ namespace WebApi.Controllers
     {
         private readonly ICommandBus _commandBus;
         private readonly IShipmentDataService _shipmentDataService;
+        private readonly CommandConnectionsDictionary _commandConnections;
 
-        public ShipmentsController(ICommandBus commandBus, IShipmentDataService shipmentDataService)
+        public ShipmentsController(ICommandBus commandBus, IShipmentDataService shipmentDataService, CommandConnectionsDictionary commandConnections)
         {
             _commandBus = commandBus;
             _shipmentDataService = shipmentDataService;
+            _commandConnections = commandConnections;
         }
 
         // GET: api/values
@@ -40,17 +42,18 @@ namespace WebApi.Controllers
         [HttpPost]
         public object Post([FromBody]string address)
         {
-            var connectionId = Request.Headers["Connection-Id"];
             var commandId  = Guid.NewGuid().ToString();
+            var connectionId = Request.Headers["Connection-Id"];
+
+            _commandConnections.AddCommandConnection(commandId, connectionId);
+
             var command = new CreateShipment
             {
                 Id = Guid.NewGuid().ToString(),
                 Address = address,
                 Metadata = new CommandMetadata
                 {
-                    CommandId = commandId,
-                    CreatedDate = DateTime.Now,
-                    TypeName = typeof(CreateShipment).AssemblyQualifiedName
+                    CommandId = commandId
                 }
             };
 
@@ -64,15 +67,17 @@ namespace WebApi.Controllers
         public object Put(string id, [FromBody]string newAddress)
         {
             var commandId = Guid.NewGuid().ToString();
+            var connectionId = Request.Headers["Connection-Id"];
+
+            _commandConnections.AddCommandConnection(commandId, connectionId);
+
             var command = new ChangeShipmentAddress
             {
                 Id = id,
                 NewAddress = newAddress,
                 Metadata = new CommandMetadata
                 {
-                    CommandId = commandId,
-                    CreatedDate = DateTime.Now,
-                    TypeName = typeof(ChangeShipmentAddress).AssemblyQualifiedName
+                    CommandId = commandId
                 }
             };
 
