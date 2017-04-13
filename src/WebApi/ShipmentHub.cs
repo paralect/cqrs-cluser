@@ -1,4 +1,4 @@
-﻿namespace Frontend
+﻿namespace WebApi
 {
     using System;
     using System.Collections.Generic;

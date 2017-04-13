@@ -3,7 +3,7 @@
 
   "dependencies": {
     "MongoDB.Driver": "2.4.3",
-    "NETStandard.Library": "1.6.0",
+    "NETStandard.Library": "1.6.1",
     "ParalectEventSourcing": "1.0.0-*"
   },
 

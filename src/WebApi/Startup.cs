@@ -1,7 +1,9 @@
 ﻿namespace WebApi
 {
+    using System;
     using DataService;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +17,8 @@
 
     public class Startup
     {
+        private const string FrontEndUrl = "http://localhost:5000";
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -30,6 +34,12 @@
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSignalR(options =>
+            {
+                options.Hubs.EnableDetailedErrors = true;
+            });
+            services.AddMemoryCache();
+
             var mongoDbConnectionSettings = new MongoDbConnectionSettings();
             var mongoClient = new MongoClient(new MongoClientSettings
             {
@@ -50,10 +60,9 @@
                 .AddSingleton<IMongoClient>(mongoClient)
                 .AddTransient<IDatabase, Database>();
 
-            // Add framework services.
-            services.AddMvc();
-
             services.AddCors();
+
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,7 +71,10 @@
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            app.UseCors(cpb => cpb.WithOrigins(FrontEndUrl).AllowCredentials().AllowAnyHeader().AllowAnyMethod());
+
+            app.UseWebSockets();
+            app.UseSignalR();
 
             app.UseMvc();
         }

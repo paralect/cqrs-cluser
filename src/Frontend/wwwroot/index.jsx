@@ -13,22 +13,24 @@ fetch(listUrl)
             data : responseJson
         }
 
-        var shipmentHub = $.connection.shipmentHub;
-        shipmentHub.client.shipmentCreated = function(id, address) {
+        var connection = $.hubConnection();
+        var shipmentHubProxy = connection.createHubProxy("shipmentHub");
+        shipmentHubProxy.on("shipmentCreated", function(id, address) {
             console.log("shipment is created");
             store.data.push({ id: id, address: address });
             store.onDataUpdated();
-        };
+        });
 
-        shipmentHub.client.shipmentAddressChanged = function(id, newAddress) {
+        shipmentHubProxy.on("shipmentAddressChanged", function(id, newAddress) {
             console.log("shipment is updated");
             store.data.find(s => s.id === id).address = newAddress;
             store.onDataUpdated();
-        };
+        });
 
-        $.connection.hub.logging = true;
-        $.connection.hub.start()
-            .done(function() { console.log('Now connected, connection ID=' + $.connection.hub.id); })
+        connection.logging = true;
+        connection.url = "http://localhost:5001/signalr/hubs";
+        connection.start()
+            .done(function() { console.log('Now connected, connection ID=' + connection.id); })
             .fail(function() { console.log('Could not Connect!'); });
 
         ReactDOM.render(
