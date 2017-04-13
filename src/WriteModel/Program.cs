@@ -2,11 +2,9 @@
 {
     using System;
     using System.Reflection;
-    using System.Text;
     using CommandHandlers;
     using Domain;
     using Microsoft.Extensions.DependencyInjection;
-    using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
     using ParalectEventSourcing.Exceptions;
@@ -81,19 +79,13 @@
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
-            var body = Encoding.UTF8.GetString(basicDeliverEventArgs.Body);
-            Console.WriteLine("Received: " + body);
-
-            var message = JsonConvert.DeserializeObject(body);
-
-            var typeName = ((dynamic)message).Metadata.TypeName.ToString();
-            var messageType = Type.GetType(typeName);
-            var typedMessage = JsonConvert.DeserializeObject(body, messageType);
+            var messageSerializer = _serviceProvider.GetService<IMessageSerializer>();
+            var command = messageSerializer.Deserialize(basicDeliverEventArgs.Body, c => c.Metadata.TypeName);
 
             try
             {
                 var commandDispatcher = _serviceProvider.GetService<IDispatcher>();
-                commandDispatcher.Dispatch(typedMessage);
+                commandDispatcher.Dispatch(command);
 
                 Console.WriteLine("Command handled successfully.");
             }
@@ -102,7 +94,7 @@
                 var channel = _serviceProvider.GetService<IChannel>();
                 channel.Send(QueueConfiguration.ErrorQueue, new
                 {
-                    OriginalCommand = typedMessage,
+                    OriginalCommand = command,
                     ErrorMessage = e.Message
                 });
             }

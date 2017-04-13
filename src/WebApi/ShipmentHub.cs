@@ -1,23 +1,22 @@
 ﻿namespace WebApi
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
     using System.Threading.Tasks;
     using Contracts.Events;
     using Microsoft.AspNetCore.SignalR;
-    using Newtonsoft.Json;
     using ParalectEventSourcing.Messaging.RabbitMq;
+    using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;
 
     public class ShipmentHub : Hub
     {
-        public static List<string> ConnectedUsers;
         private readonly CommandConnectionsDictionary _commandConnections;
+        private readonly IMessageSerializer _messageSerializer;
 
-        public ShipmentHub(IChannel successChannel, IChannel errorChannel, CommandConnectionsDictionary commandConnections)
+        public ShipmentHub(IChannel successChannel, IChannel errorChannel, CommandConnectionsDictionary commandConnections, IMessageSerializer messageSerializer)
         {
             _commandConnections = commandConnections;
+            _messageSerializer = messageSerializer;
 
             Task.Run(() =>
             {
@@ -30,57 +29,34 @@
             });
         }
 
-        private void ConsumerOnSuccess(object sender, BasicDeliverEventArgs e)
+        private void ConsumerOnSuccess(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
-            var body = Encoding.UTF8.GetString(e.Body);
-            Console.WriteLine("Received: " + body);
-            dynamic message = JsonConvert.DeserializeObject(body);
+            var @event = _messageSerializer.Deserialize(basicDeliverEventArgs.Body, e => e.Metadata.TypeName);
 
-            var typeName = message.Metadata.TypeName.ToString();
-            var messageType = Type.GetType(typeName);
-            var typedMessage = JsonConvert.DeserializeObject(body, messageType);
+            var commandId = @event.Metadata.CommandId;
+            var eventType = Type.GetType(@event.Metadata.TypeName);
 
-            var commandId = typedMessage.Metadata.CommandId;
             var connectionId = (string) _commandConnections.GetAndRemoveCommandConnection(commandId); // cast is necessary for call Client(connectionId)
 
             // TODO dispatch events
-            if (messageType == typeof(ShipmentCreated))
+            if (eventType == typeof(ShipmentCreated))
             {
-                Clients.Client(connectionId).shipmentCreated(typedMessage.Id, typedMessage.Address);
+                Clients.Client(connectionId).shipmentCreated(@event.Id, @event.Address);
             }
-            else if (messageType == typeof(ShipmentAddressChanged))
+            else if (eventType == typeof(ShipmentAddressChanged))
             {
-                Clients.Client(connectionId).shipmentAddressChanged(typedMessage.Id, typedMessage.NewAddress);
+                Clients.Client(connectionId).shipmentAddressChanged(@event.Id, @event.NewAddress);
             }
         }
 
         private void ConsumerOnError(object sender, BasicDeliverEventArgs e)
         {
-            var body = Encoding.UTF8.GetString(e.Body);
-            Console.WriteLine("Received: " + body);
-            dynamic message = JsonConvert.DeserializeObject(body);
+            var message = _messageSerializer.Deserialize(e.Body);
 
             var commandId = (string) message.OriginalCommand.Metadata.CommandId;
             var connectionId = _commandConnections.GetAndRemoveCommandConnection(commandId);
 
             Clients.Client(connectionId).showErrorMessage(message.ErrorMessage);
-        }
-
-        public override Task OnConnected()
-        {
-            if (ConnectedUsers == null)
-                ConnectedUsers = new List<string>();
-
-            ConnectedUsers.Add(Context.ConnectionId);
-
-            return base.OnConnected();
-        }
-
-        public override Task OnDisconnected(bool stopCalled)
-        {
-            ConnectedUsers?.Remove(Context.ConnectionId);
-
-            return base.OnDisconnected(stopCalled);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace ParalectEventSourcing.Serialization
 {
+    using System;
     using System.Text;
     using Newtonsoft.Json;
 
@@ -11,6 +12,26 @@
             var body = Encoding.UTF8.GetBytes(data);
 
             return body;
+        }
+
+        public dynamic Deserialize(byte[] objectBinary, Func<dynamic, string> getTypeName)
+        {
+            var objectString = Encoding.UTF8.GetString(objectBinary);
+            var @object = JsonConvert.DeserializeObject(objectString);
+
+            var objectTypeName = getTypeName(@object);
+            var objectType = Type.GetType(objectTypeName);
+            var stronlyTypedObject = JsonConvert.DeserializeObject(objectString, objectType);
+
+            return stronlyTypedObject;
+        }
+
+        public dynamic Deserialize(byte[] objectBinary)
+        {
+            var objectString = Encoding.UTF8.GetString(objectBinary);
+            var @object = JsonConvert.DeserializeObject(objectString);
+
+            return @object;
         }
     }
 }

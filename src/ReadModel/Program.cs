@@ -72,17 +72,11 @@
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
-            var body = Encoding.UTF8.GetString(basicDeliverEventArgs.Body);
-            Console.WriteLine("Received: " + body);
-
-            var message = JsonConvert.DeserializeObject(body);
-
-            var typeName = ((dynamic)message).Metadata.TypeName.ToString();
-            var messageType = Type.GetType(typeName);
-            var typedMessage = JsonConvert.DeserializeObject(body, messageType);
+            var messageSerializer = _serviceProvider.GetService<IMessageSerializer>();
+            var @event = messageSerializer.Deserialize(basicDeliverEventArgs.Body, e => e.Metadata.TypeName);
 
             var eventDispatcher = _serviceProvider.GetService<IDispatcher>();
-            eventDispatcher.Dispatch(typedMessage);
+            eventDispatcher.Dispatch(@event);
 
             Console.WriteLine("Event handled successfully.");
         }
