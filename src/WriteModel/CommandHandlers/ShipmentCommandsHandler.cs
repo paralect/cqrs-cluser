@@ -3,6 +3,7 @@
     using Contracts.Commands;
     using Domain;
     using ParalectEventSourcing.Events;
+    using ParalectEventSourcing.Exceptions;
     using ParalectEventSourcing.Repository;
 
     public class ShipmentCommandsHandler : ICommandHandler
@@ -17,6 +18,12 @@
         public void Handle(
             CreateShipment c)
         {
+            // example of DomainValidationException
+            if (c.Address.StartsWith("1"))
+            {
+                throw new DomainValidationException($"Can't create shipment with address {c.Address}");
+            }
+
             _shipments.Perform(
                 c.Id,
                 shipment => shipment.CreateShipment(c.Id, c.Metadata.CommandId, c.Address));

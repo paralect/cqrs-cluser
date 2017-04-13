@@ -14,11 +14,16 @@
     {
         public static List<string> ConnectedUsers;
 
-        public ShipmentHub(IChannel channel)
+        public ShipmentHub(IChannel successChannel, IChannel errorChannel)
         {
             Task.Run(() =>
             {
-                channel.Listen(QueueConfiguration.SuccessQueue, ConsumerOnSuccess);
+                successChannel.Listen(QueueConfiguration.SuccessQueue, ConsumerOnSuccess);
+            });
+
+            Task.Run(() =>
+            {
+                errorChannel.Listen(QueueConfiguration.ErrorQueue, ConsumerOnError);
             });
         }
 
@@ -43,6 +48,14 @@
             {
                 Clients.All.shipmentAddressChanged(typedMessage.Id, typedMessage.NewAddress);
             }
+        }
+
+        private void ConsumerOnError(object sender, BasicDeliverEventArgs e)
+        {
+            var body = Encoding.UTF8.GetString(e.Body);
+            Console.WriteLine("Received: " + body);
+
+            Clients.All.showErrorMessage(body);
         }
 
         public override Task OnConnected()

@@ -18,13 +18,21 @@ fetch(listUrl)
         shipmentHubProxy.on("shipmentCreated", function(id, address) {
             console.log("shipment is created");
             store.data.push({ id: id, address: address });
+            store.error = { message: null };
             store.onDataUpdated();
         });
 
         shipmentHubProxy.on("shipmentAddressChanged", function(id, newAddress) {
             console.log("shipment is updated");
             store.data.find(s => s.id === id).address = newAddress;
+            store.error = { message: null };
             store.onDataUpdated();
+        });
+
+        shipmentHubProxy.on("showErrorMessage", function(message) {
+            console.log(message);
+            store.error = { message: message };
+            store.onError();
         });
 
         connection.logging = true;

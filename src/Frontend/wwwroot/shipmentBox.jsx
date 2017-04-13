@@ -6,14 +6,18 @@ class ShipmentBox extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { data: this.props.store.data }
+        this.state = { data: this.props.store.data, error: { message: null } }
         this.handleShipmentCreation = this.handleShipmentCreation.bind(this);
     }
 
     componentWillMount(){
         this.props.store.onDataUpdated = () => {
-            this.setState({ data: this.props.store.data });
+            this.setState({ data: this.props.store.data, error: this.props.store.error });
         };
+
+        this.props.store.onError = () => {
+            this.setState({ data: this.props.store.data, error: this.props.store.error });
+        }
     }
 
     handleShipmentCreation (shipment) {
@@ -40,8 +44,8 @@ class ShipmentBox extends React.Component {
           <div>
             <h1>Shipments</h1>
             <ShipmentList updateUrl={"http://localhost:5001/api/shipments"}
-                          data={this.state.data} />
-            <ShipmentForm onShipmentSubmit={this.handleShipmentCreation} />
+                          data={this.state.data}/>
+            <ShipmentForm onShipmentSubmit={this.handleShipmentCreation} errorMessage={this.state.error.message} />
           </div>
         );
     }
