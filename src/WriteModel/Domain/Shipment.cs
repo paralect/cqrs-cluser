@@ -3,38 +3,41 @@
     using System;
     using Contracts.Events;
     using ParalectEventSourcing;
+    using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Events;
 
     public class Shipment : Aggregate<ShipmentState>
     {
-        public void CreateShipment(string aggregateRootId, string commandId, string address)
+        public void CreateShipment(string aggregateRootId, ICommandMetadata commandMetadata, string address)
         {
             Apply(new ShipmentCreated
             {
                 Id = aggregateRootId,
                 Address = address,
-                Metadata = new EventMetadata
-                {
-                    EventId = Guid.NewGuid().ToString(),
-                    CommandId = commandId,
-                    TypeName = typeof(ShipmentCreated).AssemblyQualifiedName
-                }
+                Metadata = CreateEventMetadata(commandMetadata, typeof(ShipmentCreated))
             });
         }
 
-        public void UpdateAddress(string commandId, string newAddress)
+        public void UpdateAddress(ICommandMetadata commandMetadata, string newAddress)
         {
             Apply(new ShipmentAddressChanged
             {
                 Id = State.Id,
                 NewAddress = newAddress,
-                Metadata = new EventMetadata
-                {
-                    EventId = Guid.NewGuid().ToString(),
-                    CommandId = commandId,
-                    TypeName = typeof(ShipmentCreated).AssemblyQualifiedName
-                }
+                Metadata = CreateEventMetadata(commandMetadata, typeof(ShipmentAddressChanged))
             });
+        }
+
+        // TODO move somewhere
+        private EventMetadata CreateEventMetadata(ICommandMetadata commandMetadata, Type eventType)
+        {
+            return new EventMetadata
+            {
+                EventId = Guid.NewGuid().ToString(),
+                CommandId = commandMetadata.CommandId,
+                ConnectionId = commandMetadata.ConnectionId,
+                TypeName = eventType.AssemblyQualifiedName
+            };
         }
     }
 }

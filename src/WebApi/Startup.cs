@@ -58,10 +58,8 @@
 
                 .AddTransient<IShipmentDataService, ShipmentDataService>()
                 .AddSingleton<IMongoClient>(mongoClient)
-                .AddTransient<IDatabase, Database>()
+                .AddTransient<IDatabase, Database>();
                 
-                .AddSingleton<CommandConnectionsDictionary, CommandConnectionsDictionary>();
-
             services.AddCors();
 
             services.AddMvc();

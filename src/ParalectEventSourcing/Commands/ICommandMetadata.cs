@@ -7,7 +7,7 @@ namespace ParalectEventSourcing.Commands
     using System;
 
     /// <summary>
-    /// Command metadata inrteface
+    /// Command metadata interface
     /// </summary>
     public interface ICommandMetadata
     {
@@ -30,6 +30,11 @@ namespace ParalectEventSourcing.Commands
         /// Gets or sets time when command was created
         /// </summary>
         DateTime CreatedDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets SignalR Connection Id
+        /// </summary>
+        string ConnectionId { get; set; }
     }
 
     /// <summary>
@@ -56,5 +61,10 @@ namespace ParalectEventSourcing.Commands
         /// Gets or sets time when command was created
         /// </summary>
         public DateTime CreatedDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets SignalR Connection Id
+        /// </summary>
+        public string ConnectionId { get; set; }
     }
 }

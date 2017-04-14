@@ -26,7 +26,7 @@
 
             _shipments.Perform(
                 c.Id,
-                shipment => shipment.CreateShipment(c.Id, c.Metadata.CommandId, c.Address));
+                shipment => shipment.CreateShipment(c.Id, c.Metadata, c.Address));
         }
 
         public void Handle(
@@ -34,7 +34,7 @@
         {
             _shipments.Perform(
                 c.Id,
-                shipment => shipment.UpdateAddress(c.Metadata.CommandId, c.NewAddress));
+                shipment => shipment.UpdateAddress(c.Metadata, c.NewAddress));
         }
     }
 }

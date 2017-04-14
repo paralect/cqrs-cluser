@@ -13,15 +13,13 @@ namespace WebApi.Controllers
     [Route("api/[controller]")]
     public class ShipmentsController : Controller
     {
-        private readonly ICommandBus _commandBus;
         private readonly IShipmentDataService _shipmentDataService;
-        private readonly CommandConnectionsDictionary _commandConnections;
+        private readonly ICommandBus _commandBus;
 
-        public ShipmentsController(ICommandBus commandBus, IShipmentDataService shipmentDataService, CommandConnectionsDictionary commandConnections)
+        public ShipmentsController(IShipmentDataService shipmentDataService, ICommandBus commandBus)
         {
-            _commandBus = commandBus;
             _shipmentDataService = shipmentDataService;
-            _commandConnections = commandConnections;
+            _commandBus = commandBus;
         }
 
         // GET: api/values
@@ -40,50 +38,38 @@ namespace WebApi.Controllers
 
         // POST api/values
         [HttpPost]
-        public object Post([FromBody]string address)
+        public void Post([FromBody]string address)
         {
-            var commandId  = Guid.NewGuid().ToString();
-            var connectionId = Request.Headers["Connection-Id"];
-
-            _commandConnections.AddCommandConnection(commandId, connectionId);
-
             var command = new CreateShipment
             {
                 Id = Guid.NewGuid().ToString(),
                 Address = address,
                 Metadata = new CommandMetadata
                 {
-                    CommandId = commandId
+                    CommandId = Guid.NewGuid().ToString(),
+                    ConnectionId = Request.Headers["Connection-Id"]
                 }
             };
 
             _commandBus.Send(command);
-
-            return new { commandId };
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public object Put(string id, [FromBody]string newAddress)
+        public void Put(string id, [FromBody]string newAddress)
         {
-            var commandId = Guid.NewGuid().ToString();
-            var connectionId = Request.Headers["Connection-Id"];
-
-            _commandConnections.AddCommandConnection(commandId, connectionId);
-
             var command = new ChangeShipmentAddress
             {
                 Id = id,
                 NewAddress = newAddress,
                 Metadata = new CommandMetadata
                 {
-                    CommandId = commandId
+                    CommandId = Guid.NewGuid().ToString(),
+                    ConnectionId = Request.Headers["Connection-Id"]
                 }
             };
 
             _commandBus.Send(command);
-
-            return new { commandId };
         }
 
         // DELETE api/values/5

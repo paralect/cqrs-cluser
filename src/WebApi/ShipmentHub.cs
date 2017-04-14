@@ -4,18 +4,17 @@
     using System.Threading.Tasks;
     using Contracts.Events;
     using Microsoft.AspNetCore.SignalR;
+    using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;
 
     public class ShipmentHub : Hub
     {
-        private readonly CommandConnectionsDictionary _commandConnections;
         private readonly IMessageSerializer _messageSerializer;
 
-        public ShipmentHub(IChannel successChannel, IChannel errorChannel, CommandConnectionsDictionary commandConnections, IMessageSerializer messageSerializer)
+        public ShipmentHub(IChannel successChannel, IChannel errorChannel, IMessageSerializer messageSerializer)
         {
-            _commandConnections = commandConnections;
             _messageSerializer = messageSerializer;
 
             Task.Run(() =>
@@ -33,10 +32,8 @@
         {
             var @event = _messageSerializer.Deserialize(basicDeliverEventArgs.Body, e => e.Metadata.TypeName);
 
-            var commandId = @event.Metadata.CommandId;
+            var connectionId = (string) @event.Metadata.ConnectionId;
             var eventType = Type.GetType(@event.Metadata.TypeName);
-
-            var connectionId = (string) _commandConnections.GetAndRemoveCommandConnection(commandId); // cast is necessary for call Client(connectionId)
 
             // TODO dispatch events
             if (eventType == typeof(ShipmentCreated))
@@ -53,8 +50,7 @@
         {
             var message = _messageSerializer.Deserialize(e.Body);
 
-            var commandId = (string) message.OriginalCommand.Metadata.CommandId;
-            var connectionId = _commandConnections.GetAndRemoveCommandConnection(commandId);
+            var connectionId = (string) message.OriginalCommand.Metadata.ConnectionId;
 
             Clients.Client(connectionId).showErrorMessage(message.ErrorMessage);
         }

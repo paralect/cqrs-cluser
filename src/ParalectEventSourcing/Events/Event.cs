@@ -12,14 +12,6 @@ namespace ParalectEventSourcing.Events
     [Serializable]
     public abstract class Event : IEvent
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Event"/> class.
-        /// </summary>
-        protected Event()
-        {
-            Metadata = new EventMetadata();
-        }
-
         /// <inheritdoc/>
         public string Id { get; set; }
 
@@ -27,6 +19,6 @@ namespace ParalectEventSourcing.Events
         public int Version { get; set; }
 
         /// <inheritdoc/>
-        public EventMetadata Metadata { get; set; }
+        public EventMetadata Metadata { get; set; } = new EventMetadata();
     }
 }
