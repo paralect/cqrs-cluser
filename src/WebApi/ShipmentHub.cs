@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using Contracts.Events;
     using Microsoft.AspNetCore.SignalR;
-    using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;

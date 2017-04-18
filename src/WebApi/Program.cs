@@ -16,7 +16,7 @@ namespace WebApi
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
-                .UseUrls("http://localhost:5001/")
+                .UseUrls("http://*:5001")
                 .Build();
 
             host.Run();

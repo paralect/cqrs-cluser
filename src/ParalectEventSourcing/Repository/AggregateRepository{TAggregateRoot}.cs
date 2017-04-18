@@ -157,6 +157,7 @@ namespace ParalectEventSourcing.Repository
                 if (metadata != null)
                 {
                     e.Metadata.CommandId = metadata.CommandId;
+                    e.Metadata.ConnectionId = metadata.ConnectionId;
                     e.Metadata.UserId = metadata.UserId;
                 }
 

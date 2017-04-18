@@ -30,10 +30,6 @@ class ShipmentBox extends React.Component {
                  },
                  body: JSON.stringify(shipment.address)
              })
-             .then(response => response.json())
-             .then(responseJson => {
-                 console.log(responseJson);
-             })
              .catch(error => {
                  console.log(error);
              });
@@ -43,7 +39,7 @@ class ShipmentBox extends React.Component {
         return (
           <div>
             <h1>Shipments</h1>
-            <ShipmentList updateUrl={"http://localhost:5001/api/shipments"}
+            <ShipmentList updateUrl={this.props.updateUrl}
                           data={this.state.data}
                           connectionId={this.props.connectionId}/>
             <ShipmentForm onShipmentSubmit={this.handleShipmentCreation} errorMessage={this.state.error.message} />

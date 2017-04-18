@@ -17,23 +17,31 @@ services:
     image: "mongo"
     ports:
       - "27017:27017"
-  web:
-    container_name: web
+  frontend:
+    container_name: frontend
+    build: ./Frontend
+    ports:
+     - "5000:80"
+    depends_on:
+      - web-api
+    restart: always
+  web-api:
+    container_name: web-api
     build: ./WebApi
     ports:
-     - "8000:80"
+     - "5001:80"
     depends_on:
       - rabbit
     restart: always
   write_model:
-    container_name: write_model
+    container_name: write-model
     build: ./WriteModel
     depends_on:
       - rabbit
       - eventstore
     restart: always
   read_model:
-    container_name: read_model
+    container_name: read-model
     build: ./ReadModel
     depends_on:
       - rabbit

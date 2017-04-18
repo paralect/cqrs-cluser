@@ -1,9 +1,7 @@
 ﻿namespace WebApi
 {
-    using System;
     using DataService;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +15,6 @@
 
     public class Startup
     {
-        private const string FrontEndUrl = "http://localhost:5000";
-
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -71,7 +67,7 @@
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseCors(cpb => cpb.WithOrigins(FrontEndUrl).AllowCredentials().AllowAnyHeader().AllowAnyMethod());
+            app.UseCors(cpb => cpb.AllowAnyOrigin().AllowCredentials().AllowAnyHeader().AllowAnyMethod());
 
             app.UseWebSockets();
             app.UseSignalR();

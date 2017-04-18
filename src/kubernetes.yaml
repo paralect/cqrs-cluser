@@ -1,12 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: default-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /frontend
+        backend:
+          serviceName: frontend
+          servicePort: 5000
+      - path: /web-api
+        backend:
+          serviceName: web-api
+          servicePort: 5001
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: web
+  name: frontend
   labels:
-    app: web
+    app: frontend
 spec:
   selector:
-    app: web
+    app: frontend
   type: LoadBalancer
   ports:
     - port: 5000
@@ -15,20 +34,52 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: web
+  name: frontend
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: web
+        app: frontend
     spec:
       containers:
-        - name: web
-          image: yarmolovichalex1/web
+        - name: frontend
+          image: yarmolovichalex1/frontend
           ports:
             - name: http
               containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-api
+  labels:
+    app: web-api
+spec:
+  selector:
+    app: web-api
+  type: LoadBalancer
+  ports:
+    - port: 5001
+      targetPort: http
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: web-api
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-api
+    spec:
+      containers:
+        - name: web-api
+          image: yarmolovichalex1/web-api
+          ports:
+            - name: http
+              containerPort: 5001
 ---
 apiVersion: v1
 kind: Service
