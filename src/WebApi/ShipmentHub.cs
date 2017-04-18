@@ -11,19 +11,26 @@
     public class ShipmentHub : Hub
     {
         private readonly IMessageSerializer _messageSerializer;
+        private readonly IChannel _successChannel;
+        private readonly IChannel _errorChannel;
 
         public ShipmentHub(IChannel successChannel, IChannel errorChannel, IMessageSerializer messageSerializer)
         {
             _messageSerializer = messageSerializer;
+            _successChannel = successChannel;
+            _errorChannel = errorChannel;
+        }
 
+        public void Listen(string connectionToken)
+        {
             Task.Run(() =>
             {
-                successChannel.Listen(QueueConfiguration.SuccessQueue, ConsumerOnSuccess);
+                _successChannel.Listen(ExchangeConfiguration.SuccessExchange, ConsumerOnSuccess, connectionToken);
             });
 
             Task.Run(() =>
             {
-                errorChannel.Listen(QueueConfiguration.ErrorQueue, ConsumerOnError);
+                _errorChannel.Listen(ExchangeConfiguration.ErrorExchange, ConsumerOnError, connectionToken);
             });
         }
 

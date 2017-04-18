@@ -28,6 +28,11 @@ namespace ParalectEventSourcing.Events
         public string ConnectionId { get; set; }
 
         /// <summary>
+        /// Gets or sets SignalR Connection Token of command that initiate this event
+        /// </summary>
+        public string ConnectionToken { get; set; }
+
+        /// <summary>
         /// Gets or sets user Id of user who initiated this event
         /// </summary>
         public string UserId { get; set; }

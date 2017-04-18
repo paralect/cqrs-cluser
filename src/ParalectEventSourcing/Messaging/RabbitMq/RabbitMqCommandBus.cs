@@ -17,7 +17,7 @@
         {
             foreach (var command in commands)
             {
-                _channel.Send(QueueConfiguration.WriteModelQueue, command);
+                _channel.Send(ExchangeConfiguration.WriteModelExchange, command);
             }
         }
     }

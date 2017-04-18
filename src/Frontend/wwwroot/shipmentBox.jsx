@@ -26,7 +26,8 @@ class ShipmentBox extends React.Component {
                  method: 'POST',
                  headers: {
                      'Content-Type': 'application/json',
-                     'Connection-Id': this.props.connectionId
+                     'Connection-Id': this.props.connectionId,
+                     'Connection-Token': this.props.connectionToken
                  },
                  body: JSON.stringify(shipment.address)
              })

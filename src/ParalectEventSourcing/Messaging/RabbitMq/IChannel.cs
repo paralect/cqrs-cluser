@@ -5,8 +5,8 @@
 
     public interface IChannel
     {
-        void Send(string queue, object message);
+        void Send(string exchange, object message, string routingKey = "");
 
-        void Listen(string queue, EventHandler<BasicDeliverEventArgs> callback);
+        void Listen(string exchange, EventHandler<BasicDeliverEventArgs> callback, string routingKey = "");
     }
 }

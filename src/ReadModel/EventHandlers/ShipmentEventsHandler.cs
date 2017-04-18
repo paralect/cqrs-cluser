@@ -36,7 +36,7 @@
 
             collection.InsertOne(shipment);
 
-            _channel.Send(QueueConfiguration.SuccessQueue, e);
+            _channel.Send(ExchangeConfiguration.SuccessExchange, e, e.Metadata.ConnectionToken);
         }
 
         public void Handle(ShipmentAddressChanged e)
@@ -47,9 +47,9 @@
                 .Set("address", e.NewAddress)
                 .CurrentDate("lastModified");
 
-            var result = collection.UpdateOne(filter, update);
+            collection.UpdateOne(filter, update);
 
-            _channel.Send(QueueConfiguration.SuccessQueue, e);
+            _channel.Send(ExchangeConfiguration.SuccessExchange, e, e.Metadata.ConnectionToken);
         }
     }
 }

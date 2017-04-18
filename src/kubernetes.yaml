@@ -68,7 +68,7 @@ kind: Deployment
 metadata:
   name: web-api
 spec:
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:

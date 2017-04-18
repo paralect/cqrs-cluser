@@ -74,7 +74,7 @@
         private static void ListenToMessages()
         {
             var channel = _serviceProvider.GetService<IChannel>();
-            channel.Listen(QueueConfiguration.WriteModelQueue, ConsumerOnReceived);
+            channel.Listen(ExchangeConfiguration.WriteModelExchange, ConsumerOnReceived);
         }
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
@@ -92,11 +92,14 @@
             catch (DomainValidationException e)
             {
                 var channel = _serviceProvider.GetService<IChannel>();
-                channel.Send(QueueConfiguration.ErrorQueue, new
-                {
-                    OriginalCommand = command,
-                    ErrorMessage = e.Message
-                });
+                channel.Send(
+                    ExchangeConfiguration.ErrorExchange, 
+                    new
+                    {
+                        OriginalCommand = command,
+                        ErrorMessage = e.Message
+                    },
+                    (string)command.Metadata.ConnectionToken);
             }
         }
     }

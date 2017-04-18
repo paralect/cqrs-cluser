@@ -47,7 +47,8 @@ namespace WebApi.Controllers
                 Metadata = new CommandMetadata
                 {
                     CommandId = Guid.NewGuid().ToString(),
-                    ConnectionId = Request.Headers["Connection-Id"]
+                    ConnectionId = Request.Headers["Connection-Id"],
+                    ConnectionToken = Request.Headers["Connection-Token"]
                 }
             };
 

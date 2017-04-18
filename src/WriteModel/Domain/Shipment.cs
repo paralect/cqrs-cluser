@@ -36,6 +36,7 @@
                 EventId = Guid.NewGuid().ToString(),
                 CommandId = commandMetadata.CommandId,
                 ConnectionId = commandMetadata.ConnectionId,
+                ConnectionToken = commandMetadata.ConnectionToken,
                 TypeName = eventType.AssemblyQualifiedName
             };
         }

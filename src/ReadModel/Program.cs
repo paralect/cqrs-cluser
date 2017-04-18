@@ -67,7 +67,7 @@
         private static void ListenToMessages()
         {
             var channel = _serviceProvider.GetService<IChannel>();
-            channel.Listen(QueueConfiguration.ReadModelQueue, ConsumerOnReceived);
+            channel.Listen(ExchangeConfiguration.ReadModelExchange, ConsumerOnReceived);
         }
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)

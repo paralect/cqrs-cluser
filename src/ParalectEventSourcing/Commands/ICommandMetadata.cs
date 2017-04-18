@@ -35,6 +35,11 @@ namespace ParalectEventSourcing.Commands
         /// Gets or sets SignalR Connection Id
         /// </summary>
         string ConnectionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets SignalR Connection Token
+        /// </summary>
+        string ConnectionToken { get; set; }
     }
 
     /// <summary>
@@ -66,5 +71,10 @@ namespace ParalectEventSourcing.Commands
         /// Gets or sets SignalR Connection Id
         /// </summary>
         public string ConnectionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets SignalR Connection Token
+        /// </summary>
+        public string ConnectionToken { get; set; }
     }
 }

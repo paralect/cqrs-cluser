@@ -14,7 +14,7 @@
 
         public void Publish(IEvent eventMessage)
         {
-            _channel.Send(QueueConfiguration.ReadModelQueue, eventMessage);
+            _channel.Send(ExchangeConfiguration.ReadModelExchange, eventMessage);
         }
 
         public void Publish(IEnumerable<IEvent> eventMessages)

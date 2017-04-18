@@ -29,7 +29,7 @@ services:
     container_name: web-api
     build: ./WebApi
     ports:
-     - "5001:80"
+     - "5001:5001"
     depends_on:
       - rabbit
     restart: always

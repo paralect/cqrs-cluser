@@ -2,7 +2,8 @@
 import ReactDOM from "react-dom";
 import ShipmentBox from 'shipmentBox.jsx';
 
-const webApiHost = "https://192.168.2.66/web-api/"; // TODO get from configuration or environment variable
+//const webApiHost = "https://192.168.2.66/web-api/"; // TODO get from configuration or environment variable
+const webApiHost = "http://localhost:5001/";
 
 const listUrl =  webApiHost + "api/shipments";
 const createUrl = webApiHost + "api/shipments";
@@ -42,36 +43,44 @@ $.getScript(signalRHubsUrl, function () {
    });
 
    connection.logging = true;
+   
 
    // https://github.com/SignalR/SignalR/issues/3776
-   let getUrl = $.signalR.transports._logic.getUrl;
+   /* let getUrl = $.signalR.transports._logic.getUrl;
    $.signalR.transports._logic.getUrl = function(connection, transport, reconnecting, poll, ajaxPost) {
+       connection.baseUrl = webApiHost;
        var url = getUrl(connection, transport, reconnecting, poll, ajaxPost);
-       return "/web-api" + url;
-   };
-
+       if (transport === "webSockets") {
+           return "/web-api" + url;
+       }
+       return url;
+   }; */
+    
    connection.start()
        .done(function() {
             let connectionId = connection.id;
+            let connectionToken = connection.token;
             console.log('Now connected, connection ID=' + connectionId);
+            console.log('connection token=' + connectionToken);
 
-            fetch(listUrl)
-               .then(response => response.json())
-               .then(responseJson => {
-
+            shipmentHubProxy.invoke("listen", connectionToken).done(function() {
+                fetch(listUrl)
+                .then(response => response.json())
+                .then(responseJson => {
                    store.data = responseJson;
-
                    ReactDOM.render(
                        <ShipmentBox store={store}
                                     createUrl={createUrl}
                                     updateUrl={updateUrl}
-                                    connectionId={connectionId} />,
+                                    connectionId={connectionId}
+                                    connectionToken={connectionToken} />,
                        document.getElementById('shipments')
                    );
                })
                .catch(error => {
                    console.log(error);
                });
+            });            
        })
        .fail(function() { console.log('Could not Connect!'); });
 });
