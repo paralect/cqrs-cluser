@@ -1,7 +1,10 @@
 ﻿namespace WebApi
 {
+    using System.IO;
+    using DataProtection;
     using DataService;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -59,6 +62,10 @@
             services.AddCors();
 
             services.AddMvc();
+
+            // TODO temporary disable data protection for SignalR scaling
+            // https://github.com/aspnet/DataProtection/issues/192
+            services.DisableDataProtection();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
