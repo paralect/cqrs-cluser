@@ -3,6 +3,7 @@
     using System;
     using System.Reflection;
     using System.Text;
+    using System.Threading.Tasks;
     using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
@@ -39,7 +40,8 @@
             _serviceProvider = new ServiceCollection()
 
                 // TODO consider creating channels per thread
-                .AddTransient<IChannel, Channel>()
+                .AddSingleton<IChannel, Channel>()
+                .AddSingleton<IReadModelChannel, Channel>()
                 .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
@@ -66,8 +68,11 @@
 
         private static void ListenToMessages()
         {
-            var channel = _serviceProvider.GetService<IChannel>();
-            channel.Listen(ExchangeConfiguration.ReadModelExchange, ConsumerOnReceived);
+            Task.Run(() =>
+            {
+                var channel = _serviceProvider.GetService<IReadModelChannel>();
+                channel.Subscribe(ExchangeConfiguration.ReadModelExchange, ConsumerOnReceived);
+            });
         }
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)

@@ -7,6 +7,8 @@
     {
         void Send(string exchange, object message, string routingKey = "");
 
-        void Listen(string exchange, EventHandler<BasicDeliverEventArgs> callback, string routingKey = "");
+        string Subscribe(string exchange, EventHandler<BasicDeliverEventArgs> callback, string routingKey = "");
+
+        void Unsubscribe(string consumerTag);
     }
 }

@@ -1,11 +1,12 @@
 ﻿namespace ParalectEventSourcing.Messaging.RabbitMq
 {
     using System;
+    using System.Threading;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Serialization;
 
-    public class Channel : IChannel
+    public class Channel : ISuccessChannel, IErrorChannel, IWriteModelChannel, IReadModelChannel
     {
         private readonly IModel _channel;
         private readonly IMessageSerializer _messageSerializer;
@@ -27,16 +28,21 @@
             _channel.BasicPublish(exchange, routingKey, null, _messageSerializer.Serialize(message));
         }
 
-        public void Listen(string exchange, EventHandler<BasicDeliverEventArgs> callback, string routingKey = "")
+        public string Subscribe(string exchange, EventHandler<BasicDeliverEventArgs> callback, string routingKey = "")
         {
-            var queueName = _channel.QueueDeclare().QueueName;
+            var queueName = _channel.QueueDeclare(exchange + "_" + Guid.NewGuid()).QueueName;
             _channel.QueueBind(queueName, exchange, routingKey);
 
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += callback;
-            _channel.BasicConsume(queueName, true, consumer);
+            var consumerTag = _channel.BasicConsume(queueName, true, Guid.NewGuid().ToString(), consumer);
 
-            Console.Read();
+            return consumerTag;
+        }
+
+        public void Unsubscribe(string consumerTag)
+        {
+            _channel.BasicCancel(consumerTag);
         }
     }
 }

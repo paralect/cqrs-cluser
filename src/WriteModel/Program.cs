@@ -2,6 +2,7 @@
 {
     using System;
     using System.Reflection;
+    using System.Threading.Tasks;
     using CommandHandlers;
     using Domain;
     using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +38,8 @@
             _serviceProvider = new ServiceCollection()
 
                 // TODO consider creating channels per thread
-                .AddTransient<IChannel, Channel>()
+                .AddSingleton<IChannel, Channel>()
+                .AddSingleton<IWriteModelChannel, Channel>()
                 .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
@@ -73,8 +75,11 @@
 
         private static void ListenToMessages()
         {
-            var channel = _serviceProvider.GetService<IChannel>();
-            channel.Listen(ExchangeConfiguration.WriteModelExchange, ConsumerOnReceived);
+            Task.Run(() =>
+            {
+                var channel = _serviceProvider.GetService<IWriteModelChannel>();
+                channel.Subscribe(ExchangeConfiguration.WriteModelExchange, ConsumerOnReceived);
+            });
         }
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)

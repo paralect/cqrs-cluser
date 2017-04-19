@@ -1,6 +1,7 @@
 ﻿namespace WebApi
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Contracts.Events;
     using Microsoft.AspNetCore.SignalR;
@@ -10,11 +11,14 @@
 
     public class ShipmentHub : Hub
     {
+        private static readonly ConcurrentDictionary<string, string> SuccessConsumers = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> ErrorConsumers = new ConcurrentDictionary<string, string>();
+
         private readonly IMessageSerializer _messageSerializer;
         private readonly IChannel _successChannel;
         private readonly IChannel _errorChannel;
 
-        public ShipmentHub(IChannel successChannel, IChannel errorChannel, IMessageSerializer messageSerializer)
+        public ShipmentHub(ISuccessChannel successChannel, IErrorChannel errorChannel, IMessageSerializer messageSerializer)
         {
             _messageSerializer = messageSerializer;
             _successChannel = successChannel;
@@ -25,12 +29,14 @@
         {
             Task.Run(() =>
             {
-                _successChannel.Listen(ExchangeConfiguration.SuccessExchange, ConsumerOnSuccess, connectionToken);
+                var successConsumerTag =_successChannel.Subscribe(ExchangeConfiguration.SuccessExchange, ConsumerOnSuccess, connectionToken);
+                SuccessConsumers.TryAdd(connectionToken, successConsumerTag);
             });
 
             Task.Run(() =>
             {
-                _errorChannel.Listen(ExchangeConfiguration.ErrorExchange, ConsumerOnError, connectionToken);
+                var errorConsumerTag = _errorChannel.Subscribe(ExchangeConfiguration.ErrorExchange, ConsumerOnError, connectionToken);
+                ErrorConsumers.TryAdd(connectionToken, errorConsumerTag);
             });
         }
 
@@ -59,6 +65,20 @@
             var connectionId = (string) message.OriginalCommand.Metadata.ConnectionId;
 
             Clients.Client(connectionId).showErrorMessage(message.ErrorMessage);
+        }
+
+        public override Task OnDisconnected(bool stopCalled)
+        {
+            var connectionToken = Context.QueryString["ConnectionToken"];
+            string successConsumerTag;
+            SuccessConsumers.TryRemove(connectionToken, out successConsumerTag);
+            string errorConsumerTag;
+            ErrorConsumers.TryRemove(connectionToken, out errorConsumerTag);
+
+            _successChannel.Unsubscribe(successConsumerTag);
+            _errorChannel.Unsubscribe(errorConsumerTag);
+
+            return base.OnDisconnected(stopCalled);
         }
     }
 }

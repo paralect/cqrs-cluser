@@ -50,7 +50,9 @@
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 
                 // TODO consider creating channels per thread
-                .AddTransient<IChannel, Channel>()
+                .AddSingleton<IChannel, Channel>()
+                .AddSingleton<ISuccessChannel, Channel>()
+                .AddSingleton<IErrorChannel, Channel>()
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
