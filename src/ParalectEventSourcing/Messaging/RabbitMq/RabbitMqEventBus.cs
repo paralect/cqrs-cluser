@@ -5,9 +5,9 @@
 
     public class RabbitMqEventBus : IEventBus
     {
-        private readonly IChannel _channel;
+        private readonly IReadModelChannel _channel;
 
-        public RabbitMqEventBus(IChannel channel)
+        public RabbitMqEventBus(IReadModelChannel channel)
         {
             _channel = channel;
         }

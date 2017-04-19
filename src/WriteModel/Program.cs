@@ -37,9 +37,9 @@
 
             _serviceProvider = new ServiceCollection()
 
-                // TODO consider creating channels per thread
-                .AddSingleton<IChannel, Channel>()
                 .AddSingleton<IWriteModelChannel, Channel>()
+                .AddSingleton<IReadModelChannel, Channel>()
+                .AddSingleton<IErrorChannel, Channel>()
                 .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
@@ -96,7 +96,7 @@
             }
             catch (DomainValidationException e)
             {
-                var channel = _serviceProvider.GetService<IChannel>();
+                var channel = _serviceProvider.GetService<IErrorChannel>();
                 channel.Send(
                     ExchangeConfiguration.ErrorExchange, 
                     new

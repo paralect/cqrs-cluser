@@ -15,8 +15,8 @@
         private static readonly ConcurrentDictionary<string, string> ErrorConsumers = new ConcurrentDictionary<string, string>();
 
         private readonly IMessageSerializer _messageSerializer;
-        private readonly IChannel _successChannel;
-        private readonly IChannel _errorChannel;
+        private readonly ISuccessChannel _successChannel;
+        private readonly IErrorChannel _errorChannel;
 
         public ShipmentHub(ISuccessChannel successChannel, IErrorChannel errorChannel, IMessageSerializer messageSerializer)
         {

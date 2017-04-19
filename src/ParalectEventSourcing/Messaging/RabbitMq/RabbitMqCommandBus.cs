@@ -5,9 +5,9 @@
 
     public class RabbitMqCommandBus : CommandBus
     {
-        private readonly IChannel _channel;
+        private readonly IWriteModelChannel _channel;
 
-        public RabbitMqCommandBus(IDateTimeProvider dateTimeProvider, IChannel channel)
+        public RabbitMqCommandBus(IDateTimeProvider dateTimeProvider, IWriteModelChannel channel)
             : base(dateTimeProvider)
         {
             _channel = channel;

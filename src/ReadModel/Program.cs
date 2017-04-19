@@ -2,12 +2,10 @@
 {
     using System;
     using System.Reflection;
-    using System.Text;
     using System.Threading.Tasks;
     using EventHandlers;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
-    using Newtonsoft.Json;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Persistence.MongoDb;
@@ -39,9 +37,8 @@
 
             _serviceProvider = new ServiceCollection()
 
-                // TODO consider creating channels per thread
-                .AddSingleton<IChannel, Channel>()
                 .AddSingleton<IReadModelChannel, Channel>()
+                .AddSingleton<ISuccessChannel, Channel>()
                 .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()

@@ -12,9 +12,9 @@
         private const string ShipmentCollection = "shipments";
 
         private readonly IDatabase _database;
-        private readonly IChannel _channel;
+        private readonly ISuccessChannel _channel;
 
-        public ShipmentEventsHandler(IDatabase database, IChannel channel)
+        public ShipmentEventsHandler(IDatabase database, ISuccessChannel channel)
         {
             _database = database;
             _channel = channel;

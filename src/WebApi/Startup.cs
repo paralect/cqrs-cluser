@@ -49,8 +49,7 @@
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 
-                // TODO consider creating channels per thread
-                .AddSingleton<IChannel, Channel>()
+                .AddSingleton<IWriteModelChannel, Channel>()
                 .AddSingleton<ISuccessChannel, Channel>()
                 .AddSingleton<IErrorChannel, Channel>()
                 .AddSingleton<IChannelFactory, ChannelFactory>()
