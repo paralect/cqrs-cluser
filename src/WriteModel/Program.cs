@@ -78,7 +78,7 @@
             Task.Run(() =>
             {
                 var channel = _serviceProvider.GetService<IWriteModelChannel>();
-                channel.Subscribe(ExchangeConfiguration.WriteModelExchange, ConsumerOnReceived);
+                channel.SubscribeToQueue(RabbitMqRoutingConfiguration.WriteModelQueue, ConsumerOnReceived);
             });
         }
 
@@ -92,19 +92,19 @@
                 var commandDispatcher = _serviceProvider.GetService<IDispatcher>();
                 commandDispatcher.Dispatch(command);
 
-                Console.WriteLine("Command handled successfully.");
+                Console.WriteLine($"Command {command.Metadata.CommandId} handled successfully.");
             }
             catch (DomainValidationException e)
             {
                 var channel = _serviceProvider.GetService<IErrorChannel>();
-                channel.Send(
-                    ExchangeConfiguration.ErrorExchange, 
+                channel.SendToExchange(
+                    RabbitMqRoutingConfiguration.ErrorExchange,
+                    (string) command.Metadata.ConnectionToken,
                     new
                     {
                         OriginalCommand = command,
                         ErrorMessage = e.Message
-                    },
-                    (string)command.Metadata.ConnectionToken);
+                    });
             }
         }
     }

@@ -5,9 +5,13 @@
 
     public interface IChannel
     {
-        void Send(string exchange, object message, string routingKey = "");
+        void SendToExchange(string exchange, string routingKey, object message);
 
-        string Subscribe(string exchange, EventHandler<BasicDeliverEventArgs> callback, string routingKey = "");
+        void SendToQueue(string queue, object message);
+
+        string SubscribeToExchange(string exchange, string routingKey, EventHandler<BasicDeliverEventArgs> callback);
+
+        void SubscribeToQueue(string queue, EventHandler<BasicDeliverEventArgs> callback);
 
         void Unsubscribe(string consumerTag);
     }

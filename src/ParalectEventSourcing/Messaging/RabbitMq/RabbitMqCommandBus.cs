@@ -17,7 +17,7 @@
         {
             foreach (var command in commands)
             {
-                _channel.Send(ExchangeConfiguration.WriteModelExchange, command);
+                _channel.SendToQueue(RabbitMqRoutingConfiguration.WriteModelQueue, command);
             }
         }
     }

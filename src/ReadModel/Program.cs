@@ -68,7 +68,7 @@
             Task.Run(() =>
             {
                 var channel = _serviceProvider.GetService<IReadModelChannel>();
-                channel.Subscribe(ExchangeConfiguration.ReadModelExchange, ConsumerOnReceived);
+                channel.SubscribeToQueue(RabbitMqRoutingConfiguration.ReadModelQueue, ConsumerOnReceived);
             });
         }
 
@@ -80,7 +80,7 @@
             var eventDispatcher = _serviceProvider.GetService<IDispatcher>();
             eventDispatcher.Dispatch(@event);
 
-            Console.WriteLine("Event handled successfully.");
+            Console.WriteLine($"Event {@event.Metadata.EventId} handled successfully.");
         }
     }
 }

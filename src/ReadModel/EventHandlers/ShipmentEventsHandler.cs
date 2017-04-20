@@ -36,7 +36,7 @@
 
             collection.InsertOne(shipment);
 
-            _channel.Send(ExchangeConfiguration.SuccessExchange, e, e.Metadata.ConnectionToken);
+            _channel.SendToExchange(RabbitMqRoutingConfiguration.SuccessExchange, e.Metadata.ConnectionToken, e);
         }
 
         public void Handle(ShipmentAddressChanged e)
@@ -49,7 +49,7 @@
 
             collection.UpdateOne(filter, update);
 
-            _channel.Send(ExchangeConfiguration.SuccessExchange, e, e.Metadata.ConnectionToken);
+            _channel.SendToExchange(RabbitMqRoutingConfiguration.SuccessExchange, e.Metadata.ConnectionToken, e);
         }
     }
 }

@@ -36,7 +36,7 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -45,6 +45,7 @@ spec:
       containers:
         - name: frontend
           image: yarmolovichalex1/frontend
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80
@@ -77,9 +78,42 @@ spec:
       containers:
         - name: web-api
           image: yarmolovichalex1/web-api
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 5001
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: write-model
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: write-model
+    spec:
+      containers:
+        - name: write-model
+          image: yarmolovichalex1/write-model
+          imagePullPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: read-model
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: read-model
+    spec:
+      containers:
+        - name: read-model
+          image: yarmolovichalex1/read-model
+          imagePullPolicy: Always
 ---
 apiVersion: v1
 kind: Service
@@ -128,21 +162,6 @@ spec:
             - name: tcp
               containerPort: 5672
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: write-model
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: write-model
-    spec:
-      containers:
-        - name: write-model
-          image: yarmolovichalex1/write-model
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -189,21 +208,6 @@ spec:
               containerPort: 2113
             - name: tcp
               containerPort: 1113
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: read-model
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: read-model
-    spec:
-      containers:
-        - name: read-model
-          image: yarmolovichalex1/read-model
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment

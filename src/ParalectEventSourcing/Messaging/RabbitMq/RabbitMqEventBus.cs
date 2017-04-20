@@ -14,7 +14,7 @@
 
         public void Publish(IEvent eventMessage)
         {
-            _channel.Send(ExchangeConfiguration.ReadModelExchange, eventMessage);
+            _channel.SendToQueue(RabbitMqRoutingConfiguration.ReadModelQueue, eventMessage);
         }
 
         public void Publish(IEnumerable<IEvent> eventMessages)

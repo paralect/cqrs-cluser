@@ -29,13 +29,13 @@
         {
             Task.Run(() =>
             {
-                var successConsumerTag =_successChannel.Subscribe(ExchangeConfiguration.SuccessExchange, ConsumerOnSuccess, connectionToken);
+                var successConsumerTag =_successChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.SuccessExchange, connectionToken, ConsumerOnSuccess);
                 SuccessConsumers.TryAdd(connectionToken, successConsumerTag);
             });
 
             Task.Run(() =>
             {
-                var errorConsumerTag = _errorChannel.Subscribe(ExchangeConfiguration.ErrorExchange, ConsumerOnError, connectionToken);
+                var errorConsumerTag = _errorChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.ErrorExchange, connectionToken, ConsumerOnError);
                 ErrorConsumers.TryAdd(connectionToken, errorConsumerTag);
             });
         }
