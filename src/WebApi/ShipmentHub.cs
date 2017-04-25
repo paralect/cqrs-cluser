@@ -25,18 +25,18 @@
             _errorChannel = errorChannel;
         }
 
-        public void Listen(string connectionToken)
+        public void Listen(string connectionId)
         {
             Task.Run(() =>
             {
-                var successConsumerTag =_successChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.SuccessExchange, connectionToken, ConsumerOnSuccess);
-                SuccessConsumers.TryAdd(connectionToken, successConsumerTag);
+                var successConsumerTag =_successChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.SuccessExchange, connectionId, ConsumerOnSuccess);
+                SuccessConsumers.TryAdd(connectionId, successConsumerTag);
             });
 
             Task.Run(() =>
             {
-                var errorConsumerTag = _errorChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.ErrorExchange, connectionToken, ConsumerOnError);
-                ErrorConsumers.TryAdd(connectionToken, errorConsumerTag);
+                var errorConsumerTag = _errorChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.ErrorExchange, connectionId, ConsumerOnError);
+                ErrorConsumers.TryAdd(connectionId, errorConsumerTag);
             });
         }
 
@@ -69,11 +69,11 @@
 
         public override Task OnDisconnected(bool stopCalled)
         {
-            var connectionToken = Context.QueryString["ConnectionToken"];
+            var connectionId = Context.ConnectionId;
             string successConsumerTag;
-            SuccessConsumers.TryRemove(connectionToken, out successConsumerTag);
+            SuccessConsumers.TryRemove(connectionId, out successConsumerTag);
             string errorConsumerTag;
-            ErrorConsumers.TryRemove(connectionToken, out errorConsumerTag);
+            ErrorConsumers.TryRemove(connectionId, out errorConsumerTag);
 
             _successChannel.Unsubscribe(successConsumerTag);
             _errorChannel.Unsubscribe(errorConsumerTag);

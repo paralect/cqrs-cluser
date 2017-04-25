@@ -26,8 +26,7 @@ class ShipmentBox extends React.Component {
                  method: 'POST',
                  headers: {
                      'Content-Type': 'application/json',
-                     'Connection-Id': this.props.connectionId,
-                     'Connection-Token': this.props.connectionToken
+                     'Connection-Id': this.props.connectionId
                  },
                  body: JSON.stringify(shipment.address)
              })
@@ -42,7 +41,7 @@ class ShipmentBox extends React.Component {
             <h1>Shipments</h1>
             <ShipmentList updateUrl={this.props.updateUrl}
                           data={this.state.data}
-                          connectionId={this.props.connectionId}/>
+                          connectionId={this.props.connectionId} />
             <ShipmentForm onShipmentSubmit={this.handleShipmentCreation} errorMessage={this.state.error.message} />
           </div>
         );

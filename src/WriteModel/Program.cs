@@ -99,7 +99,7 @@
                 var channel = _serviceProvider.GetService<IErrorChannel>();
                 channel.SendToExchange(
                     RabbitMqRoutingConfiguration.ErrorExchange,
-                    (string) command.Metadata.ConnectionToken,
+                    (string) command.Metadata.ConnectionId,
                     new
                     {
                         OriginalCommand = command,

@@ -158,7 +158,6 @@ namespace ParalectEventSourcing.Repository
                 {
                     e.Metadata.CommandId = metadata.CommandId;
                     e.Metadata.ConnectionId = metadata.ConnectionId;
-                    e.Metadata.ConnectionToken = metadata.ConnectionToken;
                     e.Metadata.UserId = metadata.UserId;
                 }
 

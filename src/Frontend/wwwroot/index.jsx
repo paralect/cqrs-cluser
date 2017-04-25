@@ -43,27 +43,21 @@ $.getScript(signalRHubsUrl, function () {
    });
 
    connection.logging = true;
-   
 
    // https://github.com/SignalR/SignalR/issues/3776
    /* let getUrl = $.signalR.transports._logic.getUrl;
    $.signalR.transports._logic.getUrl = function(connection, transport, reconnecting, poll, ajaxPost) {
        connection.baseUrl = webApiHost;
        var url = getUrl(connection, transport, reconnecting, poll, ajaxPost);
-       if (transport === "webSockets") {
-           return "/web-api" + url;
-       }
-       return url;
+       return transport === "webSockets" ? "/web-api" + url : url;
    }; */
     
    connection.start()
        .done(function() {
             let connectionId = connection.id;
-            let connectionToken = connection.token;
             console.log('Now connected, connection ID=' + connectionId);
-            console.log('connection token=' + connectionToken);
 
-            shipmentHubProxy.invoke("listen", connectionToken).done(function() {
+            shipmentHubProxy.invoke("listen", connectionId).done(function() {
                 fetch(listUrl)
                 .then(response => response.json())
                 .then(responseJson => {
@@ -72,8 +66,7 @@ $.getScript(signalRHubsUrl, function () {
                        <ShipmentBox store={store}
                                     createUrl={createUrl}
                                     updateUrl={updateUrl}
-                                    connectionId={connectionId}
-                                    connectionToken={connectionToken} />,
+                                    connectionId={connectionId} />,
                        document.getElementById('shipments')
                    );
                })
