@@ -1,5 +1,6 @@
 ﻿namespace WebApi
 {
+    using System;
     using System.IO;
     using DataProtection;
     using DataService;
@@ -45,21 +46,29 @@
                 Server = new MongoServerAddress(mongoDbConnectionSettings.HostName, mongoDbConnectionSettings.Port)
             });
 
+            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings());
+            var messageSerializer = new DefaultMessageSerializer();
+            var writeModelChannel = new Channel(channelFactory, messageSerializer);
+            var successChannel = new Channel(channelFactory, messageSerializer);
+            var errorChannel = new Channel(channelFactory, messageSerializer);
+
             services
+
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+
+                .AddSingleton<IWriteModelChannel>(writeModelChannel)
+                .AddSingleton<ISuccessChannel>(successChannel)
+                .AddSingleton<IErrorChannel>(errorChannel)
+
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 
-                .AddSingleton<IWriteModelChannel, Channel>()
-                .AddSingleton<ISuccessChannel, Channel>()
-                .AddSingleton<IErrorChannel, Channel>()
-                .AddSingleton<IChannelFactory, ChannelFactory>()
-                .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddTransient<IShipmentDataService, ShipmentDataService>()
                 .AddSingleton<IMongoClient>(mongoClient)
                 .AddTransient<IDatabase, Database>();
-                
+
             services.AddCors();
 
             services.AddMvc();

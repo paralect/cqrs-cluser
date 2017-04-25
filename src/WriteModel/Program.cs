@@ -35,14 +35,19 @@
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
 
+            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings());
+            var messageSerializer = new DefaultMessageSerializer();
+            var writeModelChannel = new Channel(channelFactory, messageSerializer);
+            var readModelChannel = new Channel(channelFactory, messageSerializer);
+            var errorChannel = new Channel(channelFactory, messageSerializer);
+
             _serviceProvider = new ServiceCollection()
 
-                .AddSingleton<IWriteModelChannel, Channel>()
-                .AddSingleton<IReadModelChannel, Channel>()
-                .AddSingleton<IErrorChannel, Channel>()
-                .AddSingleton<RabbitMqConnectionSettings>(new RabbitMqConnectionSettings())
-                .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+
+                .AddSingleton<IWriteModelChannel>(writeModelChannel)
+                .AddSingleton<IReadModelChannel>(readModelChannel)
+                .AddSingleton<IErrorChannel>(errorChannel)
 
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 
@@ -56,7 +61,8 @@
                 .AddTransient<IAggregateRepository<Device>, AggregateRepository<Device>>()
                 .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
 
-                .AddTransient<IEventSource, EventSource>()
+                // TODO change to EventSource and fix ObjectDisposedException
+                .AddTransient<IEventSource, InMemoryEventSource>()
                 .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
                 .AddSingleton<EventStoreConnectionSettings>(new EventStoreConnectionSettings())
 
