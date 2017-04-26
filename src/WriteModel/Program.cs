@@ -35,19 +35,18 @@
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
 
-            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings());
-            var messageSerializer = new DefaultMessageSerializer();
-            var writeModelChannel = new Channel(channelFactory, messageSerializer);
-            var readModelChannel = new Channel(channelFactory, messageSerializer);
-            var errorChannel = new Channel(channelFactory, messageSerializer);
+            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
+            var writeModelChannel = channelFactory.CreateChannel();
+            var readModelChannel = channelFactory.CreateChannel();
+            var errorChannel = channelFactory.CreateChannel();
 
             _serviceProvider = new ServiceCollection()
-
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddSingleton<IWriteModelChannel>(writeModelChannel)
                 .AddSingleton<IReadModelChannel>(readModelChannel)
                 .AddSingleton<IErrorChannel>(errorChannel)
+
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 

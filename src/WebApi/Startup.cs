@@ -1,11 +1,8 @@
 ﻿namespace WebApi
 {
-    using System;
-    using System.IO;
     using DataProtection;
     using DataService;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -46,15 +43,12 @@
                 Server = new MongoServerAddress(mongoDbConnectionSettings.HostName, mongoDbConnectionSettings.Port)
             });
 
-            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings());
-            var messageSerializer = new DefaultMessageSerializer();
-            var writeModelChannel = new Channel(channelFactory, messageSerializer);
-            var successChannel = new Channel(channelFactory, messageSerializer);
-            var errorChannel = new Channel(channelFactory, messageSerializer);
+            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
+            var writeModelChannel = channelFactory.CreateChannel();
+            var successChannel = channelFactory.CreateChannel();
+            var errorChannel = channelFactory.CreateChannel();
 
             services
-
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddSingleton<IWriteModelChannel>(writeModelChannel)
                 .AddSingleton<ISuccessChannel>(successChannel)

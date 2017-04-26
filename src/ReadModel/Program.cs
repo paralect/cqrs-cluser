@@ -35,17 +35,16 @@
                 Server = new MongoServerAddress(mongoDbConnectionSettings.HostName, mongoDbConnectionSettings.Port)
             });
 
-            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings());
-            var messageSerializer = new DefaultMessageSerializer();
-            var readModelChannel = new Channel(channelFactory, messageSerializer);
-            var successChannel = new Channel(channelFactory, messageSerializer);
+            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
+            var readModelChannel = channelFactory.CreateChannel();
+            var successChannel = channelFactory.CreateChannel();
 
             _serviceProvider = new ServiceCollection()
 
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
-
                 .AddSingleton<IReadModelChannel>(readModelChannel)
                 .AddSingleton<ISuccessChannel>(successChannel)
+
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddTransient<IDispatcher, EventDispatcher>()
 
