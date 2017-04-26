@@ -60,8 +60,7 @@
                 .AddTransient<IAggregateRepository<Device>, AggregateRepository<Device>>()
                 .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
 
-                // TODO change to EventSource and fix ObjectDisposedException
-                .AddTransient<IEventSource, InMemoryEventSource>()
+                .AddTransient<IEventSource, EventSource>()
                 .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
                 .AddSingleton<EventStoreConnectionSettings>(new EventStoreConnectionSettings())
 

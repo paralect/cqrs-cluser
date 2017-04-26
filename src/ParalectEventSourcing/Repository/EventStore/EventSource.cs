@@ -36,7 +36,8 @@ namespace ParalectEventSourcing.Repository.EventStore
             _serializer = serializer;
 
             IPEndPoint point = IpEndPointUtility.CreateIpEndPoint(connectionSettings.Host + ":" + connectionSettings.Port).Result;
-            _connection = EventStoreConnection.Create(point);
+            _connection = EventStoreConnection.Create(
+                ConnectionSettings.Create().KeepReconnecting(), point);
             _connection.ConnectAsync().Wait();
             _credentials = new UserCredentials(connectionSettings.Login, connectionSettings.Pass);
         }
