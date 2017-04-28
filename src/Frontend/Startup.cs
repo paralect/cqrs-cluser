@@ -39,16 +39,30 @@
             {
                 try
                 {
+#if DEBUG
+                    var webApiUrl = "http://localhost:5001";
+#else
                     var client = new HttpClient();
 
                     var webApiConfig =
                         await client.GetStringAsync(
                             "http://localhost:8001/api/v1/namespaces/default/services/web-api");
 
-                    var @object = (dynamic) JsonConvert.DeserializeObject(webApiConfig);
-                    var externalIp = (string) @object.status.loadBalancer.ingress[0].ip;
+                    var @object = (dynamic)JsonConvert.DeserializeObject(webApiConfig);
 
-                    await context.Response.WriteAsync("WebApi IP: " + externalIp);
+                    string webApiUrl = null;
+                    try
+                    {
+                        var externalIp = (string) @object.status.loadBalancer.ingress[0].ip;
+                        webApiUrl = $"http://{externalIp}:5001";
+                    }
+                    catch
+                    {
+                        // probably, external IP is not created yet
+                    }
+#endif
+                    var response = new { webApiUrl };
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
                 }
                 catch (Exception e)
                 {
