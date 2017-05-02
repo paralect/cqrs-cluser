@@ -20,7 +20,7 @@
             UserName = "guest";
             Password = "guest";
             VirtualHost = "/";
-            HostName = "rabbit";
+            HostName = "rabbitmq";
             Port = 5672;
 #endif
         }

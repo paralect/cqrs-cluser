@@ -1,6 +1,20 @@
 kind: Service
 apiVersion: v1
 metadata:
+  name: eventstore-management
+spec:
+  type: LoadBalancer
+  selector:
+    name: eventstore-node
+  ports:
+  - name: 'external-http'
+    protocol: TCP
+    port: 2114
+    targetPort: 2114
+    nodePort: 30061
+kind: Service
+apiVersion: v1
+metadata:
   name: eventstore
 spec:
   clusterIP: None
