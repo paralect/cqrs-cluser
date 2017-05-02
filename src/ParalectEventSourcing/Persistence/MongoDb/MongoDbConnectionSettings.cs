@@ -2,17 +2,14 @@
 {
     public class MongoDbConnectionSettings
     {
-        public string HostName { get; set; }
-        public int Port { get; set; }
+        public string ConnectionString { get; set; }
 
         public MongoDbConnectionSettings()
         {
 #if DEBUG
-            HostName = "localhost";
-            Port = 27017;
+            ConnectionString = "mongodb://localhost:27017";
 #else
-            HostName = "mongo";
-            Port = 27017;
+            ConnectionString = "mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017";
 #endif
         }
     }

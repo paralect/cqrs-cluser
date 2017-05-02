@@ -37,11 +37,7 @@
             });
             services.AddMemoryCache();
 
-            var mongoDbConnectionSettings = new MongoDbConnectionSettings();
-            var mongoClient = new MongoClient(new MongoClientSettings
-            {
-                Server = new MongoServerAddress(mongoDbConnectionSettings.HostName, mongoDbConnectionSettings.Port)
-            });
+            var mongoClient = new MongoClient(new MongoDbConnectionSettings().ConnectionString);
 
             var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
             var writeModelChannel = channelFactory.CreateChannel();
