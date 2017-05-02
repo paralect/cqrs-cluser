@@ -1,0 +1,92 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: eventstore
+spec:
+  clusterIP: None
+  selector:
+    name: eventstore-node
+  ports:
+  - name: 'internal-http'
+    protocol: TCP
+    port: 2113
+    targetPort: 2113
+  - name: 'external-http'
+    protocol: TCP
+    port: 2114
+    targetPort: 2114
+  - name: 'external-tcp'
+    protocol: TCP
+    port: 1113
+    targetPort: 1113
+  - name: 'internal-tcp'
+    protocol: TCP
+    port: 1112
+    targetPort: 1112
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: eventstore
+spec:
+  serviceName: eventstore
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: eventstore-node
+        app: eventstore
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: eventstore-node
+        image: eventstore/eventstore
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 2114
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+        ports:
+        - containerPort: 2113
+        - containerPort: 2114
+        - containerPort: 1113
+        - containerPort: 1112
+        env:
+        - name: EVENTSTORE_CLUSTER_SIZE
+          value: "3"
+        - name: EVENTSTORE_CLUSTER_GOSSIP_PORT
+          value: "2113"
+        - name: EVENTSTORE_CLUSTER_DNS
+          value: "eventstore.default.svc.cluster.local"
+        - name: EVENTSTORE_INT_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: EVENTSTORE_EXT_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: EVENTSTORE_INT_HTTP_PORT
+          value: "2113"
+        - name: EVENTSTORE_EXT_HTTP_PORT
+          value: "2114"
+        - name: EVENTSTORE_EXT_HTTP_PREFIXES
+          value: "http://*:2114/"
+        - name: EVENTSTORE_INT_HTTP_PREFIXES
+          value: "http://*:2113/"
+        - name: EVENTSTORE_GOSSIP_ALLOWED_DIFFERENCE_MS
+          value: "600000"
+        volumeMounts:
+        - name: es-persistent-storage
+          mountPath: /data/es
+  volumeClaimTemplates:
+  - metadata:
+      name: es-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "fast"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
