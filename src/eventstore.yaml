@@ -12,6 +12,7 @@ spec:
     port: 2114
     targetPort: 2114
     nodePort: 30061
+---
 kind: Service
 apiVersion: v1
 metadata:
