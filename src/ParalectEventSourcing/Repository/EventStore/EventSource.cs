@@ -33,12 +33,23 @@ namespace ParalectEventSourcing.Repository.EventStore
         /// <param name="serializer">events serializator</param>
         public EventSource(EventStoreConnectionSettings connectionSettings, IEventStoreSerializer serializer)
         {
+            var connectionSettingsBuilder = ConnectionSettings.Create().KeepReconnecting();
+
+#if DEBUG
+            var point = IpEndPointUtility.CreateIpEndPoint(connectionSettings.Host + ":" + connectionSettings.Port).Result;
+            _connection = EventStoreConnection.Create(connectionSettingsBuilder, point);
+#else
+            _connection = EventStoreConnection.Create(
+               connectionSettingsBuilder,
+               ClusterSettings.Create().DiscoverClusterViaDns()
+                   .SetClusterDns(connectionSettings.ClusterDns)
+                   .SetClusterGossipPort(connectionSettings.GossipPort));
+#endif
+
+            _connection.ConnectAsync().Wait();
+
             _serializer = serializer;
 
-            IPEndPoint point = IpEndPointUtility.CreateIpEndPoint(connectionSettings.Host + ":" + connectionSettings.Port).Result;
-            _connection = EventStoreConnection.Create(
-                ConnectionSettings.Create().KeepReconnecting(), point);
-            _connection.ConnectAsync().Wait();
             _credentials = new UserCredentials(connectionSettings.Login, connectionSettings.Pass);
         }
 

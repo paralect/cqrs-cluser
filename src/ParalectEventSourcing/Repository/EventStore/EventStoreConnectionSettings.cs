@@ -29,6 +29,10 @@ namespace ParalectEventSourcing.Repository.EventStore
         /// </summary>
         public string Pass { get; set; }
 
+        public string ClusterDns { get; set; }
+
+        public int GossipPort { get; set; }
+
         public EventStoreConnectionSettings()
         {
 #if DEBUG
@@ -37,8 +41,8 @@ namespace ParalectEventSourcing.Repository.EventStore
             Login = "admin";
             Pass = "changeit";
 #else
-            Host = "eventstore";
-            Port = 1113;
+            ClusterDns = "eventstore.default.svc.cluster.local";
+            GossipPort = 2113;
             Login = "admin";
             Pass = "changeit";
 #endif
