@@ -15,26 +15,39 @@ spec:
       - name: {{APP_NAME}}
         image: {{IMAGE_NAME}}
         ports:
-          - name: queue-port
-            containerPort: 5672
-          - name: management-port
-            containerPort: 15672
-          - name: cluster-port
-            containerPort: 4369
-          - name: dist-port
-            containerPort: 25672
+        - name: queue-port
+          containerPort: 5672
+        - name: management-port
+          containerPort: 15672
+        - name: cluster-port
+          containerPort: 4369
+        - name: dist-port
+          containerPort: 25672
         env: 
-          - name: RABBITMQ_DEFAULT_USER
-            value: {{RABBITMQ_DEFAULT_USER}}
-          - name: RABBITMQ_DEFAULT_PASS
-            value: {{RABBITMQ_DEFAULT_PASS}}
-          - name: RABBITMQ_ERLANG_COOKIE
-            value: {{RABBITMQ_ERLANG_COOKIE}}
-          - name: RABBITMQ_USE_LONGNAME
-            value: "true"
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: RABBITMQ_NODENAME
-            value: rabbit@$(NODE_NAME).{{SVC_NAME}}
+        - name: RABBITMQ_DEFAULT_USER
+          value: {{RABBITMQ_DEFAULT_USER}}
+        - name: RABBITMQ_DEFAULT_PASS
+          value: {{RABBITMQ_DEFAULT_PASS}}
+        - name: RABBITMQ_ERLANG_COOKIE
+          value: {{RABBITMQ_ERLANG_COOKIE}}
+        - name: RABBITMQ_USE_LONGNAME
+          value: "true"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: RABBITMQ_NODENAME
+          value: rabbit@$(NODE_NAME).{{SVC_NAME}}
+        volumeMounts:
+        - name: rabbitmq-persistent-storage
+          mountPath: /data/rabbitmq
+  volumeClaimTemplates:
+  - metadata:
+      name: rabbitmq-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "fast"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
