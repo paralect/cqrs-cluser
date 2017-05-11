@@ -52,12 +52,10 @@
 
                 .AddSingleton<IDispatcher, CommandDispatcher>()
 
-                .AddSingleton<DeviceCommandsHandler, DeviceCommandsHandler>()
                 .AddSingleton<ShipmentCommandsHandler, ShipmentCommandsHandler>()
             
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 
-                .AddTransient<IAggregateRepository<Device>, AggregateRepository<Device>>()
                 .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
 
                 .AddTransient<IEventSource, EventSource>()
@@ -74,7 +72,7 @@
 
             dispatcherConfiguration
                 .DispatcherCommandHandlerRegistry
-                .Register(Assembly.GetEntryAssembly(), new[] { typeof(DeviceCommandsHandler).Namespace });
+                .Register(Assembly.GetEntryAssembly(), new[] { typeof(ShipmentCommandsHandler).Namespace });
         }
 
         private static void ListenToMessages()

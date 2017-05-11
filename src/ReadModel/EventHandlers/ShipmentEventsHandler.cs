@@ -20,11 +20,6 @@
             _channel = channel;
         }
 
-        public void Handle(DeviceAddedToShipment e)
-        {
-            
-        }
-
         public void Handle(ShipmentCreated e)
         {
             var collection = _database.GetCollection(ShipmentCollection);

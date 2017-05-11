@@ -35,7 +35,7 @@
 
         public string SubscribeToExchange(string exchange, string routingKey, EventHandler<BasicDeliverEventArgs> callback)
         {
-            var queueName = _channel.QueueDeclare(exchange + "_" + Guid.NewGuid()).QueueName;
+            var queueName = _channel.QueueDeclare($"{exchange}_{routingKey}").QueueName;
             _channel.QueueBind(queueName, exchange, routingKey);
 
             var consumer = new EventingBasicConsumer(_channel);

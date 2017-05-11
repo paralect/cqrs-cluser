@@ -51,6 +51,14 @@ fetch("/getIp")
                             store.onError();
                         });
 
+                    // https://github.com/SignalR/SignalR/issues/3776
+                    /*let getUrl = $.signalR.transports._logic.getUrl;
+                    $.signalR.transports._logic.getUrl = function(connection, transport, reconnecting, poll, ajaxPost) {
+                        connection.baseUrl = webApiUrl;
+                        var url = getUrl(connection, transport, reconnecting, poll, ajaxPost);
+                        return transport === "webSockets" ? "/web-api" + url : url;
+                    };*/
+
                     connection.logging = true;
                     connection.start()
                         .done(function() {

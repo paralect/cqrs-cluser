@@ -44,7 +44,6 @@
 
                 .AddTransient<IDispatcher, EventDispatcher>()
 
-                .AddSingleton<DeviceEventsHandler, DeviceEventsHandler>()
                 .AddSingleton<ShipmentEventsHandler, ShipmentEventsHandler>()
 
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
@@ -59,7 +58,7 @@
 
             dispatcherConfiguration
                 .DispatcherEventHandlerRegistry
-                .Register(Assembly.GetEntryAssembly(), new[] { typeof(DeviceEventsHandler).Namespace });
+                .Register(Assembly.GetEntryAssembly(), new[] { typeof(ShipmentEventsHandler).Namespace });
         }
 
         private static void ListenToMessages()

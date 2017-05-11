@@ -1,10 +1,8 @@
 ﻿namespace WriteModel.Domain
 {
-    using System;
     using Contracts.Events;
     using ParalectEventSourcing;
     using ParalectEventSourcing.Commands;
-    using ParalectEventSourcing.Events;
 
     public class Shipment : Aggregate<ShipmentState>
     {
@@ -13,8 +11,7 @@
             Apply(new ShipmentCreated
             {
                 Id = aggregateRootId,
-                Address = address,
-                Metadata = CreateEventMetadata(commandMetadata, typeof(ShipmentCreated))
+                Address = address
             });
         }
 
@@ -23,21 +20,8 @@
             Apply(new ShipmentAddressChanged
             {
                 Id = State.Id,
-                NewAddress = newAddress,
-                Metadata = CreateEventMetadata(commandMetadata, typeof(ShipmentAddressChanged))
+                NewAddress = newAddress
             });
-        }
-
-        // TODO move somewhere
-        private EventMetadata CreateEventMetadata(ICommandMetadata commandMetadata, Type eventType)
-        {
-            return new EventMetadata
-            {
-                EventId = Guid.NewGuid().ToString(),
-                CommandId = commandMetadata.CommandId,
-                ConnectionId = commandMetadata.ConnectionId,
-                TypeName = eventType.AssemblyQualifiedName
-            };
         }
     }
 }
