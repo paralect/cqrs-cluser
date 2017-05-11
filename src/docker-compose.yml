@@ -1,6 +1,6 @@
 version: '3'
 services:
-  rabbit:
+  rabbitmq:
     container_name: rabbitmq
     image: "rabbitmq:3-management"
     ports:
@@ -31,19 +31,19 @@ services:
     ports:
      - "5001:5001"
     depends_on:
-      - rabbit
+      - rabbitmq
     restart: always
   write_model:
     container_name: write-model
     build: ./WriteModel
     depends_on:
-      - rabbit
+      - rabbitmq
       - eventstore
     restart: always
   read_model:
     container_name: read-model
     build: ./ReadModel
     depends_on:
-      - rabbit
+      - rabbitmq
       - mongo
     restart: always

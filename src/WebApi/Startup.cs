@@ -41,14 +41,12 @@
 
             var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
             var writeModelChannel = channelFactory.CreateChannel();
-            var successChannel = channelFactory.CreateChannel();
-            var errorChannel = channelFactory.CreateChannel();
 
             services
 
+                .AddSingleton<IChannelFactory>(channelFactory)
+
                 .AddSingleton<IWriteModelChannel>(writeModelChannel)
-                .AddSingleton<ISuccessChannel>(successChannel)
-                .AddSingleton<IErrorChannel>(errorChannel)
 
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()

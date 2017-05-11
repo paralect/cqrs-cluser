@@ -9,10 +9,10 @@
 
         void SendToQueue(string queue, object message);
 
-        string SubscribeToExchange(string exchange, string routingKey, EventHandler<BasicDeliverEventArgs> callback);
+        void SubscribeToExchange(string exchange, string routingKey, EventHandler<BasicDeliverEventArgs> callback);
 
         void SubscribeToQueue(string queue, EventHandler<BasicDeliverEventArgs> callback);
 
-        void Unsubscribe(string consumerTag);
+        void Close();
     }
 }

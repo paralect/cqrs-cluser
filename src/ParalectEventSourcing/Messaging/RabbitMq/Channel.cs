@@ -33,16 +33,14 @@
             _channel.BasicPublish("", queue, null, _messageSerializer.Serialize(message));
         }
 
-        public string SubscribeToExchange(string exchange, string routingKey, EventHandler<BasicDeliverEventArgs> callback)
+        public void SubscribeToExchange(string exchange, string routingKey, EventHandler<BasicDeliverEventArgs> callback)
         {
             var queueName = _channel.QueueDeclare($"{exchange}_{routingKey}").QueueName;
             _channel.QueueBind(queueName, exchange, routingKey);
 
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += callback;
-            var consumerTag = _channel.BasicConsume(queueName, true, Guid.NewGuid().ToString(), consumer);
-
-            return consumerTag;
+            _channel.BasicConsume(queueName, true, Guid.NewGuid().ToString(), consumer);
         }
 
         public void SubscribeToQueue(string queue, EventHandler<BasicDeliverEventArgs> callback)
@@ -52,9 +50,9 @@
             _channel.BasicConsume(queue, true, consumer);
         }
 
-        public void Unsubscribe(string consumerTag)
+        public void Close()
         {
-            _channel.BasicCancel(consumerTag);
+            _channel.Close();
         }
     }
 }

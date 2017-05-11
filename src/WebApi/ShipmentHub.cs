@@ -11,32 +11,32 @@
 
     public class ShipmentHub : Hub
     {
-        private static readonly ConcurrentDictionary<string, string> SuccessConsumers = new ConcurrentDictionary<string, string>();
-        private static readonly ConcurrentDictionary<string, string> ErrorConsumers = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, IChannel> SuccessSubscriptions = new ConcurrentDictionary<string, IChannel>();
+        private static readonly ConcurrentDictionary<string, IChannel> ErrorSubscriptions = new ConcurrentDictionary<string, IChannel>();
 
+        private readonly IChannelFactory _channelFactory;
         private readonly IMessageSerializer _messageSerializer;
-        private readonly ISuccessChannel _successChannel;
-        private readonly IErrorChannel _errorChannel;
 
-        public ShipmentHub(ISuccessChannel successChannel, IErrorChannel errorChannel, IMessageSerializer messageSerializer)
+        public ShipmentHub(IChannelFactory channelFactory, IMessageSerializer messageSerializer)
         {
+            _channelFactory = channelFactory;
             _messageSerializer = messageSerializer;
-            _successChannel = successChannel;
-            _errorChannel = errorChannel;
         }
 
         public void Listen(string connectionId)
         {
             Task.Run(() =>
             {
-                var successConsumerTag =_successChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.SuccessExchange, connectionId, ConsumerOnSuccess);
-                SuccessConsumers.TryAdd(connectionId, successConsumerTag);
+                var successChannel = _channelFactory.CreateChannel();
+                successChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.SuccessExchange, connectionId, ConsumerOnSuccess);
+                SuccessSubscriptions.TryAdd(connectionId, successChannel);
             });
 
             Task.Run(() =>
             {
-                var errorConsumerTag = _errorChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.ErrorExchange, connectionId, ConsumerOnError);
-                ErrorConsumers.TryAdd(connectionId, errorConsumerTag);
+                var errorChannel = _channelFactory.CreateChannel();
+                errorChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.ErrorExchange, connectionId, ConsumerOnError);
+                ErrorSubscriptions.TryAdd(connectionId, errorChannel);
             });
         }
 
@@ -70,13 +70,13 @@
         public override Task OnDisconnected(bool stopCalled)
         {
             var connectionId = Context.ConnectionId;
-            string successConsumerTag;
-            SuccessConsumers.TryRemove(connectionId, out successConsumerTag);
-            string errorConsumerTag;
-            ErrorConsumers.TryRemove(connectionId, out errorConsumerTag);
+            IChannel successChannel;
+            SuccessSubscriptions.TryRemove(connectionId, out successChannel);
+            IChannel errorChannel;
+            ErrorSubscriptions.TryRemove(connectionId, out errorChannel);
 
-            _successChannel.Unsubscribe(successConsumerTag);
-            _errorChannel.Unsubscribe(errorConsumerTag);
+            successChannel.Close();
+            errorChannel.Close();
 
             return base.OnDisconnected(stopCalled);
         }
