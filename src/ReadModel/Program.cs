@@ -29,18 +29,14 @@
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
 
-            var mongoClient = new MongoClient(new MongoDbConnectionSettings().ConnectionString);
-
-            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
-            var readModelChannel = channelFactory.CreateChannel();
-            var successChannel = channelFactory.CreateChannel();
-
             _serviceProvider = new ServiceCollection()
 
-                .AddSingleton<IReadModelChannel>(readModelChannel)
-                .AddSingleton<ISuccessChannel>(successChannel)
-
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+
+                .AddTransient<RabbitMqConnectionSettings, RabbitMqConnectionSettings>()
+                .AddSingleton<IChannelFactory, ChannelFactory>()
+                .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
+                .AddSingleton<ISuccessChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
                 .AddTransient<IDispatcher, EventDispatcher>()
 
@@ -49,7 +45,7 @@
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
 
-                .AddSingleton<IMongoClient>(mongoClient)
+                .AddSingleton<IMongoClient>(new MongoClient(new MongoDbConnectionSettings().ConnectionString))
                 .AddTransient<IDatabase, Database>()
 
                 .BuildServiceProvider();

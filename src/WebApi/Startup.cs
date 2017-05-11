@@ -37,24 +37,19 @@
             });
             services.AddMemoryCache();
 
-            var mongoClient = new MongoClient(new MongoDbConnectionSettings().ConnectionString);
-
-            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
-            var writeModelChannel = channelFactory.CreateChannel();
-
             services
 
-                .AddSingleton<IChannelFactory>(channelFactory)
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
-                .AddSingleton<IWriteModelChannel>(writeModelChannel)
+                .AddTransient<RabbitMqConnectionSettings, RabbitMqConnectionSettings>()
+                .AddSingleton<IChannelFactory, ChannelFactory>()
+                .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
                 .AddTransient<ICommandBus, RabbitMqCommandBus>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
 
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
-
                 .AddTransient<IShipmentDataService, ShipmentDataService>()
-                .AddSingleton<IMongoClient>(mongoClient)
+                .AddSingleton<IMongoClient>(new MongoClient(new MongoDbConnectionSettings().ConnectionString))
                 .AddTransient<IDatabase, Database>();
 
             services.AddCors();

@@ -35,18 +35,15 @@
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
 
-            var channelFactory = new ChannelFactory(new RabbitMqConnectionSettings(), new DefaultMessageSerializer());
-            var writeModelChannel = channelFactory.CreateChannel();
-            var readModelChannel = channelFactory.CreateChannel();
-            var errorChannel = channelFactory.CreateChannel();
-
             _serviceProvider = new ServiceCollection()
 
-                .AddSingleton<IWriteModelChannel>(writeModelChannel)
-                .AddSingleton<IReadModelChannel>(readModelChannel)
-                .AddSingleton<IErrorChannel>(errorChannel)
-
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+
+                .AddTransient<RabbitMqConnectionSettings, RabbitMqConnectionSettings>()
+                .AddSingleton<IChannelFactory, ChannelFactory>()
+                .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
+                .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
+                .AddSingleton<IErrorChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
                 .AddTransient<IEventBus, RabbitMqEventBus>()
 
@@ -60,7 +57,7 @@
 
                 .AddTransient<IEventSource, EventSource>()
                 .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
-                .AddSingleton<EventStoreConnectionSettings>(new EventStoreConnectionSettings())
+                .AddTransient<EventStoreConnectionSettings, EventStoreConnectionSettings>()
 
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
 
