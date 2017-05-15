@@ -1,4 +1,4 @@
-import { fetchShipments } from './actions';
+import { fetchShipments, SET_CONNECTION_ID } from './actions';
 
 export default hostUrl => actionDispatcher => store => {
 
@@ -34,6 +34,12 @@ export default hostUrl => actionDispatcher => store => {
         if (newStateName === 'connected') {
             wasConnected = true;
             onStateChanged('connected');
+
+            dispatch({
+                type: SET_CONNECTION_ID,
+                connectionId: connection.id
+            });
+
             dispatch({
                 type: 'connection:invoke',
                 hub: 'shipmentHub',
@@ -47,11 +53,13 @@ export default hostUrl => actionDispatcher => store => {
     connection.disconnected(function () {
         if (keepAlive) {
             if (wasConnected) {
-                onStateChanged('reconnecting')
+                onStateChanged('reconnecting');
             } else {
-                onStateChanged('connecting')
+                onStateChanged('connecting');
             }
-            connection.start();
+            connection.start().done(() => {
+                onStateChanged('connected');
+            });
         }
     });
 

@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { applyMiddleware, compose, createStore } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import { fetchShipments } from './actions';
+import { ADD_SHIPMENT_SUCCESS } from './actions';
 import shipmentApp from './reducers';
 import App from './components/App';
 import createSignalrMiddleware from './createSignalrMiddleware';
@@ -32,22 +32,14 @@ fetch("/getIp")
                         shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }));
                         shipmentHub.on("shipmentCreated",
                             function (id, address) {
-                                console.log(id, address);
+                                dispatch({ type: ADD_SHIPMENT_SUCCESS, newShipment: { id, address } });
                             });
                     });
-                    
+
                     // let store = {
                     //     data: [],
                     //     error: { message: null }
                     // };
-
-                    // shipmentHubProxy.on("shipmentCreated",
-                    //     function (id, address) {
-                    //         console.log("shipment is created");
-                    //         store.data.push({ id: id, address: address });
-                    //         store.error = { message: null };
-                    //         store.onDataUpdated();
-                    //     });
 
                     // shipmentHubProxy.on("shipmentAddressChanged",
                     //     function (id, newAddress) {
@@ -85,25 +77,6 @@ fetch("/getIp")
                         </Provider>,
                         document.getElementById('root')
                     );
-
-                    /*connection.start()
-                        .done(function () {
-                            let connectionId = connection.id;
-                            console.log('Now connected, connection ID=' + connectionId);
-
-                            shipmentHub.invoke("listen", connectionId).done(function () {
-
-                                
-
-                                store.dispatch(fetchShipments(listUrl))
-                                    .then(() => {
-                                        console.log(store.getState());
-                                    });
-
-                                
-                            });
-                        })
-                        .fail(function () { console.log('Could not Connect!'); });*/
                 });
         }
     });

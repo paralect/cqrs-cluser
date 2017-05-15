@@ -1,6 +1,6 @@
-﻿import React from 'react'
-import { connect } from 'react-redux'
-import { addShipment } from '../actions'
+﻿import React from 'react';
+import { connect } from 'react-redux';
+import { addShipment } from '../actions';
 
 let AddShipment = ({ dispatch }) => {
     let input;
