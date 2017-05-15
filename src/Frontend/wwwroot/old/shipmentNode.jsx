@@ -1,4 +1,17 @@
-﻿import React from 'react';
+﻿import React, { PropTypes } from 'react';
+
+const ShipmentNode = ({}) => (
+
+)
+
+
+    
+
+
+
+
+
+
 
 class ShipmentNode extends React.Component {
 

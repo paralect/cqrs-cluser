@@ -1,7 +1,7 @@
 ﻿"use strict";
 
 module.exports = {
-    entry: "./wwwroot/index.jsx",
+    entry: "./wwwroot/index.js",
     output: {
         filename: "./wwwroot/dist/bundle.js"
     },
