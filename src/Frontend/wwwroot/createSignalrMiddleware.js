@@ -1,11 +1,10 @@
-const connection = $.hubConnection('/signalr', {
-    useDefaultPath: false
-});
+import { fetchShipments } from './actions';
+
+const connection = $.hubConnection("http://localhost:5001/signalr", { useDefaultPath: false });
 
 export default function createSignalrMiddleware(actionDispatcher) {
     return store => {
-
-        const dispatch = store.dispatch.bind(store)
+        const dispatch = store.dispatch.bind(store);
         const stateConversion = {
             0: 'connecting',
             1: 'connected',
@@ -32,10 +31,15 @@ export default function createSignalrMiddleware(actionDispatcher) {
 
         connection.stateChanged(state => {
             const newStateName = stateConversion[state.newState];
-
             if (newStateName === 'connected') {
                 wasConnected = true;
                 onStateChanged('connected');
+                dispatch({
+                    type: 'connection:invoke',
+                    hub: 'shipmentHub',
+                    method: 'listen',
+                    args: connection.id
+                });
             }
         });
 
@@ -55,25 +59,24 @@ export default function createSignalrMiddleware(actionDispatcher) {
             const { type } = action;
             switch (type) {
                 case 'connection:start':
-                    keepAlive = true
-                    onStateChanged('connecting')
-                    connection.start({
-                        transport: [
-                            /* 'webSockets', */
-                            'longPolling'
-                        ]
-                    })
+                    keepAlive = true;
+                    onStateChanged('connecting');
+                    connection.start().done(() => {
+                        onStateChanged('connected');
+                    });
                     return;
                 case 'connection:stop':
                     keepAlive = false;
                     wasConnected = false;
-                    onStateChanged('disconnected');
+                    onStateChanged('disconnected')
                     connection.stop();
                     return;
                 case 'connection:invoke':
                     const { hub, method, args } = action;
                     const proxy = connection[hub];
-                    proxy.invoke(method, ...args);
+                    proxy.invoke(method, args).done(() => {
+                        dispatch(fetchShipments("http://localhost:5001/api/shipments"));
+                    });
                     return;
                 default:
                     return next(action);

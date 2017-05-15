@@ -2,9 +2,11 @@
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { applyMiddleware, compose, createStore } from 'redux';
+import thunkMiddleware from 'redux-thunk';
+import { fetchShipments } from './actions';
 import shipmentApp from './reducers';
 import App from './components/App';
-import createSignalrMiddleware from './signalrMiddleware';
+import createSignalrMiddleware from './createSignalrMiddleware';
 
 fetch("/getIp")
     .then(response => response.json())
@@ -24,15 +26,9 @@ fetch("/getIp")
             $.getScript(signalRHubsUrl,
                 function () {
 
-                    const connection = $.hubConnection(signalRConnectionUrl, { useDefaultPath: false });
-                    const shipmentHub = connection['shipmentHub'] = connection.createHubProxy('shipmentHub');
-
-                    const signalrMiddleware = createSignalrMiddleware((dispatch, connection) => {
-                        // shipmentHub.on('HandleTestEvents', (events) => {
-                        //     events.forEach(event => dispatch(event));
-                        // })
-                        // shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }))
-
+                    let signalrMiddleware = createSignalrMiddleware((dispatch, connection) => {
+                        const shipmentHub = connection['shipmentHub'] = connection.createHubProxy('shipmentHub');
+                        shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }));
                         shipmentHub.on("shipmentCreated",
                             function (id, address) {
                                 console.log(id, address);
@@ -75,39 +71,38 @@ fetch("/getIp")
                         return transport === "webSockets" ? "/web-api" + url : url;
                     };*/
 
-                    connection.logging = true;
-                    connection.start()
+                    let store = createStore(
+                        shipmentApp,
+                        compose(applyMiddleware(thunkMiddleware, signalrMiddleware),
+                            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()));
+
+                    store.dispatch({ type: 'connection:start' });
+
+                    render(
+                        <Provider store={store}>
+                            <App />
+                        </Provider>,
+                        document.getElementById('root')
+                    );
+
+                    /*connection.start()
                         .done(function () {
                             let connectionId = connection.id;
                             console.log('Now connected, connection ID=' + connectionId);
 
                             shipmentHub.invoke("listen", connectionId).done(function () {
 
-                                fetch(listUrl)
-                                    .then(response => response.json())
-                                    .then(responseJson => {
+                                
 
-                                        let store = createStore(
-                                            shipmentApp,
-                                            { shipments: responseJson },
-                                            compose(applyMiddleware(signalrMiddleware),
-                                            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()));
-
-                                        render(
-                                            <Provider store={store}>
-                                                <App />
-                                            </Provider>,
-                                            document.getElementById('root')
-                                        );
-
-                                    })
-                                    .catch(error => {
-                                        console.log(error);
+                                store.dispatch(fetchShipments(listUrl))
+                                    .then(() => {
+                                        console.log(store.getState());
                                     });
+
+                                
                             });
                         })
-                        .fail(function () { console.log('Could not Connect!'); });
+                        .fail(function () { console.log('Could not Connect!'); });*/
                 });
         }
     });
-
