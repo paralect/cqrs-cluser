@@ -1,9 +1,10 @@
 ﻿import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux';
 import shipmentApp from './reducers';
 import App from './components/App';
+import createSignalrMiddleware from './signalrMiddleware';
 
 fetch("/getIp")
     .then(response => response.json())
@@ -23,36 +24,48 @@ fetch("/getIp")
             $.getScript(signalRHubsUrl,
                 function () {
 
-                    let store = {
-                        data: [],
-                        error: { message: null }
-                    };
+                    const connection = $.hubConnection(signalRConnectionUrl, { useDefaultPath: false });
+                    const shipmentHub = connection['shipmentHub'] = connection.createHubProxy('shipmentHub');
 
-                    let connection = $.hubConnection(signalRConnectionUrl, { useDefaultPath: false });
-                    let shipmentHubProxy = connection.createHubProxy("shipmentHub");
+                    const signalrMiddleware = createSignalrMiddleware((dispatch, connection) => {
+                        // shipmentHub.on('HandleTestEvents', (events) => {
+                        //     events.forEach(event => dispatch(event));
+                        // })
+                        // shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }))
 
-                    shipmentHubProxy.on("shipmentCreated",
-                        function (id, address) {
-                            console.log("shipment is created");
-                            store.data.push({ id: id, address: address });
-                            store.error = { message: null };
-                            store.onDataUpdated();
-                        });
+                        shipmentHub.on("shipmentCreated",
+                            function (id, address) {
+                                console.log(id, address);
+                            });
+                    });
 
-                    shipmentHubProxy.on("shipmentAddressChanged",
-                        function (id, newAddress) {
-                            console.log("shipment is updated");
-                            store.data.find(s => s.id === id).address = newAddress;
-                            store.error = { message: null };
-                            store.onDataUpdated();
-                        });
+                    // let store = {
+                    //     data: [],
+                    //     error: { message: null }
+                    // };
 
-                    shipmentHubProxy.on("showErrorMessage",
-                        function (message) {
-                            console.log(message);
-                            store.error = { message: message };
-                            store.onError();
-                        });
+                    // shipmentHubProxy.on("shipmentCreated",
+                    //     function (id, address) {
+                    //         console.log("shipment is created");
+                    //         store.data.push({ id: id, address: address });
+                    //         store.error = { message: null };
+                    //         store.onDataUpdated();
+                    //     });
+
+                    // shipmentHubProxy.on("shipmentAddressChanged",
+                    //     function (id, newAddress) {
+                    //         console.log("shipment is updated");
+                    //         store.data.find(s => s.id === id).address = newAddress;
+                    //         store.error = { message: null };
+                    //         store.onDataUpdated();
+                    //     });
+
+                    // shipmentHubProxy.on("showErrorMessage",
+                    //     function (message) {
+                    //         console.log(message);
+                    //         store.error = { message: message };
+                    //         store.onError();
+                    //     });
 
                     // https://github.com/SignalR/SignalR/issues/3776
                     /*let getUrl = $.signalR.transports._logic.getUrl;
@@ -68,12 +81,17 @@ fetch("/getIp")
                             let connectionId = connection.id;
                             console.log('Now connected, connection ID=' + connectionId);
 
-                            shipmentHubProxy.invoke("listen", connectionId).done(function () {
+                            shipmentHub.invoke("listen", connectionId).done(function () {
+
                                 fetch(listUrl)
                                     .then(response => response.json())
                                     .then(responseJson => {
 
-                                        let store = createStore(shipmentApp, { shipments: responseJson });
+                                        let store = createStore(
+                                            shipmentApp,
+                                            { shipments: responseJson },
+                                            compose(applyMiddleware(signalrMiddleware),
+                                            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()));
 
                                         render(
                                             <Provider store={store}>
