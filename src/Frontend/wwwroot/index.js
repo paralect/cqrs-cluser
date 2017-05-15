@@ -26,7 +26,8 @@ fetch("/getIp")
             $.getScript(signalRHubsUrl,
                 function () {
 
-                    let signalrMiddleware = createSignalrMiddleware((dispatch, connection) => {
+                    let signalrMiddleware = createSignalrMiddleware(webApiUrl);
+                    signalrMiddleware = signalrMiddleware((dispatch, connection) => {
                         const shipmentHub = connection['shipmentHub'] = connection.createHubProxy('shipmentHub');
                         shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }));
                         shipmentHub.on("shipmentCreated",
@@ -34,7 +35,7 @@ fetch("/getIp")
                                 console.log(id, address);
                             });
                     });
-
+                    
                     // let store = {
                     //     data: [],
                     //     error: { message: null }

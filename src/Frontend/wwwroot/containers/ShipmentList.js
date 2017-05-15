@@ -1,13 +1,13 @@
 ﻿import { connect } from 'react-redux';
 import ShipmentList from '../components/ShipmentList';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
     return {
-        shipments: state.shipments
+        shipments: state.shipments.items
     }
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
     return {
     
     }
