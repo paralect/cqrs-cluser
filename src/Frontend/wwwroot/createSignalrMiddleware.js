@@ -1,0 +1,94 @@
+import { fetchShipments } from './actionCreators';
+import * as actions from './actions';
+
+export default actionDispatcher => store => {
+
+    const dispatch = store.dispatch.bind(store);
+    const stateConversion = {
+        0: 'connecting',
+        1: 'connected',
+        2: 'reconnecting',
+        4: 'disconnected'
+    };
+
+    let keepAlive = false;
+    let wasConnected = false;
+    let currentState = null;
+
+    const hostUrl = store.getState().connection.hostUrl;
+    const connection = $.hubConnection(hostUrl);
+
+    actionDispatcher(dispatch, connection);
+
+    function onStateChanged(state) {
+        if (currentState === state) {
+            return;
+        }
+        currentState = state;
+        dispatch({
+            type: 'connection:statechanged',
+            state: state
+        });
+    }
+
+    connection.stateChanged(state => {
+        const newStateName = stateConversion[state.newState];
+        if (newStateName === 'connected') {
+            wasConnected = true;
+            onStateChanged('connected');
+
+            dispatch({
+                type: actions.SET_CONNECTION_ID,
+                connectionId: connection.id
+            });
+
+            dispatch({
+                type: 'connection:invoke',
+                hub: 'shipmentHub',
+                method: 'listen',
+                args: connection.id
+            });
+        }
+    });
+
+    // When the connection drops, try to reconnect.
+    connection.disconnected(function () {
+        if (keepAlive) {
+            if (wasConnected) {
+                onStateChanged('reconnecting');
+            } else {
+                onStateChanged('connecting');
+            }
+            connection.start().done(() => {
+                onStateChanged('connected');
+            });
+        }
+    });
+
+    return next => action => {
+        switch (action.type) {
+            case 'connection:start':
+                keepAlive = true;
+                onStateChanged('connecting');
+                connection.start().done(() => {
+                    onStateChanged('connected');
+                });
+                return;
+            case 'connection:stop':
+                keepAlive = false;
+                wasConnected = false;
+                onStateChanged('disconnected')
+                connection.stop();
+                return;
+            case 'connection:invoke':
+                const { hub, method, args } = action;
+                const proxy = connection[hub];
+                proxy.invoke(method, args).done(() => {
+                    dispatch(fetchShipments(`${hostUrl}/api/shipments`));
+                });
+                return;
+            default:
+                return next(action);
+        }
+    };
+};
