@@ -6,7 +6,7 @@ const Shipment = ({ id, address, editMode, onEdit }) => (
     <tr>
         <td>{id}</td>
         <td>{editMode ? (
-            <EditShipmentForm address={address} form={`EditShipmentForm_${id}`}/>
+            <EditShipmentForm id={id} address={address} form={`EditShipmentForm_${id}`}/>
         ) : address }</td>
         <td><button className="btn btn-link" onClick={() => onEdit(id)}>Edit</button></td>
     </tr>

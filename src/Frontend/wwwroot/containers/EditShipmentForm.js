@@ -6,7 +6,8 @@ import EditShipmentForm from '../components/EditShipmentForm';
 
 const mapStateToProps = (state, ownProps) => ({
     initialValues: {
-        address: ownProps.address
+        address: ownProps.address,
+        id: ownProps.id
     }
 });
 

@@ -21,16 +21,20 @@ export function addShipmentFailure(errorMessage) {
     return { type: actions.ADD_SHIPMENT_FAILURE, errorMessage };
 }
 
-export function changeShipmentAddress(newAddress) {
-    return { type: actions.CHANGE_SHIPMENT_ADDRESS, newAddress };
-}
-
 export function enterEditMode(id) {
     return { type: actions.ENTER_EDIT_MODE, id }
 }
 
 export function exitEditMode(id) {
     return { type: actions.EXIT_EDIT_MODE, id }
+}
+
+export function updateShipmentRequest(id, address) {
+    return { type: actions.UPDATE_SHIPMENT_REQUEST, id, address };
+}
+
+export function updateShipmentSuccess(id, newAddress) {
+    return { type: actions.UPDATE_SHIPMENT_SUCCESS, id, newAddress };
 }
 
 export function fetchShipments(url) {
@@ -49,12 +53,13 @@ export function fetchShipments(url) {
 
 export function addShipment(values) {
     return (dispatch, getState) => {
+        const state = getState();
         dispatch(addShipmentRequest());
-        fetch(`${getState().connection.hostUrl}/api/shipments`, {
+        fetch(`${state.connection.hostUrl}/api/shipments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Connection-Id': getState().connection.connectionId
+                'Connection-Id': state.connection.connectionId
             },
             body: JSON.stringify(values.shipmentAddress)
         });
@@ -63,16 +68,16 @@ export function addShipment(values) {
 
 export function updateShipment(values) {
     return (dispatch, getState) => {
-        // dispatch(addShipmentRequest());
-        // fetch(`${getState().connection.hostUrl}/api/shipments`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Connection-Id': getState().connection.connectionId
-        //     },
-        //     body: JSON.stringify(values.shipmentAddress)
-        // });
-
-        console.log(values);
+        const state = getState();
+        dispatch(updateShipmentRequest());
+        fetch(`${state.connection.hostUrl}/api/shipments/${values.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Connection-Id': state.connection.connectionId
+            },
+            body: JSON.stringify(values.address)
+        });
+        dispatch({type: actions.EXIT_EDIT_MODE, id: values.id });
     };
 }

@@ -62,6 +62,14 @@ const shipments = (state = { items: [], isFetching: false }, action) => {
             return Object.assign({}, state,
                 { items: state.items.map(i => i.id === action.id ? Object.assign({}, i, { editMode: true }) : i)}
             );
+        case actions.EXIT_EDIT_MODE:
+            return Object.assign({}, state,
+                { items: state.items.map(i => i.id === action.id ? Object.assign({}, i, { editMode: false }) : i)}
+            );
+        case actions.UPDATE_SHIPMENT_SUCCESS:
+            return Object.assign({}, state,
+                { items: state.items.map(i => i.id === action.id ? Object.assign({}, i, { address: action.newAddress }) : i)}
+            );
         default:
             return state;
     }

@@ -31,9 +31,7 @@ fetch("/getIp")
                             });
                         shipmentHub.on("shipmentAddressChanged",
                         function (id, newAddress) {
-                            console.log("shipment is updated");
-                            // another dispatch to update address
-                            dispatch({type: actions.EXIT_EDIT_MODE, id });
+                            dispatch({type: actions.UPDATE_SHIPMENT_SUCCESS, id, newAddress });
                         });
                     });
 
