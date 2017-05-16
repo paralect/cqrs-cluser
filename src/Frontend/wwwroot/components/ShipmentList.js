@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import PropTypes from 'prop-types';
-import Shipment from './Shipment';
+import Shipment from '../containers/Shipment';
 
 const ShipmentList = ({ shipments }) => (
     <table className="table table-sm">

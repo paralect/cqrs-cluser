@@ -29,15 +29,13 @@ fetch("/getIp")
                             function (errorMessage) {
                                 dispatch({ type: actions.ADD_SHIPMENT_FAILURE, errorMessage });
                             });
+                        shipmentHub.on("shipmentAddressChanged",
+                        function (id, newAddress) {
+                            console.log("shipment is updated");
+                            // another dispatch to update address
+                            dispatch({type: actions.EXIT_EDIT_MODE, id });
+                        });
                     });
-
-                    // shipmentHubProxy.on("shipmentAddressChanged",
-                    //     function (id, newAddress) {
-                    //         console.log("shipment is updated");
-                    //         store.data.find(s => s.id === id).address = newAddress;
-                    //         store.error = { message: null };
-                    //         store.onDataUpdated();
-                    //     });
 
                     let store = createStore(
                         shipmentApp,

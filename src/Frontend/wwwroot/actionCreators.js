@@ -25,6 +25,14 @@ export function changeShipmentAddress(newAddress) {
     return { type: actions.CHANGE_SHIPMENT_ADDRESS, newAddress };
 }
 
+export function enterEditMode(id) {
+    return { type: actions.ENTER_EDIT_MODE, id }
+}
+
+export function exitEditMode(id) {
+    return { type: actions.EXIT_EDIT_MODE, id }
+}
+
 export function fetchShipments(url) {
     return dispatch => {
         dispatch(requestShipments());
