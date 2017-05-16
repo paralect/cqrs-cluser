@@ -1,4 +1,5 @@
-import { fetchShipments, SET_CONNECTION_ID } from './actions';
+import { fetchShipments } from './actionCreators';
+import * as actions from './actions';
 
 export default hostUrl => actionDispatcher => store => {
 
@@ -36,7 +37,7 @@ export default hostUrl => actionDispatcher => store => {
             onStateChanged('connected');
 
             dispatch({
-                type: SET_CONNECTION_ID,
+                type: actions.SET_CONNECTION_ID,
                 connectionId: connection.id
             });
 
@@ -64,8 +65,7 @@ export default hostUrl => actionDispatcher => store => {
     });
 
     return next => action => {
-        const { type } = action;
-        switch (type) {
+        switch (action.type) {
             case 'connection:start':
                 keepAlive = true;
                 onStateChanged('connecting');

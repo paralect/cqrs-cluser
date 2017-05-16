@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { applyMiddleware, compose, createStore } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import { ADD_SHIPMENT_SUCCESS } from './actions';
+import * as actions from './actions';
 import shipmentApp from './reducers';
 import App from './components/App';
 import createSignalrMiddleware from './createSignalrMiddleware';
@@ -32,7 +32,7 @@ fetch("/getIp")
                         shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }));
                         shipmentHub.on("shipmentCreated",
                             function (id, address) {
-                                dispatch({ type: ADD_SHIPMENT_SUCCESS, newShipment: { id, address } });
+                                dispatch({ type: actions.ADD_SHIPMENT_SUCCESS, newShipment: { id, address } });
                             });
                     });
 
