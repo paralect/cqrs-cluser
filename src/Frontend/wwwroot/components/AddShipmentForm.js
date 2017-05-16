@@ -1,7 +1,7 @@
 import React from 'react';
 import { Field } from 'redux-form';
 
-const AddShipmentForm = props => {
+export default props => {
     return (
         <form onSubmit={props.handleSubmit}>
             <h3>Add new shipment:</h3>
@@ -16,5 +16,3 @@ const AddShipmentForm = props => {
         </form>
     );
 };
-
-export default AddShipmentForm;

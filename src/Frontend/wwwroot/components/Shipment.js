@@ -1,14 +1,12 @@
 ﻿import React from 'react';
 import PropTypes from 'prop-types';
+import EditShipmentForm from '../containers/EditShipmentForm';
 
 const Shipment = ({ id, address, editMode, onEdit }) => (
     <tr>
         <td>{id}</td>
         <td>{editMode ? (
-            <form className="form-inline">
-                <input type="text" className="form-control" value={address} />
-                <input type="submit" value="Update" className="form-control" />
-            </form>
+            <EditShipmentForm address={address} form={`EditShipmentForm_${id}`}/>
         ) : address }</td>
         <td><button className="btn btn-link" onClick={() => onEdit(id)}>Edit</button></td>
     </tr>

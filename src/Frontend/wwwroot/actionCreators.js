@@ -60,3 +60,19 @@ export function addShipment(values) {
         });
     };
 }
+
+export function updateShipment(values) {
+    return (dispatch, getState) => {
+        // dispatch(addShipmentRequest());
+        // fetch(`${getState().connection.hostUrl}/api/shipments`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Connection-Id': getState().connection.connectionId
+        //     },
+        //     body: JSON.stringify(values.shipmentAddress)
+        // });
+
+        console.log(values);
+    };
+}
