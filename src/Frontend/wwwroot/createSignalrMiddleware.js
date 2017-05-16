@@ -1,7 +1,7 @@
 import { fetchShipments } from './actionCreators';
 import * as actions from './actions';
 
-export default hostUrl => actionDispatcher => store => {
+export default actionDispatcher => store => {
 
     const dispatch = store.dispatch.bind(store);
     const stateConversion = {
@@ -15,7 +15,8 @@ export default hostUrl => actionDispatcher => store => {
     let wasConnected = false;
     let currentState = null;
 
-    const connection = $.hubConnection(`${hostUrl}/signalr`);
+    const hostUrl = store.getState().connection.hostUrl;
+    const connection = $.hubConnection(hostUrl);
 
     actionDispatcher(dispatch, connection);
 

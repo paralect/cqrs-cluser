@@ -2,7 +2,7 @@
 import * as actions from './actions';
 
 export function requestShipments() {
-    return { type: actions.REQUEST_SHIPMENTS, items: [] };
+    return { type: actions.REQUEST_SHIPMENTS };
 }
 
 export function receiveShipments(items) {
@@ -42,11 +42,11 @@ export function fetchShipments(url) {
 export function addShipment(values) {
     return (dispatch, getState) => {
         dispatch(addShipmentRequest());
-        fetch("http://localhost:5001/api/shipments", {
+        fetch(`${getState().connection.hostUrl}/api/shipments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Connection-Id': getState().shipments.connectionId
+                'Connection-Id': getState().connection.connectionId
             },
             body: JSON.stringify(values.shipmentAddress)
         });

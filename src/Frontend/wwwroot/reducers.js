@@ -2,12 +2,11 @@
 import { reducer as formReducer } from 'redux-form';
 import * as actions from './actions';
 
-function shipments(state = { isFetching: false, items: [] }, action) {
+function shipments(state = { items: [], isFetching: false }, action) {
     switch (action.type) {
         case actions.REQUEST_SHIPMENTS:
             return Object.assign({}, state, {
-                  isFetching: true, 
-                  items: action.items 
+                  isFetching: true
                 }
             );
         case actions.RECEIVE_SHIPMENTS:
@@ -29,10 +28,6 @@ function shipments(state = { isFetching: false, items: [] }, action) {
                     isFetching: true,
                     errorMessage: action.errorMessage
                 });
-        case actions.SET_CONNECTION_ID:
-            return Object.assign({}, state, {
-                    connectionId: action.connectionId
-                });
         case actions.CHANGE_SHIPMENT_ADDRESS:
             return [
                 ...state,
@@ -45,9 +40,21 @@ function shipments(state = { isFetching: false, items: [] }, action) {
     }
 }
 
-const shipmentApp = combineReducers({
+function connection(state = { }, action) {
+    switch (action.type) {
+        case actions.SET_CONNECTION_ID:
+            return Object.assign({}, state, {
+                connectionId: action.connectionId
+            });
+        default:
+            return state;
+    }
+}
+
+const rootReducer = combineReducers({
     shipments,
+    connection,
     form: formReducer
 });
 
-export default shipmentApp;
+export default rootReducer;

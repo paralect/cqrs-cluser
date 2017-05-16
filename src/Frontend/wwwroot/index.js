@@ -11,23 +11,14 @@ import createSignalrMiddleware from './createSignalrMiddleware';
 fetch("/getIp")
     .then(response => response.json())
     .then(responseJson => {
-
         const webApiUrl = responseJson.webApiUrl;
         if (!webApiUrl) {
             console.log("WebApi is not available, please try again later");
         } else {
-            const listUrl = webApiUrl + "/api/shipments";
-            const createUrl = webApiUrl + "/api/shipments";
-            const updateUrl = webApiUrl + "/api/shipments";
-
-            const signalRConnectionUrl = webApiUrl + "/signalr";
             const signalRHubsUrl = webApiUrl + "/signalr/hubs";
-
             $.getScript(signalRHubsUrl,
                 function () {
-
-                    let signalrMiddleware = createSignalrMiddleware(webApiUrl);
-                    signalrMiddleware = signalrMiddleware((dispatch, connection) => {
+                    const signalrMiddleware = createSignalrMiddleware((dispatch, connection) => {
                         const shipmentHub = connection['shipmentHub'] = connection.createHubProxy('shipmentHub');
                         shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }));
                         shipmentHub.on("shipmentCreated",
@@ -35,11 +26,6 @@ fetch("/getIp")
                                 dispatch({ type: actions.ADD_SHIPMENT_SUCCESS, newShipment: { id, address } });
                             });
                     });
-
-                    // let store = {
-                    //     data: [],
-                    //     error: { message: null }
-                    // };
 
                     // shipmentHubProxy.on("shipmentAddressChanged",
                     //     function (id, newAddress) {
@@ -56,16 +42,9 @@ fetch("/getIp")
                     //         store.onError();
                     //     });
 
-                    // https://github.com/SignalR/SignalR/issues/3776
-                    /*let getUrl = $.signalR.transports._logic.getUrl;
-                    $.signalR.transports._logic.getUrl = function(connection, transport, reconnecting, poll, ajaxPost) {
-                        connection.baseUrl = webApiUrl;
-                        var url = getUrl(connection, transport, reconnecting, poll, ajaxPost);
-                        return transport === "webSockets" ? "/web-api" + url : url;
-                    };*/
-
                     let store = createStore(
                         shipmentApp,
+                        { connection: { hostUrl: webApiUrl }},
                         compose(applyMiddleware(thunkMiddleware, signalrMiddleware),
                             window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()));
 
