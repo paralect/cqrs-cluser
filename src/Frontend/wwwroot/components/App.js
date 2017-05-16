@@ -2,12 +2,10 @@
 import AddShipmentForm from '../containers/AddShipmentForm';
 import ShipmentList from '../containers/ShipmentList';
 
-const App = () => (
+export default () => (
     <div>
       <h1>Shipments</h1>
       <ShipmentList />
       <AddShipmentForm />
     </div>
 );
-
-export default App;

@@ -2,73 +2,61 @@
 import { reducer as formReducer } from 'redux-form';
 import * as actions from './actions';
 
-// const shipment = (state = { editMode: false }, action) => {
-//     switch (action.type) {
-//         case actions.RECEIVE_SHIPMENTS:
-//             return Object.assign({}, state, );
-//         case actions.ENTER_EDIT_MODE:
-//             return Object.assign({}, state, {
-//                 editMode: true,
-//                 itemToEdit: action.id
-//             });
-//         case actions.EXIT_EDIT_MODE:
-//             return Object.assign({}, state, {
-//                 editMode: false,
-//                 itemToFinishEdit: action.id
-//             });
-//         case actions.ADD_SHIPMENT_SUCCESS: 
-//             return {
-//                 id: action.newShipment.id,
-//                 address: action.newShipment.address,
-//             };
-//         default:
-//             return state;
-//     }
-// }
+const shipment = (state = { }, action) => {
+    switch (action.type) {
+        case actions.RECEIVE_SHIPMENTS:
+            return Object.assign({}, state, { editMode: false });
+        case actions.ENTER_EDIT_MODE:
+            return Object.assign({}, state, { editMode: true });
+        case actions.EXIT_EDIT_MODE:
+            return Object.assign({}, state, { editMode: false });
+        case actions.ADD_SHIPMENT_SUCCESS: 
+            return {
+                id: action.newShipment.id,
+                address: action.newShipment.address,
+                editMode: false
+            };
+        case actions.UPDATE_SHIPMENT_SUCCESS:
+            return Object.assign({}, state, { address: action.newAddress });
+        default:
+            return state;
+    }
+}
 
-const shipments = (state = { items: [], isFetching: false }, action) => {
+const shipments = (state = { items: [] }, action) => {
+
+    const getShipmentsList = (state, action) => 
+        state.items.map(i => i.id === action.id ? shipment(i, action) : i);
+    
     switch (action.type) {
         case actions.REQUEST_SHIPMENTS:
-            return Object.assign({}, state, { isFetching: true });
+            return state;
         case actions.RECEIVE_SHIPMENTS:
             return Object.assign({}, state, {
-                isFetching: false,
-                items: action.items.map(i => {
-                    return {
-                        id: i.id,
-                        address: i.address,
-                        editMode: false
-                    };
-                })
+                items: action.items.map(i => shipment(i, action))
             });
         case actions.ADD_SHIPMENT_REQUEST:
-            return Object.assign({}, state, { isFetching: true });
+            return Object.assign({}, state);
         case actions.ADD_SHIPMENT_SUCCESS:
             return Object.assign({}, state, {
-                isFetching: false,
-                items: [...state.items, { 
-                    id: action.newShipment.id, 
-                    address: action.newShipment.address, 
-                    editMode: false 
-                }],
+                items: [...state.items, shipment(null, action)],
                 errorMessage: null
             });
         case actions.ADD_SHIPMENT_FAILURE:
             return Object.assign({}, state, {
-                isFetching: true,
                 errorMessage: action.errorMessage
             });
         case actions.ENTER_EDIT_MODE:
             return Object.assign({}, state,
-                { items: state.items.map(i => i.id === action.id ? Object.assign({}, i, { editMode: true }) : i)}
+                { items: getShipmentsList(state, action) }
             );
         case actions.EXIT_EDIT_MODE:
             return Object.assign({}, state,
-                { items: state.items.map(i => i.id === action.id ? Object.assign({}, i, { editMode: false }) : i)}
+                { items: getShipmentsList(state, action) }
             );
         case actions.UPDATE_SHIPMENT_SUCCESS:
             return Object.assign({}, state,
-                { items: state.items.map(i => i.id === action.id ? Object.assign({}, i, { address: action.newAddress }) : i)}
+                { items: getShipmentsList(state, action) }
             );
         default:
             return state;
@@ -89,7 +77,16 @@ const connection = (state = {}, action) => {
 const rootReducer = combineReducers({
     shipments,
     connection,
-    form: formReducer
+    form: formReducer.plugin({
+        addShipmentForm: (state, action) => {
+            switch (action.type) {
+                case actions.ADD_SHIPMENT_SUCCESS:
+                    return undefined;
+                default:
+                    return state;
+            }
+        }
+    })
 });
 
 export default rootReducer;
