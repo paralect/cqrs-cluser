@@ -15,7 +15,7 @@ fetch("/getIp")
         if (!webApiUrl) {
             console.log("WebApi is not available, please try again later");
         } else {
-            const signalRHubsUrl = webApiUrl + "/signalr/hubs";
+            const signalRHubsUrl = `${webApiUrl}/signalr/hubs`;
             $.getScript(signalRHubsUrl,
                 function () {
                     const signalrMiddleware = createSignalrMiddleware((dispatch, connection) => {
