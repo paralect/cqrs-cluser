@@ -25,6 +25,10 @@ fetch("/getIp")
                             function (id, address) {
                                 dispatch({ type: actions.ADD_SHIPMENT_SUCCESS, newShipment: { id, address } });
                             });
+                        shipmentHub.on("showErrorMessage",
+                            function (errorMessage) {
+                                dispatch({ type: actions.ADD_SHIPMENT_FAILURE, errorMessage });
+                            });
                     });
 
                     // shipmentHubProxy.on("shipmentAddressChanged",
@@ -33,13 +37,6 @@ fetch("/getIp")
                     //         store.data.find(s => s.id === id).address = newAddress;
                     //         store.error = { message: null };
                     //         store.onDataUpdated();
-                    //     });
-
-                    // shipmentHubProxy.on("showErrorMessage",
-                    //     function (message) {
-                    //         console.log(message);
-                    //         store.error = { message: message };
-                    //         store.onError();
                     //     });
 
                     let store = createStore(

@@ -5,23 +5,19 @@ import * as actions from './actions';
 function shipments(state = { items: [], isFetching: false }, action) {
     switch (action.type) {
         case actions.REQUEST_SHIPMENTS:
-            return Object.assign({}, state, {
-                  isFetching: true
-                }
-            );
+            return Object.assign({}, state, { isFetching: true } );
         case actions.RECEIVE_SHIPMENTS:
             return Object.assign({}, state, {
                 isFetching: false,
                 items: action.items
             });
         case actions.ADD_SHIPMENT_REQUEST:
-            return Object.assign({}, state, {
-                    isFetching: true
-                });
+            return Object.assign({}, state, { isFetching: true });
         case actions.ADD_SHIPMENT_SUCCESS:
             return Object.assign({}, state, {
                     isFetching: false,
-                    items: [...state.items, action.newShipment]
+                    items: [...state.items, action.newShipment],
+                    errorMessage: null
                 });
         case actions.ADD_SHIPMENT_FAILURE:
             return Object.assign({}, state, {
@@ -29,12 +25,7 @@ function shipments(state = { items: [], isFetching: false }, action) {
                     errorMessage: action.errorMessage
                 });
         case actions.CHANGE_SHIPMENT_ADDRESS:
-            return [
-                ...state,
-                {
-                    address: action.newAddress
-                }
-            ];
+            return [ ...state, { address: action.newAddress } ];
         default:
             return state;
     }
