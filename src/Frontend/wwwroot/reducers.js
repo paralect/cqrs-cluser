@@ -1,4 +1,5 @@
 ﻿import { combineReducers } from 'redux';
+import { reducer as formReducer } from 'redux-form';
 import { 
     SET_CONNECTION_ID,
     REQUEST_SHIPMENTS,
@@ -53,7 +54,8 @@ function shipments(state = { isFetching: false, items: [] }, action) {
 }
 
 const shipmentApp = combineReducers({
-    shipments
+    shipments,
+    form: formReducer
 });
 
 export default shipmentApp;

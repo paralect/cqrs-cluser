@@ -1,12 +1,12 @@
 ﻿import React from 'react';
-import AddShipment from '../containers/AddShipment';
+import AddShipmentForm from '../containers/AddShipmentForm';
 import ShipmentList from '../containers/ShipmentList';
 
 const App = () => (
     <div>
       <h1>Shipments</h1>
       <ShipmentList />
-      <AddShipment />
+      <AddShipmentForm />
     </div>
 );
 

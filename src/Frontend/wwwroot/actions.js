@@ -8,11 +8,8 @@ export function requestShipments() {
 }
 
 export const RECEIVE_SHIPMENTS = 'RECEIVE_SHIPMENTS';
-export function receiveShipments(json) {
-    return {
-        type: RECEIVE_SHIPMENTS,
-        items: json
-    };
+export function receiveShipments(items) {
+    return { type: RECEIVE_SHIPMENTS, items };
 }
 
 export const ADD_SHIPMENT_REQUEST = 'ADD_SHIPMENT_REQUEST';
@@ -49,7 +46,7 @@ export function fetchShipments(url) {
     };
 }
 
-export function addShipment(address) {
+export function addShipment(values) {
     return (dispatch, getState) => {
         dispatch(addShipmentRequest());
         fetch("http://localhost:5001/api/shipments", {
@@ -58,7 +55,7 @@ export function addShipment(address) {
                 'Content-Type': 'application/json',
                 'Connection-Id': getState().shipments.connectionId
             },
-            body: JSON.stringify(address)
+            body: JSON.stringify(values.shipmentAddress)
         });
     };
 }

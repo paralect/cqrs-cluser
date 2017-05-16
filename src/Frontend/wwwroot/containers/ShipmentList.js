@@ -7,15 +7,4 @@ const mapStateToProps = state => {
     }
 };
 
-const mapDispatchToProps = dispatch => {
-    return {
-    
-    }
-};
-
-const ContainerShipmentList = connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ShipmentList);
-
-export default ContainerShipmentList;
+export default connect(mapStateToProps)(ShipmentList);
