@@ -28,12 +28,12 @@
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Map("/getIp", GetIp);
+            app.Map("/getWebApiUrl", GetWebApiUrl);
 
             app.UseStaticFiles();
         }
 
-        private static void GetIp(IApplicationBuilder app)
+        private static void GetWebApiUrl(IApplicationBuilder app)
         {
             app.Run(async context =>
             {

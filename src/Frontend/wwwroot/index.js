@@ -4,11 +4,11 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, compose, createStore } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import * as actions from './actions';
-import shipmentApp from './reducers';
+import rootReducer from './reducers';
 import App from './components/App';
 import createSignalrMiddleware from './createSignalrMiddleware';
 
-fetch("/getIp")
+fetch("/getWebApiUrl")
     .then(response => response.json())
     .then(responseJson => {
         const webApiUrl = responseJson.webApiUrl;
@@ -19,8 +19,8 @@ fetch("/getIp")
             $.getScript(signalRHubsUrl,
                 function () {
                     const signalrMiddleware = createSignalrMiddleware((dispatch, connection) => {
-                        const shipmentHub = connection['shipmentHub'] = connection.createHubProxy('shipmentHub');
-                        shipmentHub.on('Disconnect', () => dispatch({ type: 'connection:stop' }));
+                        const shipmentHub = connection.shipmentHub = connection.createHubProxy('shipmentHub');
+                        shipmentHub.on('Disconnect', () => dispatch({ type: actions.SIGNALR_CONNECTION_STOP }));
                         shipmentHub.on("shipmentCreated",
                             function (id, address) {
                                 dispatch({ type: actions.ADD_SHIPMENT_SUCCESS, newShipment: { id, address } });
@@ -30,18 +30,18 @@ fetch("/getIp")
                                 dispatch({ type: actions.ADD_SHIPMENT_FAILURE, errorMessage });
                             });
                         shipmentHub.on("shipmentAddressChanged",
-                        function (id, newAddress) {
-                            dispatch({type: actions.UPDATE_SHIPMENT_SUCCESS, id, newAddress });
-                        });
+                            function (id, newAddress) {
+                                dispatch({ type: actions.UPDATE_SHIPMENT_SUCCESS, id, newAddress });
+                            });
                     });
 
-                    let store = createStore(
-                        shipmentApp,
+                    const store = createStore(
+                        rootReducer,
                         { connection: { hostUrl: webApiUrl }},
                         compose(applyMiddleware(thunkMiddleware, signalrMiddleware),
                             window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()));
 
-                    store.dispatch({ type: 'connection:start' });
+                    store.dispatch({ type: actions.SIGNALR_CONNECTION_START });
 
                     render(
                         <Provider store={store}>
