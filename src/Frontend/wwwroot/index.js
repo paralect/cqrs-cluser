@@ -35,11 +35,11 @@ fetch("/getWebApiUrl")
                             });
                     });
 
+                    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
                     const store = createStore(
                         rootReducer,
                         { connection: { hostUrl: webApiUrl }},
-                        compose(applyMiddleware(thunkMiddleware, signalrMiddleware),
-                            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()));
+                        composeEnhancers(applyMiddleware(thunkMiddleware, signalrMiddleware)));
 
                     store.dispatch({ type: actions.SIGNALR_CONNECTION_START });
 
