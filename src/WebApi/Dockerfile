@@ -1,6 +1,6 @@
-FROM microsoft/aspnetcore
-
+FROM microsoft/aspnetcore:1.1
+ARG source
 WORKDIR /app
-COPY bin/release/netcoreapp1.0/publish .
-
+EXPOSE 80
+COPY ${source:-obj/Docker/publish} .
 ENTRYPOINT ["dotnet", "WebApi.dll"]

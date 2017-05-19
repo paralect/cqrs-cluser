@@ -96,11 +96,11 @@ namespace ParalectEventSourcing.Repository.EventStore
             do
             {
                 var currentSlice = _connection.ReadStreamEventsForwardAsync(streamId, nextSliceStart, step, false, _credentials).Result;
-                nextSliceStart = currentSlice.NextEventNumber;
+                nextSliceStart = (int) currentSlice.NextEventNumber; // TODO adapt to "long" type of event numbers of new EventStore API
                 streamEvents.AddRange(currentSlice.Events);
                 if (currentSlice.IsEndOfStream)
                 {
-                    lastVersion = currentSlice.LastEventNumber;
+                    lastVersion = (int) currentSlice.LastEventNumber;
                     break;
                 }
             }
