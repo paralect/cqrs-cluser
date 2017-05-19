@@ -20,3 +20,9 @@ services:
     build:
       context: ./src/WriteModel
       dockerfile: Dockerfile
+
+  readmodel:
+    image: readmodel
+    build:
+      context: ./src/ReadModel
+      dockerfile: Dockerfile

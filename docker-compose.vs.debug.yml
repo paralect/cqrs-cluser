@@ -43,3 +43,16 @@ services:
     entrypoint: tail -f /dev/null
     labels:
       - "com.microsoft.visualstudio.targetoperatingsystem=linux"
+
+  readmodel:
+    image: readmodel:dev
+    build:
+      args:
+        source: ${DOCKER_BUILD_SOURCE}
+    volumes:
+      - ./src/ReadModel:/app
+      - ~/.nuget/packages:/root/.nuget/packages:ro
+      - ~/clrdbg:/clrdbg:ro
+    entrypoint: tail -f /dev/null
+    labels:
+      - "com.microsoft.visualstudio.targetoperatingsystem=linux"
