@@ -36,7 +36,7 @@ namespace ParalectEventSourcing.Repository.EventStore
         public EventStoreConnectionSettings()
         {
 #if DEBUG
-            Host = "localhost";
+            Host = "eventstore";
             Port = 1113;
             Login = "admin";
             Pass = "changeit";
