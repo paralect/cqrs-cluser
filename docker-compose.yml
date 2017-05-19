@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  frontend:
+    image: frontend
+    build:
+      context: ./src/Frontend
+      dockerfile: Dockerfile
+    ports:
+     - "5000:5000"
