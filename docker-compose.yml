@@ -8,8 +8,15 @@ services:
       dockerfile: Dockerfile
     ports:
      - "5000:5000"
+
   webapi:
     image: webapi
     build:
       context: ./src/WebApi
+      dockerfile: Dockerfile
+
+  writemodel:
+    image: writemodel
+    build:
+      context: ./src/WriteModel
       dockerfile: Dockerfile
