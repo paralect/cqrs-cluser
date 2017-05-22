@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>cbf3169c-724f-4438-bcd3-3270ca501799</ProjectGuid>
     <DockerLaunchBrowser>True</DockerLaunchBrowser>
-    <DockerServiceUrl>http://localhost:{ServicePort}</DockerServiceUrl>
+    <DockerServiceUrl>http://localhost:{ServicePort}/shipments.html</DockerServiceUrl>
     <DockerServiceName>frontend</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
