@@ -7,7 +7,6 @@ namespace ParalectEventSourcing.Repository.EventStore
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
     using System.Threading.Tasks;
     using Events;
     using Exceptions;
@@ -15,41 +14,25 @@ namespace ParalectEventSourcing.Repository.EventStore
     using global::EventStore.ClientAPI.Exceptions;
     using global::EventStore.ClientAPI.SystemData;
     using Serialization;
-    using Utils;
 
     /// <summary>
     /// Event source
     /// </summary>
-    public class EventSource : IEventSource
+    public abstract class EventSource : IEventSource
     {
-        private readonly IEventStoreConnection _connection;
         private readonly IEventStoreSerializer _serializer;
         private readonly UserCredentials _credentials;
+
+        protected IEventStoreConnection Connection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventSource"/> class.
         /// </summary>
         /// <param name="connectionSettings">EventStore connections string</param>
         /// <param name="serializer">events serializator</param>
-        public EventSource(EventStoreConnectionSettings connectionSettings, IEventStoreSerializer serializer)
+        protected EventSource(EventStoreConnectionSettings connectionSettings, IEventStoreSerializer serializer)
         {
-            var connectionSettingsBuilder = ConnectionSettings.Create().KeepReconnecting();
-
-#if DEBUG
-            var point = IpEndPointUtility.CreateIpEndPoint(connectionSettings.Host + ":" + connectionSettings.Port).Result;
-            _connection = EventStoreConnection.Create(connectionSettingsBuilder, point);
-#else
-            _connection = EventStoreConnection.Create(
-               connectionSettingsBuilder,
-               ClusterSettings.Create().DiscoverClusterViaDns()
-                   .SetClusterDns(connectionSettings.ClusterDns)
-                   .SetClusterGossipPort(connectionSettings.GossipPort));
-#endif
-
-            _connection.ConnectAsync().Wait();
-
             _serializer = serializer;
-
             _credentials = new UserCredentials(connectionSettings.Login, connectionSettings.Pass);
         }
 
@@ -66,7 +49,7 @@ namespace ParalectEventSourcing.Repository.EventStore
             var items = events.Select(x => _serializer.Serialize(x));
             try
             {
-                await _connection.AppendToStreamAsync(streamId, version, items, _credentials);
+                await Connection.AppendToStreamAsync(streamId, version, items, _credentials);
             }
             catch (WrongExpectedVersionException e)
             {
@@ -95,12 +78,12 @@ namespace ParalectEventSourcing.Repository.EventStore
             var lastVersion = 0;
             do
             {
-                var currentSlice = _connection.ReadStreamEventsForwardAsync(streamId, nextSliceStart, step, false, _credentials).Result;
-                nextSliceStart = currentSlice.NextEventNumber;
+                var currentSlice = Connection.ReadStreamEventsForwardAsync(streamId, nextSliceStart, step, false, _credentials).Result;
+                nextSliceStart = (int) currentSlice.NextEventNumber; // TODO adapt to "long" type of event numbers of new EventStore API
                 streamEvents.AddRange(currentSlice.Events);
                 if (currentSlice.IsEndOfStream)
                 {
-                    lastVersion = currentSlice.LastEventNumber;
+                    lastVersion = (int) currentSlice.LastEventNumber;
                     break;
                 }
             }

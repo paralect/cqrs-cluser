@@ -1,0 +1,64 @@
+version: '2'
+
+services:
+  frontend:
+    image: yarmolovichalex1/frontend
+    build:
+      context: ./src/Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - webapi
+
+  webapi:
+    image: yarmolovichalex1/webapi
+    build:
+      context: ./src/WebApi
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    depends_on:
+      - rabbitmq
+      - mongo
+    restart: always
+
+  writemodel:
+    image: yarmolovichalex1/writemodel
+    build:
+      context: ./src/WriteModel
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - eventstore
+    restart: always
+
+  readmodel:
+    image: yarmolovichalex1/readmodel
+    build:
+      context: ./src/ReadModel
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - mongo
+    restart: always
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  eventstore:
+    container_name: eventstore
+    image: eventstore/eventstore
+    ports:
+      - "1113:1113"
+      - "2113:2113"
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"

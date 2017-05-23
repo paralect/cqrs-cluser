@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using CommandHandlers;
     using Domain;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
@@ -18,51 +19,76 @@
     using ParalectEventSourcing.Utils;
     using RabbitMQ.Client.Events;
     using Serilog;
+    using System.IO;
 
     public class Program
     {
         private static IServiceProvider _serviceProvider;
+        private static string _environment;
+
+        public static IConfigurationRoot Configuration { get; set; }
 
         public static void Main(string[] args)
         {
-            RegisterDependencies();
+            _environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{_environment}.json", optional: true)
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
+
+            var services = new ServiceCollection();
+            RegisterConnectionSettings(services);
+            RegisterCommonServices(services);
+
             ListenToMessages();
 
             Console.ReadLine();
         }
 
-        private static void RegisterDependencies()
+        private static void RegisterConnectionSettings(IServiceCollection services)
+        {
+            services
+                .AddOptions()
+                .Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options))
+                .Configure<EventStoreConnectionSettings>(options => Configuration.GetSection("EventStore").Bind(options));
+        }
+
+        private static void RegisterCommonServices(IServiceCollection services)
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
 
-            _serviceProvider = new ServiceCollection()
+            if (_environment == "Development")
+            {
+                services.AddTransient<IEventSource, HostEventSource>();
+            }
+            else
+            {
+                services.AddTransient<IEventSource, ClusterEventSource>();
+            }
 
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
-
-                .AddTransient<RabbitMqConnectionSettings, RabbitMqConnectionSettings>()
+            _serviceProvider = services
+              
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<IErrorChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
                 .AddTransient<IEventBus, RabbitMqEventBus>()
-
                 .AddSingleton<IDispatcher, CommandDispatcher>()
-
-                .AddSingleton<ShipmentCommandsHandler, ShipmentCommandsHandler>()
-            
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
-
-                .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
-
-                .AddTransient<IEventSource, EventSource>()
                 .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
-                .AddTransient<EventStoreConnectionSettings, EventStoreConnectionSettings>()
-
                 .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
-
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
+
+                .AddSingleton<ShipmentCommandsHandler, ShipmentCommandsHandler>()
+                .AddTransient<IAggregateRepository<Shipment>, AggregateRepository<Shipment>>()
+
                 .BuildServiceProvider();
 
             dispatcherConfiguration.ServiceLocator = _serviceProvider;

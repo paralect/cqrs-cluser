@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+  frontend:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+
+  webapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+
+  writemodel:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  readmodel:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development

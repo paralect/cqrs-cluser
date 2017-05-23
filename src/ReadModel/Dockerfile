@@ -1,6 +1,5 @@
-FROM microsoft/dotnet
-
+FROM microsoft/dotnet:1.1-runtime
+ARG source
 WORKDIR /app
-COPY bin/release/netcoreapp1.0/publish .
-
+COPY ${source:-obj/Docker/publish} .
 ENTRYPOINT ["dotnet", "ReadModel.dll"]
