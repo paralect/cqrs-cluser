@@ -29,7 +29,10 @@ spec:
           imagePullPolicy: Always
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 5000
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
         - name: bb
           image: gcr.io/google_containers/busybox
           command:
@@ -90,6 +93,9 @@ spec:
           ports:
             - name: http
               containerPort: 5001
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -106,6 +112,9 @@ spec:
         - name: writemodel
           image: yarmolovichalex1/writemodel
           imagePullPolicy: Always
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -122,3 +131,6 @@ spec:
         - name: readmodel
           image: yarmolovichalex1/readmodel
           imagePullPolicy: Always
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
