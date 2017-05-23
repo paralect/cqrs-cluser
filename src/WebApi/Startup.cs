@@ -7,6 +7,7 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using MongoDB.Driver;
     using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Messaging.RabbitMq;
@@ -39,20 +40,9 @@
 
             services.AddOptions();
             services.Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options));
+            services.Configure<MongoDbConnectionSettings>(options => Configuration.GetSection("MongoDB").Bind(options));
 
-            services
-
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
-
-                .AddSingleton<IChannelFactory, ChannelFactory>()
-                .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
-
-                .AddTransient<ICommandBus, RabbitMqCommandBus>()
-                .AddTransient<IDateTimeProvider, DateTimeProvider>()
-
-                .AddTransient<IShipmentDataService, ShipmentDataService>()
-                .AddSingleton<IMongoClient>(new MongoClient(new MongoDbConnectionSettings().ConnectionString))
-                .AddTransient<IDatabase, Database>();
+            RegisterCommonServices(services);
 
             services.AddCors();
 
@@ -75,6 +65,23 @@
             app.UseSignalR();
 
             app.UseMvc();
+        }
+
+        public static void RegisterCommonServices(IServiceCollection services)
+        {
+            services
+
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+
+                .AddSingleton<IChannelFactory, ChannelFactory>()
+                .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
+
+                .AddTransient<ICommandBus, RabbitMqCommandBus>()
+                .AddTransient<IDateTimeProvider, DateTimeProvider>()
+
+                .AddTransient<IShipmentDataService, ShipmentDataService>()
+                .AddSingleton<IMongoClient>(sp => new MongoClient(sp.GetService<IOptions<MongoDbConnectionSettings>>().Value.ConnectionString))
+                .AddTransient<IDatabase, Database>();
         }
     }
 }

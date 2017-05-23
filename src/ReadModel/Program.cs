@@ -14,6 +14,7 @@
     using RabbitMQ.Client.Events;
     using Serilog;
     using System.IO;
+    using Microsoft.Extensions.Options;
 
     public class Program
     {
@@ -23,9 +24,13 @@
 
         public static void Main(string[] args)
         {
+            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{environmentName}.json", optional: true)
+                .AddEnvironmentVariables();
 
             Configuration = builder.Build();
 
@@ -43,6 +48,7 @@
 
                 .AddOptions()
                 .Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options))
+                .Configure<MongoDbConnectionSettings>(options => Configuration.GetSection("MongoDB").Bind(options))
 
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
@@ -57,7 +63,7 @@
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
 
-                .AddSingleton<IMongoClient>(new MongoClient(new MongoDbConnectionSettings().ConnectionString))
+                .AddSingleton<IMongoClient>(sp => new MongoClient(sp.GetService<IOptions<MongoDbConnectionSettings>>().Value.ConnectionString))
                 .AddTransient<IDatabase, Database>()
 
                 .BuildServiceProvider();
