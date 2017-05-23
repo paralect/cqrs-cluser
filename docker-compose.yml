@@ -2,7 +2,7 @@ version: '2'
 
 services:
   frontend:
-    image: frontend
+    image: yarmolovichalex1/frontend
     build:
       context: ./src/Frontend
       dockerfile: Dockerfile
@@ -12,7 +12,7 @@ services:
       - webapi
 
   webapi:
-    image: webapi
+    image: yarmolovichalex1/webapi
     build:
       context: ./src/WebApi
       dockerfile: Dockerfile
@@ -24,7 +24,7 @@ services:
     restart: always
 
   writemodel:
-    image: writemodel
+    image: yarmolovichalex1/writemodel
     build:
       context: ./src/WriteModel
       dockerfile: Dockerfile
@@ -34,7 +34,7 @@ services:
     restart: always
 
   readmodel:
-    image: readmodel
+    image: yarmolovichalex1/readmodel
     build:
       context: ./src/ReadModel
       dockerfile: Dockerfile

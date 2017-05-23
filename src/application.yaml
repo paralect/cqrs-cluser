@@ -61,12 +61,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: web-api
+  name: webapi
   labels:
-    app: web-api
+    app: webapi
 spec:
   selector:
-    app: web-api
+    app: webapi
   type: LoadBalancer
   ports:
     - port: 5001
@@ -75,17 +75,17 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: web-api
+  name: webapi
 spec:
   replicas: 2
   template:
     metadata:
       labels:
-        app: web-api
+        app: webapi
     spec:
       containers:
-        - name: web-api
-          image: yarmolovichalex1/web-api
+        - name: webapi
+          image: yarmolovichalex1/webapi
           imagePullPolicy: Always
           ports:
             - name: http
@@ -94,31 +94,31 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: write-model
+  name: writemodel
 spec:
   replicas: 2
   template:
     metadata:
       labels:
-        app: write-model
+        app: writemodel
     spec:
       containers:
-        - name: write-model
-          image: yarmolovichalex1/write-model
+        - name: writemodel
+          image: yarmolovichalex1/writemodel
           imagePullPolicy: Always
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: read-model
+  name: readmodel
 spec:
   replicas: 2
   template:
     metadata:
       labels:
-        app: read-model
+        app: readmodel
     spec:
       containers:
-        - name: read-model
-          image: yarmolovichalex1/read-model
+        - name: readmodel
+          image: yarmolovichalex1/readmodel
           imagePullPolicy: Always
