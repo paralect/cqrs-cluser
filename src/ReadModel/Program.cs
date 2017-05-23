@@ -24,44 +24,49 @@
 
         public static void Main(string[] args)
         {
-            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{environmentName}.json", optional: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
 
-            RegisterDependencies();
+            var services = new ServiceCollection();
+            RegisterConnectionSettings(services);
+            RegisterCommonServices(services);
+
             ListenToMessages();
 
             Console.ReadLine();
         }
 
-        private static void RegisterDependencies()
+        private static void RegisterConnectionSettings(IServiceCollection services)
+        {
+            services
+                .AddOptions()
+                .Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options))
+                .Configure<MongoDbConnectionSettings>(options => Configuration.GetSection("MongoDB").Bind(options));
+        }
+
+        private static void RegisterCommonServices(IServiceCollection services)
         {
             var dispatcherConfiguration = new DispatcherConfiguration();
 
-            _serviceProvider = new ServiceCollection()
-
-                .AddOptions()
-                .Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options))
-                .Configure<MongoDbConnectionSettings>(options => Configuration.GetSection("MongoDB").Bind(options))
-
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+            _serviceProvider = services
 
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<ISuccessChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
                 .AddTransient<IDispatcher, EventDispatcher>()
-
-                .AddSingleton<ShipmentEventsHandler, ShipmentEventsHandler>()
-
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
+
+                .AddSingleton<ShipmentEventsHandler, ShipmentEventsHandler>()
 
                 .AddSingleton<IMongoClient>(sp => new MongoClient(sp.GetService<IOptions<MongoDbConnectionSettings>>().Value.ConnectionString))
                 .AddTransient<IDatabase, Database>()

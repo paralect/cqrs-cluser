@@ -38,10 +38,7 @@
             });
             services.AddMemoryCache();
 
-            services.AddOptions();
-            services.Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options));
-            services.Configure<MongoDbConnectionSettings>(options => Configuration.GetSection("MongoDB").Bind(options));
-
+            RegisterConnectionSettings(services);
             RegisterCommonServices(services);
 
             services.AddCors();
@@ -67,10 +64,17 @@
             app.UseMvc();
         }
 
-        public static void RegisterCommonServices(IServiceCollection services)
+        private void RegisterConnectionSettings(IServiceCollection services)
         {
             services
+                .AddOptions()
+                .Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options))
+                .Configure<MongoDbConnectionSettings>(options => Configuration.GetSection("MongoDB").Bind(options));
+        }
 
+        private void RegisterCommonServices(IServiceCollection services)
+        {
+            services
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
                 .AddSingleton<IChannelFactory, ChannelFactory>()
