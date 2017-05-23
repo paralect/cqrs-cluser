@@ -26,41 +26,51 @@
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.Map("/getWebApiUrl", GetLocalWebApiUrl);
             }
-
-            app.Map("/getWebApiUrl", GetWebApiUrl);
+            else if (env.IsProduction())
+            {
+                app.Map("/getWebApiUrl", GetProductionWebApiUrl);
+            }
 
             app.UseStaticFiles();
         }
 
-        private static void GetWebApiUrl(IApplicationBuilder app)
+        private static void GetLocalWebApiUrl(IApplicationBuilder app)
+        {
+            app.Run(async context =>
+            {
+                var webApiUrl = "http://localhost:5001";
+                var response = new { webApiUrl };
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
+            });
+        }
+
+        private static void GetProductionWebApiUrl(IApplicationBuilder app)
         {
             app.Run(async context =>
             {
                 try
                 {
-#if DEBUG
-                    var webApiUrl = "http://localhost:5001";
-#else
                     var client = new HttpClient();
 
                     var webApiConfig =
                         await client.GetStringAsync(
-                            "http://localhost:8001/api/v1/namespaces/default/services/web-api");
+                            "http://localhost:8001/api/v1/namespaces/default/services/webapi");
 
                     var @object = (dynamic)JsonConvert.DeserializeObject(webApiConfig);
 
                     string webApiUrl = null;
                     try
                     {
-                        var externalIp = (string) @object.status.loadBalancer.ingress[0].ip;
+                        var externalIp = (string)@object.status.loadBalancer.ingress[0].ip;
                         webApiUrl = $"http://{externalIp}:5001";
                     }
                     catch
                     {
                         // probably, external IP is not created yet
                     }
-#endif
+
                     var response = new { webApiUrl };
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
                 }
