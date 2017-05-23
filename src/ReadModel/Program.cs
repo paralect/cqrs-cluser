@@ -4,6 +4,7 @@
     using System.Reflection;
     using System.Threading.Tasks;
     using EventHandlers;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
     using ParalectEventSourcing.Dispatching;
@@ -12,13 +13,22 @@
     using ParalectEventSourcing.Serialization;
     using RabbitMQ.Client.Events;
     using Serilog;
+    using System.IO;
 
     public class Program
     {
         private static IServiceProvider _serviceProvider;
 
+        public static IConfigurationRoot Configuration { get; set; }
+
         public static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+
+            Configuration = builder.Build();
+
             RegisterDependencies();
             ListenToMessages();
 
@@ -31,9 +41,11 @@
 
             _serviceProvider = new ServiceCollection()
 
+                .AddOptions()
+                .Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options))
+
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
-                .AddTransient<RabbitMqConnectionSettings, RabbitMqConnectionSettings>()
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<ISuccessChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())

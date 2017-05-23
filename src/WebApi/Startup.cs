@@ -37,11 +37,13 @@
             });
             services.AddMemoryCache();
 
+            services.AddOptions();
+            services.Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options));
+
             services
 
                 .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
 
-                .AddTransient<RabbitMqConnectionSettings, RabbitMqConnectionSettings>()
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 

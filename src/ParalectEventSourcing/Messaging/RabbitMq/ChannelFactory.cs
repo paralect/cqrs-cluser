@@ -1,6 +1,6 @@
 namespace ParalectEventSourcing.Messaging.RabbitMq
 {
-    using System;
+    using Microsoft.Extensions.Options;
     using RabbitMQ.Client;
     using Serialization;
 
@@ -9,8 +9,9 @@ namespace ParalectEventSourcing.Messaging.RabbitMq
         private readonly IConnection _connection;
         private readonly IMessageSerializer _messageSerializer;
 
-        public ChannelFactory(RabbitMqConnectionSettings connectionSettings, IMessageSerializer messageSerializer)
+        public ChannelFactory(IOptions<RabbitMqConnectionSettings> connectionSettingsAccessor, IMessageSerializer messageSerializer)
         {
+            var connectionSettings = connectionSettingsAccessor.Value;
             var connectionFactory = new ConnectionFactory
             {
                 UserName = connectionSettings.UserName,
@@ -23,15 +24,6 @@ namespace ParalectEventSourcing.Messaging.RabbitMq
             };
 
             _connection = connectionFactory.CreateConnection();
-
-            _connection.ConnectionShutdown += (sender, args) =>
-            {
-                Console.WriteLine("Connection closed");
-                Console.WriteLine("Cause: " + args.Cause);
-                Console.WriteLine("Initiator: " + args.Initiator);
-                Console.WriteLine("ReplyCode: " + args.ReplyCode);
-                Console.WriteLine("ReplyText: " + args.ReplyText);
-            };
 
             _messageSerializer = messageSerializer;
         }

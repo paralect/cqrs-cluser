@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using CommandHandlers;
     using Domain;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
@@ -18,13 +19,22 @@
     using ParalectEventSourcing.Utils;
     using RabbitMQ.Client.Events;
     using Serilog;
+    using System.IO;
 
     public class Program
     {
         private static IServiceProvider _serviceProvider;
 
+        public static IConfigurationRoot Configuration { get; set; }
+
         public static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+
+            Configuration = builder.Build();
+
             RegisterDependencies();
             ListenToMessages();
 
@@ -37,9 +47,11 @@
 
             _serviceProvider = new ServiceCollection()
 
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+                .AddOptions()
+                .Configure<RabbitMqConnectionSettings>(options => Configuration.GetSection("RabbitMQ").Bind(options))
 
-                .AddTransient<RabbitMqConnectionSettings, RabbitMqConnectionSettings>()
+                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+              
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
