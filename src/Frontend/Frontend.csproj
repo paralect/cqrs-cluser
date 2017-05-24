@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.2" />
   </ItemGroup>
 
+  <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
+    <Exec Command="npm install" />
+    <Exec Command="npm run build" />
+  </Target>
 </Project>
