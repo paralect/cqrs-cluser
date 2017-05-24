@@ -13,8 +13,9 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.2" />
   </ItemGroup>
 
-  <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
+  <Target Name="PrebuildScript" BeforeTargets="Build">
     <Exec Command="npm install" />
+    <Exec Command="npm rebuild node-sass" />
     <Exec Command="npm run build" />
   </Target>
 </Project>
