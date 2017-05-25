@@ -4,6 +4,7 @@ services:
   frontend:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - WebApiUrlHC=http://webapi:5001/hc
     ports:
       - "80"
 

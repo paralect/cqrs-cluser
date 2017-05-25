@@ -1,5 +1,6 @@
 ﻿namespace WebApi
 {
+    using System.Threading.Tasks;
     using DataProtection;
     using DataService;
     using Microsoft.AspNetCore.Builder;
@@ -8,6 +9,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Extensions.HealthChecks;
     using MongoDB.Driver;
     using ParalectEventSourcing.Commands;
     using ParalectEventSourcing.Messaging.RabbitMq;
@@ -17,6 +19,8 @@
 
     public class Startup
     {
+        private IConfigurationRoot Configuration { get; }
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -27,11 +31,14 @@
             Configuration = builder.Build();
         }
 
-        public IConfigurationRoot Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHealthChecks(checks =>
+            {
+                checks.AddValueTaskCheck("HTTP Endpoint", () => new ValueTask<IHealthCheckResult>(HealthCheckResult.Healthy("Ok")));
+            });
+
             services.AddSignalR(options =>
             {
                 options.Hubs.EnableDetailedErrors = true;
