@@ -20,6 +20,7 @@
     using RabbitMQ.Client.Events;
     using Serilog;
     using System.IO;
+    using ParalectEventSourcing.Persistence.Redis;
 
     public class Program
     {
@@ -41,6 +42,13 @@
             Configuration = builder.Build();
 
             var services = new ServiceCollection();
+
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = "redis";
+                options.InstanceName = "EsSnapshots";
+            });
+
             RegisterConnectionSettings(services);
             RegisterCommonServices(services);
 
@@ -82,7 +90,7 @@
                 .AddSingleton<IDispatcher, CommandDispatcher>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
                 .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
-                .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
+                .AddTransient<ISnapshotRepository, RedisSnapshotRepository>()
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
 
