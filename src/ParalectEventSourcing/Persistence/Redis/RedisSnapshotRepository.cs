@@ -23,7 +23,7 @@
         public Snapshot Load(string id)
         {
             var snapshot = _distributedCache.Get(id);
-            return snapshot == null ? null : _messageSerializer.Deserialize(snapshot);
+            return snapshot == null ? null : _messageSerializer.Deserialize(snapshot, typeof(Snapshot));
         }
     }
 }

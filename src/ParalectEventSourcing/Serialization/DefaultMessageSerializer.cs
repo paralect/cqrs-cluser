@@ -33,5 +33,13 @@
 
             return @object;
         }
+
+        public dynamic Deserialize(byte[] objectBinary, Type objectType)
+        {
+            var objectString = Encoding.UTF8.GetString(objectBinary);
+            var @object = JsonConvert.DeserializeObject(objectString, objectType);
+
+            return @object;
+        }
     }
 }
