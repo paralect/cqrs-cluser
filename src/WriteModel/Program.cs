@@ -20,6 +20,8 @@
     using RabbitMQ.Client.Events;
     using Serilog;
     using System.IO;
+    using System.Linq;
+    using System.Net;
     using ParalectEventSourcing.Persistence.Redis;
 
     public class Program
@@ -43,9 +45,11 @@
 
             var services = new ServiceCollection();
 
+            var ip =  IpEndPointUtility.GetHostIp("redis").Result.ToString();
+
             services.AddDistributedRedisCache(options =>
             {
-                options.Configuration = "redis";
+                options.Configuration = ip;
                 options.InstanceName = "EsSnapshots";
             });
 
