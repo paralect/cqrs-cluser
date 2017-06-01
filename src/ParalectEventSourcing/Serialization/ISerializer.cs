@@ -2,9 +2,9 @@
 {
     using System;
 
-    public interface IMessageSerializer
+    public interface ISerializer
     {
-        byte[] Serialize(object message);
+        byte[] Serialize(object data);
 
         dynamic Deserialize(byte[] objectBinary, Func<dynamic, string> getTypeName);
 

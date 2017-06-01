@@ -75,7 +75,7 @@
         private void RegisterCommonServices(IServiceCollection services)
         {
             services
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+                .AddTransient<ISerializer, DefaultSerializer>()
 
                 .AddSingleton<IChannelFactory, ChannelFactory>()
                 .AddSingleton<IWriteModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())

@@ -28,14 +28,14 @@ namespace ParalectEventSourcing.Repository
         private readonly IEventSource _eventSource;
         private readonly IEventBus _eventBus;
         private readonly ISnapshotRepository _snapshots;
-        private readonly IMessageSerializer _messageSerializer;
+        private readonly ISerializer _serializer;
 
-        public AggregateRepository(IEventSource eventSource, IEventBus eventBus, ISnapshotRepository snapshots, IMessageSerializer messageSerializer)
+        public AggregateRepository(IEventSource eventSource, IEventBus eventBus, ISnapshotRepository snapshots, ISerializer serializer)
         {
             _eventSource = eventSource;
             _eventBus = eventBus;
             _snapshots = snapshots;
-            _messageSerializer = messageSerializer;
+            _serializer = serializer;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace ParalectEventSourcing.Repository
             }
             else
             {
-                state = _messageSerializer.Deserialize(snapshot.Payload, aggregateStateType);
+                state = _serializer.Deserialize(snapshot.Payload, aggregateStateType);
                 stream = _eventSource.GetEventsStream(streamId, snapshot.StreamVersion + 1);
             }
 
@@ -102,7 +102,7 @@ namespace ParalectEventSourcing.Repository
 
             if (aggregateRoot.Version % SnapshotsInterval == 0)
             {
-                _snapshots.Save(new Snapshot(id, version, _messageSerializer.Serialize(aggregateRoot.State)));
+                _snapshots.Save(new Snapshot(id, version, _serializer.Serialize(aggregateRoot.State)));
             }
         }
 

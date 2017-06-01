@@ -89,7 +89,7 @@
                 .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<IErrorChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+                .AddTransient<ISerializer, DefaultSerializer>()
                 .AddTransient<IEventBus, RabbitMqEventBus>()
                 .AddSingleton<IDispatcher, CommandDispatcher>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
@@ -121,7 +121,7 @@
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
-            var messageSerializer = _serviceProvider.GetService<IMessageSerializer>();
+            var messageSerializer = _serviceProvider.GetService<ISerializer>();
             var command = messageSerializer.Deserialize(basicDeliverEventArgs.Body, c => c.Metadata.TypeName);
 
             try

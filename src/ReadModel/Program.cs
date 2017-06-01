@@ -61,7 +61,7 @@
                 .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<ISuccessChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+                .AddTransient<ISerializer, DefaultSerializer>()
                 .AddTransient<IDispatcher, EventDispatcher>()
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
@@ -91,7 +91,7 @@
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
-            var messageSerializer = _serviceProvider.GetService<IMessageSerializer>();
+            var messageSerializer = _serviceProvider.GetService<ISerializer>();
             var @event = messageSerializer.Deserialize(basicDeliverEventArgs.Body, e => e.Metadata.TypeName);
 
             var eventDispatcher = _serviceProvider.GetService<IDispatcher>();

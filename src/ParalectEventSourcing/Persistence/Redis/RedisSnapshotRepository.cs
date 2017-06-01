@@ -7,23 +7,23 @@
     public class RedisSnapshotRepository : ISnapshotRepository
     {
         private readonly IDistributedCache _distributedCache;
-        private readonly IMessageSerializer _messageSerializer;
+        private readonly ISerializer _serializer;
 
-        public RedisSnapshotRepository(IDistributedCache distributedCache, IMessageSerializer messageSerializer)
+        public RedisSnapshotRepository(IDistributedCache distributedCache, ISerializer serializer)
         {
             _distributedCache = distributedCache;
-            _messageSerializer = messageSerializer;
+            _serializer = serializer;
         }
 
         public void Save(Snapshot snapshot)
         {
-            _distributedCache.Set(snapshot.StreamId, _messageSerializer.Serialize(snapshot));
+            _distributedCache.Set(snapshot.StreamId, _serializer.Serialize(snapshot));
         }
 
         public Snapshot Load(string id)
         {
             var snapshot = _distributedCache.Get(id);
-            return snapshot == null ? null : _messageSerializer.Deserialize(snapshot, typeof(Snapshot));
+            return snapshot == null ? null : _serializer.Deserialize(snapshot, typeof(Snapshot));
         }
     }
 }

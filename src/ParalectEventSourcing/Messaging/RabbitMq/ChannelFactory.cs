@@ -7,9 +7,9 @@ namespace ParalectEventSourcing.Messaging.RabbitMq
     public class ChannelFactory : IChannelFactory
     {
         private readonly IConnection _connection;
-        private readonly IMessageSerializer _messageSerializer;
+        private readonly ISerializer _serializer;
 
-        public ChannelFactory(IOptions<RabbitMqConnectionSettings> connectionSettingsAccessor, IMessageSerializer messageSerializer)
+        public ChannelFactory(IOptions<RabbitMqConnectionSettings> connectionSettingsAccessor, ISerializer serializer)
         {
             var connectionSettings = connectionSettingsAccessor.Value;
             var connectionFactory = new ConnectionFactory
@@ -25,13 +25,13 @@ namespace ParalectEventSourcing.Messaging.RabbitMq
 
             _connection = connectionFactory.CreateConnection();
 
-            _messageSerializer = messageSerializer;
+            _serializer = serializer;
         }
 
         public Channel CreateChannel()
         {
             var model = _connection.CreateModel();
-            return new Channel(model, _messageSerializer);
+            return new Channel(model, _serializer);
         }
     }
 }

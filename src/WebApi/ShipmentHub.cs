@@ -15,12 +15,12 @@
         private static readonly ConcurrentDictionary<string, IChannel> ErrorSubscriptions = new ConcurrentDictionary<string, IChannel>();
 
         private readonly IChannelFactory _channelFactory;
-        private readonly IMessageSerializer _messageSerializer;
+        private readonly ISerializer _serializer;
 
-        public ShipmentHub(IChannelFactory channelFactory, IMessageSerializer messageSerializer)
+        public ShipmentHub(IChannelFactory channelFactory, ISerializer serializer)
         {
             _channelFactory = channelFactory;
-            _messageSerializer = messageSerializer;
+            _serializer = serializer;
         }
 
         public void Listen(string connectionId)
@@ -42,7 +42,7 @@
 
         private void ConsumerOnSuccess(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
-            var @event = _messageSerializer.Deserialize(basicDeliverEventArgs.Body, e => e.Metadata.TypeName);
+            var @event = _serializer.Deserialize(basicDeliverEventArgs.Body, e => e.Metadata.TypeName);
 
             var connectionId = (string) @event.Metadata.ConnectionId;
             var eventType = Type.GetType(@event.Metadata.TypeName);
@@ -60,7 +60,7 @@
 
         private void ConsumerOnError(object sender, BasicDeliverEventArgs e)
         {
-            var message = _messageSerializer.Deserialize(e.Body);
+            var message = _serializer.Deserialize(e.Body);
 
             var connectionId = (string) message.OriginalCommand.Metadata.ConnectionId;
 
