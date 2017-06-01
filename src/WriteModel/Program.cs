@@ -10,7 +10,6 @@
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
     using ParalectEventSourcing.Exceptions;
-    using ParalectEventSourcing.InMemory;
     using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Repository;
     using ParalectEventSourcing.Repository.EventStore;
@@ -20,8 +19,6 @@
     using RabbitMQ.Client.Events;
     using Serilog;
     using System.IO;
-    using System.Linq;
-    using System.Net;
     using ParalectEventSourcing.Persistence.Redis;
 
     public class Program
@@ -45,12 +42,10 @@
 
             var services = new ServiceCollection();
 
-            var ip =  IpEndPointUtility.GetHostIp("redis").Result.ToString();
-
             services.AddDistributedRedisCache(options =>
             {
-                options.Configuration = ip;
-                options.InstanceName = "EsSnapshots";
+                options.Configuration = IpEndPointUtility.GetHostIp(Configuration["Redis:Host"]).Result.ToString();
+                options.InstanceName = Configuration["Redis:InstanceName"];
             });
 
             RegisterConnectionSettings(services);
