@@ -68,6 +68,9 @@ services:
     image: redis
     command: redis-server --appendonly yes
     volumes:
-      - /data:/data
+      - redis:/data
     ports:
       - "6379:6379"
+
+volumes:
+  redis:
