@@ -2,6 +2,8 @@
 //     Copyright (c) Advanced Metering Services LLC. All rights reserved.
 // </copyright>
 
+using ParalectEventSourcing.Serialization;
+
 namespace ParalectEventSourcing.Repository
 {
     using System;
@@ -26,18 +28,14 @@ namespace ParalectEventSourcing.Repository
         private readonly IEventSource _eventSource;
         private readonly IEventBus _eventBus;
         private readonly ISnapshotRepository _snapshots;
+        private readonly ISerializer _serializer;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AggregateRepository{TAggregateRoot}"/> class.
-        /// </summary>
-        /// <param name="eventSource">event source</param>
-        /// <param name="eventBus">event bus</param>
-        /// <param name="snapshots">snapshots repository</param>
-        public AggregateRepository(IEventSource eventSource, IEventBus eventBus, ISnapshotRepository snapshots)
+        public AggregateRepository(IEventSource eventSource, IEventBus eventBus, ISnapshotRepository snapshots, ISerializer serializer)
         {
             _eventSource = eventSource;
             _eventBus = eventBus;
             _snapshots = snapshots;
+            _serializer = serializer;
         }
 
         /// <summary>
@@ -64,12 +62,26 @@ namespace ParalectEventSourcing.Repository
                     "Aggregate ID was not specified when trying to get by id {0} aggregate", typeof(TAggregateRoot).FullName));
             }
 
-            var snapshot = _snapshots.Load(streamId);
-            var stream = snapshot == null ? _eventSource.GetEventsStream(streamId) : _eventSource.GetEventsStream(streamId, snapshot.StreamVersion + 1);
+            var snapshot = _snapshots.LoadAsync(streamId).Result;
+            var aggregateStateType = GetAggregateStateType(typeof(TAggregateRoot));
+
+            object state;
+            EventsStream stream;
+            if (snapshot == null)
+            {
+                state = CreateAggregateState(aggregateStateType);
+                stream = _eventSource.GetEventsStream(streamId);
+            }
+            else
+            {
+                state = _serializer.Deserialize(snapshot.Payload, aggregateStateType);
+                stream = _eventSource.GetEventsStream(streamId, snapshot.StreamVersion + 1);
+            }
+
             var aggregate = new TAggregateRoot();
-            var state = snapshot != null ? snapshot.Payload : CreateAggregateState(typeof(TAggregateRoot));
             StateSpooler.Spool(state ?? aggregate, stream.Events);
             aggregate.Setup(state, stream.End);
+
             return aggregate;
         }
 
@@ -85,12 +97,12 @@ namespace ParalectEventSourcing.Repository
             var events = ExtractEvents(aggregateRoot, metadata).ToList();
             var version = aggregateRoot.Version;
             events.ForEach(e => e.Version = version);
-            await _eventSource.AppendEventsAsync(id, version, events);
+            await _eventSource.AppendEventsAsync(id, version, events).ConfigureAwait(false);
             _eventBus?.Publish(events);
 
             if (aggregateRoot.Version % SnapshotsInterval == 0)
             {
-                _snapshots.Save(new Snapshot(id, version, aggregateRoot.State));
+                await _snapshots.SaveAsync(new Snapshot(id, version, _serializer.Serialize(aggregateRoot.State))).ConfigureAwait(false);
             }
         }
 
@@ -118,12 +130,12 @@ namespace ParalectEventSourcing.Repository
             CommitEvents(id, aggregate, metadata);
         }
 
-        /// <summary>
-        /// Will return null, if cannot find aggregate state type
-        /// </summary>
-        /// <returns>new aggregate state</returns>
-        /// <param name="aggregateType">aggregate root type</param>
-        private static object CreateAggregateState(Type aggregateType)
+        private static object CreateAggregateState(Type aggregateStateType)
+        {
+            return Activator.CreateInstance(aggregateStateType);
+        }
+
+        private static Type GetAggregateStateType(Type aggregateType)
         {
             if (aggregateType.GetTypeInfo().BaseType == null)
             {
@@ -133,15 +145,7 @@ namespace ParalectEventSourcing.Repository
             var aggregateInterface = aggregateType.GetTypeInfo().BaseType;
             var args = aggregateInterface.GetGenericArguments();
 
-            if (args.Length == 0)
-            {
-                return null;
-            }
-
-            var aggregateStateType = args[0];
-            var state = Activator.CreateInstance(aggregateStateType);
-
-            return state;
+            return args.Length == 0 ? null : args[0];
         }
 
         private IEnumerable<IEvent> ExtractEvents(IAggregateRoot aggregate, ICommandMetadata metadata)

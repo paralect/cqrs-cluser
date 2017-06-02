@@ -15,7 +15,7 @@ namespace ParalectEventSourcing.Snapshoting
         /// <param name="streamId">aggregate id</param>
         /// <param name="streamVersionId">aggregate version</param>
         /// <param name="payload">aggregate state</param>
-        public Snapshot(string streamId, int streamVersionId, object payload)
+        public Snapshot(string streamId, int streamVersionId, byte[] payload)
         {
             StreamId = streamId;
             StreamVersion = streamVersionId;
@@ -35,6 +35,6 @@ namespace ParalectEventSourcing.Snapshoting
         /// <summary>
         /// Gets or sets payload
         /// </summary>
-        public object Payload { get; set; }
+        public byte[] Payload { get; set; }
     }
 }

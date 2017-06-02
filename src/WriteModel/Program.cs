@@ -10,7 +10,6 @@
     using ParalectEventSourcing.Dispatching;
     using ParalectEventSourcing.Events;
     using ParalectEventSourcing.Exceptions;
-    using ParalectEventSourcing.InMemory;
     using ParalectEventSourcing.Messaging.RabbitMq;
     using ParalectEventSourcing.Repository;
     using ParalectEventSourcing.Repository.EventStore;
@@ -20,6 +19,7 @@
     using RabbitMQ.Client.Events;
     using Serilog;
     using System.IO;
+    using ParalectEventSourcing.Persistence.Redis;
 
     public class Program
     {
@@ -41,6 +41,13 @@
             Configuration = builder.Build();
 
             var services = new ServiceCollection();
+
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = IpEndPointUtility.GetHostIp(Configuration["Redis:Host"]).Result.ToString();
+                options.InstanceName = Configuration["Redis:InstanceName"];
+            });
+
             RegisterConnectionSettings(services);
             RegisterCommonServices(services);
 
@@ -77,12 +84,12 @@
                 .AddSingleton<IReadModelChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
                 .AddSingleton<IErrorChannel>(sp => sp.GetService<IChannelFactory>().CreateChannel())
 
-                .AddTransient<IMessageSerializer, DefaultMessageSerializer>()
+                .AddTransient<ISerializer, DefaultSerializer>()
                 .AddTransient<IEventBus, RabbitMqEventBus>()
                 .AddSingleton<IDispatcher, CommandDispatcher>()
                 .AddTransient<IDateTimeProvider, DateTimeProvider>()
                 .AddTransient<IEventStoreSerializer, MessagePackEventStoreSerializer>()
-                .AddTransient<ISnapshotRepository, InMemorySnapshotRepository>()
+                .AddTransient<ISnapshotRepository, RedisSnapshotRepository>()
                 .AddSingleton<DispatcherConfiguration>(dispatcherConfiguration)
                 .AddSingleton<ILogger>(Log.Logger)
 
@@ -109,7 +116,7 @@
 
         private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
         {
-            var messageSerializer = _serviceProvider.GetService<IMessageSerializer>();
+            var messageSerializer = _serviceProvider.GetService<ISerializer>();
             var command = messageSerializer.Deserialize(basicDeliverEventArgs.Body, c => c.Metadata.TypeName);
 
             try

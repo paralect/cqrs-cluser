@@ -8,9 +8,9 @@
     public class Channel : ISuccessChannel, IErrorChannel, IWriteModelChannel, IReadModelChannel
     {
         private readonly IModel _channel;
-        private readonly IMessageSerializer _messageSerializer;
+        private readonly ISerializer _serializer;
 
-        public Channel(IModel model, IMessageSerializer messageSerializer)
+        public Channel(IModel model, ISerializer serializer)
         {
             _channel = model;
 
@@ -20,17 +20,17 @@
             _channel.ExchangeDeclare(RabbitMqRoutingConfiguration.SuccessExchange, "direct", true);
             _channel.ExchangeDeclare(RabbitMqRoutingConfiguration.ErrorExchange, "direct", true);
 
-            _messageSerializer = messageSerializer;
+            _serializer = serializer;
         }
 
         public void SendToExchange(string exchange, string routingKey, object message)
         {
-            _channel.BasicPublish(exchange, routingKey, null, _messageSerializer.Serialize(message));
+            _channel.BasicPublish(exchange, routingKey, null, _serializer.Serialize(message));
         }
 
         public void SendToQueue(string queue, object message)
         {
-            _channel.BasicPublish("", queue, null, _messageSerializer.Serialize(message));
+            _channel.BasicPublish("", queue, null, _serializer.Serialize(message));
         }
 
         public void SubscribeToExchange(string exchange, string routingKey, EventHandler<BasicDeliverEventArgs> callback)

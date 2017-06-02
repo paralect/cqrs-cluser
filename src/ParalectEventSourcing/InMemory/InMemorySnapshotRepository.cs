@@ -5,6 +5,7 @@
 namespace ParalectEventSourcing.InMemory
 {
     using System.Collections.Concurrent;
+    using System.Threading.Tasks;
     using Snapshoting;
 
     /// <summary>
@@ -23,15 +24,16 @@ namespace ParalectEventSourcing.InMemory
         }
 
         /// <inheritdoc/>
-        public void Save(Snapshot snapshot)
+        public Task SaveAsync(Snapshot snapshot)
         {
             _snapshots[snapshot.StreamId] = snapshot;
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc/>
-        public Snapshot Load(string id)
+        public Task<Snapshot> LoadAsync(string id)
         {
-            return _snapshots.ContainsKey(id) ? _snapshots[id] : null;
+            return _snapshots.ContainsKey(id) ? Task.FromResult(_snapshots[id]) : Task.FromResult((Snapshot) null);
         }
     }
 }

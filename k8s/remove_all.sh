@@ -3,6 +3,7 @@
 kubectl delete -f "application.yaml"
 kubectl delete -f "mongo.yaml"
 kubectl delete -f "eventstore.yaml"
+kubectl delete -f "redis.yaml"
 
 kubectl delete statefulsets "rabbitmq"
 kubectl delete service "rabbitmq"

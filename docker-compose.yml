@@ -62,3 +62,15 @@ services:
     image: mongo
     ports:
       - "27017:27017"
+
+  redis:
+    container_name: redis
+    image: redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis:/data
+    ports:
+      - "6379:6379"
+
+volumes:
+  redis:
