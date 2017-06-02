@@ -1,6 +1,7 @@
 ﻿namespace ParalectEventSourcing.Persistence.Redis
 {
     using System;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Caching.Distributed;
     using Serialization;
     using Snapshoting;
@@ -16,11 +17,11 @@
             _serializer = serializer;
         }
 
-        public void Save(Snapshot snapshot)
+        public async Task SaveAsync(Snapshot snapshot)
         {
             try
             {
-                _distributedCache.Set(snapshot.StreamId, _serializer.Serialize(snapshot));
+                await _distributedCache.SetAsync(snapshot.StreamId, _serializer.Serialize(snapshot)).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -28,12 +29,12 @@
             }
         }
 
-        public Snapshot Load(string id)
+        public async Task<Snapshot> LoadAsync(string id)
         {
             byte[] snapshot = null;
             try
             {
-                snapshot = _distributedCache.Get(id);
+                snapshot = await _distributedCache.GetAsync(id).ConfigureAwait(false);
             }
             catch (Exception e)
             {

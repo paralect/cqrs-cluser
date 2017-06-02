@@ -62,7 +62,7 @@ namespace ParalectEventSourcing.Repository
                     "Aggregate ID was not specified when trying to get by id {0} aggregate", typeof(TAggregateRoot).FullName));
             }
 
-            var snapshot = _snapshots.Load(streamId);
+            var snapshot = _snapshots.LoadAsync(streamId).Result;
             var aggregateStateType = GetAggregateStateType(typeof(TAggregateRoot));
 
             object state;
@@ -97,12 +97,12 @@ namespace ParalectEventSourcing.Repository
             var events = ExtractEvents(aggregateRoot, metadata).ToList();
             var version = aggregateRoot.Version;
             events.ForEach(e => e.Version = version);
-            await _eventSource.AppendEventsAsync(id, version, events);
+            await _eventSource.AppendEventsAsync(id, version, events).ConfigureAwait(false);
             _eventBus?.Publish(events);
 
             if (aggregateRoot.Version % SnapshotsInterval == 0)
             {
-                _snapshots.Save(new Snapshot(id, version, _serializer.Serialize(aggregateRoot.State)));
+                await _snapshots.SaveAsync(new Snapshot(id, version, _serializer.Serialize(aggregateRoot.State))).ConfigureAwait(false);
             }
         }
 

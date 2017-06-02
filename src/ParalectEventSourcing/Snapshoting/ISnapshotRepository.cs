@@ -4,22 +4,12 @@
 
 namespace ParalectEventSourcing.Snapshoting
 {
-    /// <summary>
-    /// Snapshots repository interface
-    /// </summary>
+    using System.Threading.Tasks;
+
     public interface ISnapshotRepository
     {
-        /// <summary>
-        /// Saves snapshot to repository
-        /// </summary>
-        /// <param name="snapshot">the snapshot</param>
-        void Save(Snapshot snapshot);
+        Task SaveAsync(Snapshot snapshot);
 
-        /// <summary>
-        /// Loads snapshot from repository
-        /// </summary>
-        /// <param name="id">aggregate root ID</param>
-        /// <returns>the snapshot</returns>
-        Snapshot Load(string id);
+        Task<Snapshot> LoadAsync(string id);
     }
 }
