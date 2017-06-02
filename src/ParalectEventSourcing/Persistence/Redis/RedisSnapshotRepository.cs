@@ -1,5 +1,6 @@
 ﻿namespace ParalectEventSourcing.Persistence.Redis
 {
+    using System;
     using Microsoft.Extensions.Caching.Distributed;
     using Serialization;
     using Snapshoting;
@@ -17,12 +18,28 @@
 
         public void Save(Snapshot snapshot)
         {
-            _distributedCache.Set(snapshot.StreamId, _serializer.Serialize(snapshot));
+            try
+            {
+                _distributedCache.Set(snapshot.StreamId, _serializer.Serialize(snapshot));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Can't save the snapshot with ID {snapshot.StreamId}: {e.Message}");
+            }
         }
 
         public Snapshot Load(string id)
         {
-            var snapshot = _distributedCache.Get(id);
+            byte[] snapshot = null;
+            try
+            {
+                snapshot = _distributedCache.Get(id);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Can't get the snapshot with ID {id}: {e.Message}");
+            }
+
             return snapshot == null ? null : _serializer.Deserialize(snapshot, typeof(Snapshot));
         }
     }
