@@ -5,7 +5,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    role: redis
+    app: redis
   ports:
   - port: 6379
     targetPort: 6379
@@ -20,24 +20,20 @@ spec:
   ports:
   - port: 6379
     targetPort: 6379
-  clusterIP: None
   selector:
-    role: redis
+    app: redis
 ---
-apiVersion: apps/v1beta1
-kind: StatefulSet
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
   name: redis
 spec:
-  serviceName: redis
   replicas: 1
   template:
     metadata:
       labels:
-        role: redis
-        environment: test
+        app: redis
     spec:
-      terminationGracePeriodSeconds: 10
       containers:
         - name: redis
           image: redis
@@ -48,15 +44,21 @@ spec:
             - "--appendonly" 
             - "yes"
           volumeMounts:
-            - name: redis-persistent-storage
+            - name: redis-pv
               mountPath: /data
-  volumeClaimTemplates:
-  - metadata:
-      name: redis-persistent-storage
-      annotations:
-        volume.beta.kubernetes.io/storage-class: "fast"
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi
+      volumes:
+        - name: redis-pv
+          persistentVolumeClaim:
+            claimName: redis-pvc
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: redis-pvc
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "fast"
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 1Gi
