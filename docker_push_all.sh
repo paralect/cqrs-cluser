@@ -1,4 +1,0 @@
-docker push yarmolovichalex1/frontend
-docker push yarmolovichalex1/webapi
-docker push yarmolovichalex1/writemodel
-docker push yarmolovichalex1/readmodel

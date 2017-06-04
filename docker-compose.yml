@@ -2,29 +2,25 @@ version: '2'
 
 services:
   frontend:
-    image: yarmolovichalex1/frontend
+    image: yarmolovichalex1/frontend:latest
     build:
       context: ./src/Frontend
       dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
     depends_on:
       - webapi
 
   webapi:
-    image: yarmolovichalex1/webapi
+    image: yarmolovichalex1/webapi:latest
     build:
       context: ./src/WebApi
       dockerfile: Dockerfile
-    ports:
-      - "5001:5001"
     depends_on:
       - rabbitmq
       - mongo
     restart: always
 
   writemodel:
-    image: yarmolovichalex1/writemodel
+    image: yarmolovichalex1/writemodel:latest
     build:
       context: ./src/WriteModel
       dockerfile: Dockerfile
@@ -34,7 +30,7 @@ services:
     restart: always
 
   readmodel:
-    image: yarmolovichalex1/readmodel
+    image: yarmolovichalex1/readmodel:latest
     build:
       context: ./src/ReadModel
       dockerfile: Dockerfile
@@ -47,34 +43,15 @@ services:
     container_name: rabbitmq
     hostname: rabbitmq
     image: rabbitmq:3-management
-    volumes:
-      - rabbitmq:/var/lib/rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
 
   eventstore:
     container_name: eventstore
-    image: eventstore/eventstore
-    ports:
-      - "1113:1113"
-      - "2113:2113"
+    image: eventstore/eventstore:latest
 
   mongo:
     container_name: mongo
-    image: mongo
-    ports:
-      - "27017:27017"
+    image: mongo:latest
 
   redis:
     container_name: redis
-    image: redis
-    command: redis-server --appendonly yes
-    volumes:
-      - redis:/data
-    ports:
-      - "6379:6379"
-
-volumes:
-  redis:
-  rabbitmq:
+    image: redis:latest

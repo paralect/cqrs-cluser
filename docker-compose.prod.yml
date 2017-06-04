@@ -5,28 +5,26 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
 
   webapi:
     ports:
       - "5001:5001"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
 
   writemodel:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
 
   readmodel:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
 
   rabbitmq:
     ports:
       - "5672:5672"
       - "15672:15672"
-    volumes:
-      - rabbitmq:/var/lib/rabbitmq
 
   eventstore:
     ports:
@@ -41,9 +39,3 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
-    volumes:
-      - redis:/data
-
-volumes:
-  redis:
-  rabbitmq:
