@@ -89,15 +89,18 @@
             });
         }
 
-        private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
+        private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs e)
         {
             var messageSerializer = _serviceProvider.GetService<ISerializer>();
-            var @event = messageSerializer.Deserialize(basicDeliverEventArgs.Body, e => e.Metadata.TypeName);
+            var @event = messageSerializer.Deserialize(e.Body, evt => evt.Metadata.TypeName);
 
             var eventDispatcher = _serviceProvider.GetService<IDispatcher>();
             eventDispatcher.Dispatch(@event);
 
             Console.WriteLine($"Event {@event.Metadata.EventId} handled successfully.");
+
+            var readModelChannel = _serviceProvider.GetService<IReadModelChannel>();
+            readModelChannel.Ack(e.DeliveryTag);
         }
     }
 }

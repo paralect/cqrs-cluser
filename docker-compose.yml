@@ -45,7 +45,10 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
+    hostname: rabbitmq
     image: rabbitmq:3-management
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -74,3 +77,4 @@ services:
 
 volumes:
   redis:
+  rabbitmq:

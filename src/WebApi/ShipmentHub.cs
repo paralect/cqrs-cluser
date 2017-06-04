@@ -15,6 +15,8 @@
         private static readonly ConcurrentDictionary<string, IChannel> ErrorSubscriptions = new ConcurrentDictionary<string, IChannel>();
 
         private readonly IChannelFactory _channelFactory;
+        private ISuccessChannel _successChannel;
+        private IErrorChannel _errorChannel;
         private readonly ISerializer _serializer;
 
         public ShipmentHub(IChannelFactory channelFactory, ISerializer serializer)
@@ -27,16 +29,16 @@
         {
             Task.Run(() =>
             {
-                var successChannel = _channelFactory.CreateChannel();
-                successChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.SuccessExchange, connectionId, ConsumerOnSuccess);
-                SuccessSubscriptions.TryAdd(connectionId, successChannel);
+                _successChannel = _channelFactory.CreateChannel();
+                _successChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.SuccessExchange, connectionId, ConsumerOnSuccess);
+                SuccessSubscriptions.TryAdd(connectionId, _successChannel);
             });
 
             Task.Run(() =>
             {
-                var errorChannel = _channelFactory.CreateChannel();
-                errorChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.ErrorExchange, connectionId, ConsumerOnError);
-                ErrorSubscriptions.TryAdd(connectionId, errorChannel);
+                _errorChannel = _channelFactory.CreateChannel();
+                _errorChannel.SubscribeToExchange(RabbitMqRoutingConfiguration.ErrorExchange, connectionId, ConsumerOnError);
+                ErrorSubscriptions.TryAdd(connectionId, _errorChannel);
             });
         }
 
@@ -56,6 +58,8 @@
             {
                 Clients.Client(connectionId).shipmentAddressChanged(@event.Id, @event.NewAddress);
             }
+
+            _successChannel.Ack(basicDeliverEventArgs.DeliveryTag);
         }
 
         private void ConsumerOnError(object sender, BasicDeliverEventArgs e)
@@ -65,6 +69,8 @@
             var connectionId = (string) message.OriginalCommand.Metadata.ConnectionId;
 
             Clients.Client(connectionId).showErrorMessage(message.ErrorMessage);
+
+            _errorChannel.Ack(e.DeliveryTag);
         }
 
         public override Task OnDisconnected(bool stopCalled)
