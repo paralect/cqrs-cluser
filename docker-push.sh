@@ -5,7 +5,7 @@ docker-compose -f docker-compose.ci.build.yml up
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
 
 # push images to Docker Registry
-docker push yarmolovichalex1/frontend
-docker push yarmolovichalex1/webapi
-docker push yarmolovichalex1/writemodel
-docker push yarmolovichalex1/readmodel
+docker push $1/frontend
+docker push $1/webapi
+docker push $1/writemodel
+docker push $1/readmodel
