@@ -114,10 +114,10 @@
             });
         }
 
-        private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
+        private static void ConsumerOnReceived(object sender, BasicDeliverEventArgs e)
         {
             var messageSerializer = _serviceProvider.GetService<ISerializer>();
-            var command = messageSerializer.Deserialize(basicDeliverEventArgs.Body, c => c.Metadata.TypeName);
+            var command = messageSerializer.Deserialize(e.Body, c => c.Metadata.TypeName);
 
             try
             {
@@ -126,7 +126,7 @@
 
                 Console.WriteLine($"Command {command.Metadata.CommandId} handled successfully.");
             }
-            catch (DomainValidationException e)
+            catch (DomainValidationException ex)
             {
                 var channel = _serviceProvider.GetService<IErrorChannel>();
                 channel.SendToExchange(
@@ -135,9 +135,12 @@
                     new
                     {
                         OriginalCommand = command,
-                        ErrorMessage = e.Message
+                        ErrorMessage = ex.Message
                     });
             }
+
+            var writeModelChannel = _serviceProvider.GetService<IWriteModelChannel>();
+            writeModelChannel.Ack(e.DeliveryTag);
         }
     }
 }

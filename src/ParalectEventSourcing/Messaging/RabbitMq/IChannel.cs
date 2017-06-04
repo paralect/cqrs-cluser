@@ -14,5 +14,7 @@
         void SubscribeToQueue(string queue, EventHandler<BasicDeliverEventArgs> callback);
 
         void Close();
+
+        void Ack(ulong deliveryTag);
     }
 }
