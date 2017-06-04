@@ -40,7 +40,7 @@ spec:
           value: rabbit@$(NODE_NAME).{{SVC_NAME}}
         volumeMounts:
         - name: rabbitmq-persistent-storage
-          mountPath: /data/rabbitmq
+          mountPath: /var/lib/rabbitmq
   volumeClaimTemplates:
   - metadata:
       name: rabbitmq-persistent-storage
