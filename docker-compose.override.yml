@@ -32,6 +32,8 @@ services:
     ports:
       - "1113:1113"
       - "2113:2113"
+    volumes:
+      - eventstore:/var/lib/eventstore
 
   mongo:
     ports:
@@ -47,3 +49,4 @@ services:
 volumes:
   redis:
   rabbitmq:
+  eventstore:
